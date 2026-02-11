@@ -1,0 +1,144 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &808878533845256741
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1219901383230229955, guid: 8a910ce7cd9ceea49b59dcd1af674629, type: 3}
+      propertyPath: m_Pivot.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1219901383230229955, guid: 8a910ce7cd9ceea49b59dcd1af674629, type: 3}
+      propertyPath: m_Pivot.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1219901383230229955, guid: 8a910ce7cd9ceea49b59dcd1af674629, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1219901383230229955, guid: 8a910ce7cd9ceea49b59dcd1af674629, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1219901383230229955, guid: 8a910ce7cd9ceea49b59dcd1af674629, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1219901383230229955, guid: 8a910ce7cd9ceea49b59dcd1af674629, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1219901383230229955, guid: 8a910ce7cd9ceea49b59dcd1af674629, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 600
+      objectReference: {fileID: 0}
+    - target: {fileID: 1219901383230229955, guid: 8a910ce7cd9ceea49b59dcd1af674629, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 400
+      objectReference: {fileID: 0}
+    - target: {fileID: 1219901383230229955, guid: 8a910ce7cd9ceea49b59dcd1af674629, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1219901383230229955, guid: 8a910ce7cd9ceea49b59dcd1af674629, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1219901383230229955, guid: 8a910ce7cd9ceea49b59dcd1af674629, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1219901383230229955, guid: 8a910ce7cd9ceea49b59dcd1af674629, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1219901383230229955, guid: 8a910ce7cd9ceea49b59dcd1af674629, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1219901383230229955, guid: 8a910ce7cd9ceea49b59dcd1af674629, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1219901383230229955, guid: 8a910ce7cd9ceea49b59dcd1af674629, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1219901383230229955, guid: 8a910ce7cd9ceea49b59dcd1af674629, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1219901383230229955, guid: 8a910ce7cd9ceea49b59dcd1af674629, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1219901383230229955, guid: 8a910ce7cd9ceea49b59dcd1af674629, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1219901383230229955, guid: 8a910ce7cd9ceea49b59dcd1af674629, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1219901383230229955, guid: 8a910ce7cd9ceea49b59dcd1af674629, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5749132006840449694, guid: 8a910ce7cd9ceea49b59dcd1af674629, type: 3}
+      propertyPath: m_Name
+      value: BigCardViusual_Book_Spectrograph_Variant
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5749132006840449694, guid: 8a910ce7cd9ceea49b59dcd1af674629, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5105064906490981583}
+  m_SourcePrefab: {fileID: 100100000, guid: 8a910ce7cd9ceea49b59dcd1af674629, type: 3}
+--- !u!1 &4967667906864525499 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5749132006840449694, guid: 8a910ce7cd9ceea49b59dcd1af674629, type: 3}
+  m_PrefabInstance: {fileID: 808878533845256741}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5105064906490981583
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4967667906864525499}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3be674da6c1dc414b95ea41283bf0065, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  database: {fileID: 11400000, guid: 19bc38e31ee9b3040a65c42719356e98, type: 2}
+  twoPagesWithTextPrefab: {fileID: 4207027436075829662, guid: 6ce72fbef547e0444a4eaf0a6fe9d2ea, type: 3}
+  twoPagesWithSubstanceListPrefab: {fileID: 3888195678440931685, guid: f0520f389b0bf3547806011cc7d0a6b3, type: 3}
+  pagesParent: {fileID: 8466908888775678388}
+  autoBuildOnAwake: 1
+  minBandWidth: 5
+  maxBandWidth: 50
+  introHeadingLeft: What is a Spectrograph?
+  introTextLeft: 'A spectrograph separates light into its component wavelengths (colors).
+
+    Different
+    substances absorb and emit light in unique patterns. These patterns
+
+    appear
+    as brighter or thicker lines at specific wavelengths (the colored bands).'
+  introHeadingRight: Forensic Use
+  introTextRight: "In forensics, spectrographs help identify trace materials\u2014biological
+    fluids,\ndrugs, residues, and man\u2011made compounds\u2014by matching the observed
+    band pattern\nagainst a reference library. A match can corroborate a narrative
+    or reveal\nnew investigative leads."
+--- !u!224 &8466908888775678388 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 9131389625562780561, guid: 8a910ce7cd9ceea49b59dcd1af674629, type: 3}
+  m_PrefabInstance: {fileID: 808878533845256741}
+  m_PrefabAsset: {fileID: 0}

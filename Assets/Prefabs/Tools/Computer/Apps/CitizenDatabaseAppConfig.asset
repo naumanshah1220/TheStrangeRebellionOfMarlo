@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d229961201ea844da9c0834f01c7090, type: 3}
+  m_Name: CitizenDatabaseAppConfig
+  m_EditorClassIdentifier: 
+  AppId: citizen_database
+  AppName: Citizen Database
+  AppIcon: {fileID: -974477970, guid: 5922dfce69835c249bce3d2d35c05c9b, type: 3}
+  appType: 0
+  AppPrefab: {fileID: 2945204941474384841, guid: 014d91e1d345f6a49bbf5bceb6a1d1ef, type: 3}
+  SupportsScrolling: 1
+  files: []
+  iconsPerRow: 4
+  iconSize: 100
+  iconSpacing: 20
+  IsResizable: 1
+  AllowMultipleInstances: 0
+  IsOnDesktop: 1
+  IsOnAppMenu: 1

@@ -1,0 +1,65 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 97b7a5ec5c3ee254e99c6771c31c26b5, type: 3}
+  m_Name: CitizenDatabase
+  m_EditorClassIdentifier: 
+  citizenCSVFile: {fileID: 4900000, guid: 34567890123456789012345678901234, type: 3}
+  loadFromCSV: 1
+  scriptableObjectCitizens:
+  - {fileID: 11400000, guid: f6229db1909719d40bc9aa4260742988, type: 2}
+  - {fileID: 11400000, guid: 1a7c609a63b72c54fb73b97f9ea8f30c, type: 2}
+  - {fileID: 11400000, guid: 77d2c0f1aeddb9f40b72874b0375c039, type: 2}
+  - {fileID: 11400000, guid: 3cc27994a34bc6f4d8123423382fef9d, type: 2}
+  - {fileID: 11400000, guid: 35bb329eb5e496148a1d1054eefb164a, type: 2}
+  databaseGenericQuestions:
+  - tagType: person
+    questions:
+    - Tell me about '{tag}'
+    - Do you know '{tag}'?
+    - What's your relationship with '{tag}'?
+  - tagType: location
+    questions:
+    - Tell me about '{tag}'
+    - Have you been to '{tag}'?
+    - What do you know about '{tag}'?
+  - tagType: item
+    questions:
+    - Tell me about '{tag}'
+    - Do you recognize '{tag}'?
+    - What do you know about '{tag}'?
+  - tagType: date
+    questions:
+    - Tell me about '{tag}'
+    - What happened on '{tag}'?
+    - Do you remember '{tag}'?
+  - tagType: time
+    questions:
+    - Tell me about '{tag}'
+    - What were you doing at '{tag}'?
+    - Do you remember '{tag}'?
+  databaseGenericResponses:
+  - responseSequence:
+    - I don't know anything about that.
+    isLie: 0
+    responseDelayOverride: 0
+    clickableClues: []
+  - responseSequence:
+    - I already told you, I don't know.
+    isLie: 0
+    responseDelayOverride: 0
+    clickableClues: []
+  - responseSequence:
+    - Why do you keep asking me about things I don't know?
+    isLie: 0
+    responseDelayOverride: 0
+    clickableClues: []
+  showDebugInfo: 0

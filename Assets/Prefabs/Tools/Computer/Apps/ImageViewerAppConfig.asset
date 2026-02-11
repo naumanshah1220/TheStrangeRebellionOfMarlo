@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d229961201ea844da9c0834f01c7090, type: 3}
+  m_Name: ImageViewerAppConfig
+  m_EditorClassIdentifier: 
+  AppId: image_viewer
+  AppName: Image Viewer
+  AppIcon: {fileID: -1348700458, guid: ef5a1d746f0210547b3df86db006ce9f, type: 3}
+  appType: 0
+  AppPrefab: {fileID: 1009255723264845421, guid: bf070a9c6b701e047bf8b7fc9cc6d559, type: 3}
+  SupportsScrolling: 1
+  files: []
+  iconsPerRow: 4
+  iconSize: 100
+  iconSpacing: 20
+  IsResizable: 1
+  AllowMultipleInstances: 0
+  IsOnDesktop: 0
+  IsOnAppMenu: 0

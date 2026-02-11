@@ -1,0 +1,78 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96453dbccce78704893d5d51d6952c1e, type: 3}
+  m_Name: Test_CoreCase1
+  m_EditorClassIdentifier: 
+  caseID: 1
+  title: Core 1
+  description: Test_CoreCase1
+  caseType: 0
+  firstAvailableDay: 1
+  coreSequenceNumber: 1
+  reward: 50
+  requiredPreviousCaseIds: []
+  unlocksNextCaseIds: []
+  lawBroken: 
+  extraRewardForState: 0
+  suspicionReduction: 0
+  involvesResistance: 0
+  resistanceChoice: 
+  stateChoice: 
+  suspects:
+  - {fileID: 11400000, guid: f6229db1909719d40bc9aa4260742988, type: 2}
+  - {fileID: 11400000, guid: 1a7c609a63b72c54fb73b97f9ea8f30c, type: 2}
+  - {fileID: 11400000, guid: 77d2c0f1aeddb9f40b72874b0375c039, type: 2}
+  culprit: {fileID: 11400000, guid: 77d2c0f1aeddb9f40b72874b0375c039, type: 2}
+  evidences:
+  - {fileID: 11400000, guid: cba4d98a6e816d64fbac8431da5df2b5, type: 2}
+  - {fileID: 11400000, guid: 7a9a4f353f031c54e9a84d6cb7ab1a58, type: 2}
+  - {fileID: 11400000, guid: db8d04c26b0039f4098d5c814357e7d7, type: 2}
+  extraEvidences:
+  - {fileID: 11400000, guid: 944fc08f26dc11345bf1e8563b03859b, type: 2}
+  steps:
+  - stepId: 
+    stepNumber: 0
+    description: 
+    requiredClueIds: []
+    unlockedClueIds: []
+  verdictSchema: {fileID: 11400000, guid: 3bad399509d821c4fa28ecda54ce736c, type: 2}
+  solutions:
+  - answers:
+    - slotId: suspect
+      acceptedOptionIds:
+      - 001
+    - slotId: violation
+      acceptedOptionIds:
+      - violation_envy
+    - slotId: location
+      acceptedOptionIds:
+      - location_ministry
+    - slotId: method
+      acceptedOptionIds:
+      - method_blackmail
+    - slotId: motive
+      acceptedOptionIds:
+      - motive_jealousy
+    requiredJustificationTagIds:
+    - 001
+    bonusJustificationTagIds: []
+    minConfidenceToApprove: 0
+  minDiscoveredCluesToAllowCommit: 3
+  allowCommitWithLowConfidence: 1
+  cardImage: {fileID: 21300000, guid: b5dc0ac12ff3d4b61b4045e6a75c5d27, type: 3}
+  fullCardPrefab: {fileID: 5749132006840449694, guid: d9d33f43e6a080a4d839dff1c62fda35, type: 3}
+  isSolved: 1
+  convictedSuspect: {fileID: 11400000, guid: 77d2c0f1aeddb9f40b72874b0375c039, type: 2}
+  conviction:
+    violationName: Theft
+    description: Unlawful taking of property
+    severity: 0

@@ -1,0 +1,12 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1045 &1
+EditorBuildSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/Detective 6.0.unity
+    guid: c8fe1f01fce964a43a7a0649a8f89748
+  m_configObjects: {}
+  m_UseUCBPForAssetBundles: 0

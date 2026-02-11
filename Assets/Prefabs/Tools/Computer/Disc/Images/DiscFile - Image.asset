@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58d595d5a703e9b4a844367147c491d2, type: 3}
+  m_Name: DiscFile - Image
+  m_EditorClassIdentifier: 
+  fileName: Photo1
+  fileType: 1
+  fileIcon: {fileID: 21300000, guid: 072f9a3983fd642b18925f878f115f57, type: 3}
+  fileDescription: This is the image of the suspect1
+  contentPrefab: {fileID: 6547359093423717192, guid: c5c4ec40341eb624c8076154429a93d0, type: 3}
+  viewerApp: {fileID: 11400000, guid: 81969b06ecd341444865fa35703e1f01, type: 2}
+  associatedCitizenId: 004
+  fileNameColor: {r: 1, g: 1, b: 1, a: 1}

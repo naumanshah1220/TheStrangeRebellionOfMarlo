@@ -1,0 +1,975 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb237e517a03ce143b3d95125b42c667, type: 3}
+  m_Name: SpectrographDatabase
+  m_EditorClassIdentifier: 
+  substances:
+  - substance: 1
+    bands:
+    - enabled: 1
+      width: 18
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 16
+    - enabled: 1
+      width: 8
+    - enabled: 0
+      width: 10
+  - substance: 2
+    bands:
+    - enabled: 1
+      width: 21
+    - enabled: 1
+      width: 9
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 10
+    - enabled: 1
+      width: 14
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+  - substance: 3
+    bands:
+    - enabled: 1
+      width: 18
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 11
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 15
+    - enabled: 1
+      width: 11
+  - substance: 4
+    bands:
+    - enabled: 1
+      width: 19
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 13
+    - enabled: 1
+      width: 14
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 14
+    - enabled: 0
+      width: 10
+  - substance: 5
+    bands:
+    - enabled: 1
+      width: 21
+    - enabled: 1
+      width: 8
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 12
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 9
+    - enabled: 0
+      width: 10
+  - substance: 6
+    bands:
+    - enabled: 1
+      width: 19
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 13
+    - enabled: 1
+      width: 14
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 12
+  - substance: 7
+    bands:
+    - enabled: 1
+      width: 21
+    - enabled: 1
+      width: 16
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 16
+    - enabled: 1
+      width: 8
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+  - substance: 8
+    bands:
+    - enabled: 1
+      width: 21
+    - enabled: 1
+      width: 14
+    - enabled: 1
+      width: 9
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 14
+  - substance: 9
+    bands:
+    - enabled: 1
+      width: 20
+    - enabled: 1
+      width: 12
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 14
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 10
+  - substance: 10
+    bands:
+    - enabled: 1
+      width: 22
+    - enabled: 1
+      width: 12
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 15
+    - enabled: 1
+      width: 15
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+  - substance: 11
+    bands:
+    - enabled: 1
+      width: 22
+    - enabled: 1
+      width: 8
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 8
+  - substance: 12
+    bands:
+    - enabled: 1
+      width: 19
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 11
+    - enabled: 1
+      width: 10
+    - enabled: 1
+      width: 8
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+  - substance: 13
+    bands:
+    - enabled: 1
+      width: 18
+    - enabled: 1
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 11
+    - enabled: 1
+      width: 12
+    - enabled: 0
+      width: 10
+  - substance: 14
+    bands:
+    - enabled: 1
+      width: 20
+    - enabled: 1
+      width: 11
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 8
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 14
+    - enabled: 0
+      width: 10
+  - substance: 15
+    bands:
+    - enabled: 1
+      width: 21
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 12
+    - enabled: 1
+      width: 11
+    - enabled: 1
+      width: 10
+  - substance: 16
+    bands:
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 11
+    - enabled: 1
+      width: 19
+    - enabled: 1
+      width: 16
+    - enabled: 1
+      width: 11
+    - enabled: 0
+      width: 10
+  - substance: 17
+    bands:
+    - enabled: 1
+      width: 10
+    - enabled: 1
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 18
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 16
+  - substance: 18
+    bands:
+    - enabled: 1
+      width: 16
+    - enabled: 1
+      width: 15
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 20
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 14
+    - enabled: 0
+      width: 10
+  - substance: 19
+    bands:
+    - enabled: 1
+      width: 16
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 15
+    - enabled: 1
+      width: 21
+    - enabled: 1
+      width: 15
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+  - substance: 20
+    bands:
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 13
+    - enabled: 1
+      width: 16
+    - enabled: 1
+      width: 18
+    - enabled: 1
+      width: 14
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+  - substance: 21
+    bands:
+    - enabled: 1
+      width: 16
+    - enabled: 1
+      width: 12
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 20
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 14
+  - substance: 22
+    bands:
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 14
+    - enabled: 1
+      width: 21
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 8
+    - enabled: 1
+      width: 16
+  - substance: 23
+    bands:
+    - enabled: 1
+      width: 9
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 18
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 15
+    - enabled: 1
+      width: 13
+  - substance: 24
+    bands:
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 8
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 20
+    - enabled: 1
+      width: 8
+    - enabled: 1
+      width: 14
+    - enabled: 0
+      width: 10
+  - substance: 25
+    bands:
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 19
+    - enabled: 1
+      width: 10
+    - enabled: 1
+      width: 15
+    - enabled: 1
+      width: 9
+  - substance: 26
+    bands:
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 13
+    - enabled: 1
+      width: 8
+    - enabled: 1
+      width: 19
+    - enabled: 1
+      width: 13
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+  - substance: 27
+    bands:
+    - enabled: 1
+      width: 12
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 19
+    - enabled: 1
+      width: 12
+    - enabled: 1
+      width: 13
+    - enabled: 0
+      width: 10
+  - substance: 28
+    bands:
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 20
+    - enabled: 1
+      width: 13
+    - enabled: 1
+      width: 13
+    - enabled: 1
+      width: 11
+  - substance: 29
+    bands:
+    - enabled: 1
+      width: 12
+    - enabled: 1
+      width: 15
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 20
+    - enabled: 1
+      width: 8
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+  - substance: 30
+    bands:
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 16
+    - enabled: 1
+      width: 12
+    - enabled: 1
+      width: 21
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 12
+  - substance: 31
+    bands:
+    - enabled: 1
+      width: 8
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 12
+    - enabled: 1
+      width: 21
+    - enabled: 1
+      width: 10
+    - enabled: 0
+      width: 10
+  - substance: 32
+    bands:
+    - enabled: 1
+      width: 12
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 15
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 21
+    - enabled: 1
+      width: 16
+    - enabled: 0
+      width: 10
+  - substance: 33
+    bands:
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 15
+    - enabled: 1
+      width: 21
+    - enabled: 1
+      width: 8
+    - enabled: 1
+      width: 11
+  - substance: 34
+    bands:
+    - enabled: 1
+      width: 12
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 16
+    - enabled: 1
+      width: 21
+    - enabled: 1
+      width: 15
+    - enabled: 0
+      width: 10
+  - substance: 35
+    bands:
+    - enabled: 1
+      width: 8
+    - enabled: 1
+      width: 14
+    - enabled: 1
+      width: 8
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 18
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+  - substance: 36
+    bands:
+    - enabled: 1
+      width: 15
+    - enabled: 1
+      width: 13
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 22
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 9
+  - substance: 37
+    bands:
+    - enabled: 1
+      width: 12
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 13
+    - enabled: 1
+      width: 11
+    - enabled: 1
+      width: 18
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+  - substance: 38
+    bands:
+    - enabled: 1
+      width: 14
+    - enabled: 1
+      width: 8
+    - enabled: 1
+      width: 9
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 18
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+  - substance: 39
+    bands:
+    - enabled: 1
+      width: 13
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 11
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 18
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 12
+  - substance: 40
+    bands:
+    - enabled: 1
+      width: 9
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 18
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 10
+  - substance: 41
+    bands:
+    - enabled: 1
+      width: 8
+    - enabled: 1
+      width: 13
+    - enabled: 1
+      width: 20
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 11
+  - substance: 42
+    bands:
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 11
+    - enabled: 1
+      width: 20
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 8
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 12
+  - substance: 43
+    bands:
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 13
+    - enabled: 1
+      width: 19
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 12
+    - enabled: 1
+      width: 14
+  - substance: 44
+    bands:
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 15
+    - enabled: 1
+      width: 22
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 9
+    - enabled: 1
+      width: 13
+    - enabled: 0
+      width: 10
+  - substance: 45
+    bands:
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 20
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 8
+    - enabled: 1
+      width: 13
+    - enabled: 1
+      width: 12
+  - substance: 46
+    bands:
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 21
+    - enabled: 1
+      width: 13
+    - enabled: 1
+      width: 14
+    - enabled: 1
+      width: 9
+    - enabled: 0
+      width: 10
+  - substance: 47
+    bands:
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 22
+    - enabled: 1
+      width: 10
+    - enabled: 1
+      width: 14
+    - enabled: 1
+      width: 9
+    - enabled: 0
+      width: 10
+  - substance: 48
+    bands:
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 16
+    - enabled: 1
+      width: 22
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 8
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 9
+  - substance: 49
+    bands:
+    - enabled: 1
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 21
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 16
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 8
+  - substance: 50
+    bands:
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 13
+    - enabled: 1
+      width: 19
+    - enabled: 1
+      width: 8
+    - enabled: 1
+      width: 8
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+  - substance: 51
+    bands:
+    - enabled: 1
+      width: 16
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 21
+    - enabled: 1
+      width: 10
+    - enabled: 1
+      width: 13
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+  - substance: 52
+    bands:
+    - enabled: 1
+      width: 8
+    - enabled: 1
+      width: 10
+    - enabled: 1
+      width: 21
+    - enabled: 1
+      width: 12
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+  - substance: 53
+    bands:
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 10
+    - enabled: 1
+      width: 21
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 11
+    - enabled: 1
+      width: 15
+  - substance: 54
+    bands:
+    - enabled: 1
+      width: 14
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 19
+    - enabled: 1
+      width: 12
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 11
+    - enabled: 0
+      width: 10
+  - substance: 55
+    bands:
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 19
+    - enabled: 1
+      width: 8
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 15
+    - enabled: 1
+      width: 10
+  - substance: 56
+    bands:
+    - enabled: 1
+      width: 13
+    - enabled: 1
+      width: 12
+    - enabled: 1
+      width: 20
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 9
+    - enabled: 0
+      width: 10
+  - substance: 57
+    bands:
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 10
+    - enabled: 1
+      width: 21
+    - enabled: 1
+      width: 12
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 16
+  - substance: 58
+    bands:
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 15
+    - enabled: 1
+      width: 19
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 16
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 13
+  - substance: 59
+    bands:
+    - enabled: 1
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 20
+    - enabled: 1
+      width: 16
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 9
+  - substance: 60
+    bands:
+    - enabled: 0
+      width: 10
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 18
+    - enabled: 0
+      width: 10
+    - enabled: 1
+      width: 13
+    - enabled: 1
+      width: 16
+    - enabled: 1
+      width: 8

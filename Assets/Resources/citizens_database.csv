@@ -1,0 +1,26 @@
+CitizenID,FirstName,LastName,DOB,Gender,Ethnicity,MaritalStatus,Address,Occupation,CriminalRecord,NervousnessLevel,Deceased
+CIT001,John,Smith,03/15/1985,Male,Caucasian,Married,"123 Main St, Cityville",Software Engineer,"",0.2,FALSE
+CIT002,Maria,Garcia,07/22/1992,Female,Hispanic,Single,"456 Oak Ave, Townsburg",Nurse,"",0.3,FALSE
+CIT003,Robert,Johnson,12/08/1978,Male,AfricanAmerican,Divorced,"789 Pine Rd, Villageton",Mechanic,"Theft|05/12/2015|Stole car parts from garage|Minor",0.7,FALSE
+CIT004,Emily,Chen,09/03/1988,Female,Asian,Married,"321 Elm St, Cityville",Doctor,"",0.1,FALSE
+CIT005,Michael,Davis,11/20/1965,Male,Caucasian,Widowed,"654 Birch Ln, Townsburg",Retired Police Officer,"Public Intoxication|08/10/2010|Drunk and disorderly|Minor",0.4,FALSE
+CIT006,Sarah,Wilson,02/14/1990,Female,Caucasian,Single,"987 Maple Dr, Villageton",Teacher,"",0.3,FALSE
+CIT007,Carlos,Rodriguez,06/30/1982,Male,Hispanic,Married,"147 Cedar St, Cityville",Construction Worker,"Assault|03/20/2018|Bar fight|Moderate",0.8,FALSE
+CIT008,Lisa,Thompson,04/07/1987,Female,Caucasian,Married,"258 Spruce Ave, Townsburg",Accountant,"",0.2,FALSE
+CIT009,David,Lee,08/25/1995,Male,Asian,Single,"369 Willow Rd, Villageton",College Student,"",0.5,FALSE
+CIT010,Jessica,Brown,01/12/1983,Female,AfricanAmerican,Divorced,"741 Oakwood Blvd, Cityville",Lawyer,"",0.1,FALSE
+CIT011,Mark,Williams,10/17/1976,Male,Caucasian,Married,"852 Pinewood Dr, Townsburg",Bank Manager,"Fraud|11/08/2012|Embezzlement from previous job|Major",0.9,FALSE
+CIT012,Amanda,Taylor,05/29/1991,Female,Caucasian,Single,"963 Elmwood Ave, Villageton",Bartender,"",0.4,FALSE
+CIT013,James,Anderson,12/03/1969,Male,Caucasian,Married,"159 Maplewood St, Cityville",Carpenter,"",0.3,FALSE
+CIT014,Rachel,Martinez,07/18/1984,Female,Hispanic,Married,"357 Cedarwood Ln, Townsburg",Graphic Designer,"",0.2,FALSE
+CIT015,Thomas,Jackson,09/11/1980,Male,AfricanAmerican,Single,"468 Birchwood Rd, Villageton",Security Guard,"Theft|02/25/2020|Shoplifting|Minor;Assault|06/15/2021|Fight with neighbor|Moderate",0.6,FALSE
+CIT016,Nicole,White,03/05/1993,Female,Caucasian,Single,"579 Ashwood Dr, Cityville",Photographer,"",0.3,FALSE
+CIT017,Kevin,Harris,11/28/1977,Male,Caucasian,Divorced,"681 Redwood Ave, Townsburg",Plumber,"",0.4,FALSE
+CIT018,Michelle,Clark,06/09/1989,Female,AfricanAmerican,Married,"792 Dogwood St, Villageton",Social Worker,"",0.2,FALSE
+CIT019,Steven,Lewis,04/21/1986,Male,Caucasian,Married,"894 Hickory Ln, Cityville",Electrician,"",0.3,FALSE
+CIT020,Angela,Walker,08/14/1979,Female,Hispanic,Divorced,"135 Sycamore Rd, Townsburg",Restaurant Manager,"",0.5,FALSE
+CIT021,Walter,Morgan,01/08/1955,Male,Caucasian,Married,"246 Chestnut Dr, Villageton",Retired Banker,"",0.2,TRUE
+CIT022,Helen,Young,12/22/1948,Female,Caucasian,Widowed,"468 Walnut Ave, Cityville",Retired Teacher,"",0.1,TRUE
+CIT023,Frank,King,05/16/1972,Male,Caucasian,Married,"579 Beech St, Townsburg",Truck Driver,"DUI|07/30/2019|Driving under influence|Moderate",0.7,FALSE
+CIT024,Patricia,Scott,09/02/1981,Female,Caucasian,Single,"681 Poplar Ln, Villageton",Veterinarian,"",0.2,FALSE
+CIT025,Gregory,Green,02/27/1988,Male,AfricanAmerican,Married,"792 Magnolia Rd, Cityville",Firefighter,"",0.3,FALSE 

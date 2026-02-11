@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96453dbccce78704893d5d51d6952c1e, type: 3}
+  m_Name: Test_CoreCase4
+  m_EditorClassIdentifier: 
+  caseID: 6
+  title: Core 4
+  description: Test_CoreCase4
+  caseType: 0
+  firstAvailableDay: 2
+  coreSequenceNumber: 1
+  reward: 50
+  requiredPreviousCaseIds: []
+  unlocksNextCaseIds: []
+  lawBroken: 
+  extraRewardForState: 0
+  suspicionReduction: 0
+  involvesResistance: 0
+  resistanceChoice: 
+  stateChoice: 
+  suspectStatements:
+  - citizenID: CIT-001
+    statements:
+    - I wasn't there
+    - I didn't do it
+    - Wtf you saying?
+    guilty: 0
+  - citizenID: CIT-002
+    statements:
+    - Statement 1
+    - Statement 2
+    - Statement 3
+    - Statement 4
+    - Statement 5
+    guilty: 0
+  evidences:
+  - {fileID: 11400000, guid: 7a9a4f353f031c54e9a84d6cb7ab1a58, type: 2}
+  - {fileID: 11400000, guid: cba4d98a6e816d64fbac8431da5df2b5, type: 2}
+  - {fileID: 11400000, guid: 7a9a4f353f031c54e9a84d6cb7ab1a58, type: 2}
+  - {fileID: 11400000, guid: cba4d98a6e816d64fbac8431da5df2b5, type: 2}
+  extraEvidences:
+  - {fileID: 11400000, guid: cba4d98a6e816d64fbac8431da5df2b5, type: 2}
+  steps: []
+  cardImage: {fileID: 21300000, guid: b5dc0ac12ff3d4b61b4045e6a75c5d27, type: 3}
+  fullCardPrefab: {fileID: 5749132006840449694, guid: d9d33f43e6a080a4d839dff1c62fda35, type: 3}
