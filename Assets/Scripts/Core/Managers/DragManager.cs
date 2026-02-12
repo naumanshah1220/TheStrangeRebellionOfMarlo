@@ -1,9 +1,8 @@
 using UnityEngine;
 using System.Collections;
 
-public class DragManager : MonoBehaviour
+public class DragManager : SingletonMonoBehaviour<DragManager>
 {
-    public static DragManager Instance;
 
     [Header("Refs")]
     public Camera mainCamera;
@@ -39,9 +38,8 @@ public class DragManager : MonoBehaviour
     private bool lastCanBeSubmitted = false;
     private bool lastOverSubmitZone = false;
 
-    void Awake()
+    protected override void OnSingletonAwake()
     {
-        Instance = this;
         if (!mainCamera)
             mainCamera = Camera.main;
     }

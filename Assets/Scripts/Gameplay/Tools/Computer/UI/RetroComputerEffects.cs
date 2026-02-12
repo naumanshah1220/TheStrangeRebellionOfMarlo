@@ -5,7 +5,7 @@ using System.Collections;
 /// <summary>
 /// Handles retro computer effects including cursor management and window wipe effects
 /// </summary>
-public class RetroComputerEffects : MonoBehaviour
+public class RetroComputerEffects : SingletonMonoBehaviour<RetroComputerEffects>
 {
     [Header("Cursor Settings")]
     [SerializeField] private Image computerCursor; // The custom computer cursor UI element
@@ -14,38 +14,15 @@ public class RetroComputerEffects : MonoBehaviour
     [SerializeField] private Sprite resizeCursorSprite;
     [SerializeField] private Sprite moveCursorSprite;
     [SerializeField] private Vector2 cursorOffset = Vector2.zero;
-    
-    private static RetroComputerEffects instance;
+
     private Coroutine hourglassCoroutine;
     private Canvas parentCanvas;
     private Camera mainCamera;
     private bool isComputerCursorActive = false;
     private Sprite originalCursorSprite; // Store original cursor sprite
-    
-    public static RetroComputerEffects Instance
+
+    protected override void OnSingletonAwake()
     {
-        get
-        {
-            if (instance == null)
-            {
-                instance = FindObjectOfType<RetroComputerEffects>();
-            }
-            return instance;
-        }
-    }
-    
-    private void Awake()
-    {
-        if (instance == null)
-        {
-            instance = this;
-        }
-        else if (instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        
         // Get references
         parentCanvas = GetComponentInParent<Canvas>();
         mainCamera = Camera.main;

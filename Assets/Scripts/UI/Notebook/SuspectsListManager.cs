@@ -5,35 +5,21 @@ using TMPro;
 /// <summary>
 /// Manages the suspects list in the notebook
 /// </summary>
-public class SuspectsListManager : MonoBehaviour
+public class SuspectsListManager : SingletonMonoBehaviour<SuspectsListManager>
 {
     [Header("References")]
     public GameObject suspectEntryPrefab; // Prefab for suspect entries
     public NotebookManager notebookManager; // Reference to notebook manager
-    
+
     [Header("Settings")]
     public bool debugSuspectInfo = false;
-    
+
     // Data
     private List<SuspectEntry> suspectEntries = new List<SuspectEntry>();
     private Dictionary<string, SuspectEntry> suspectLookup = new Dictionary<string, SuspectEntry>();
-    
-    // Singleton
-    public static SuspectsListManager Instance { get; private set; }
-    
-    private void Awake()
+
+    protected override void OnSingletonAwake()
     {
-        // Set up singleton
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-            return;
-        }
-        
         // Find notebook manager if not assigned
         if (notebookManager == null)
         {
@@ -63,7 +49,7 @@ public class SuspectsListManager : MonoBehaviour
         }
     }
     
-    private void OnDestroy()
+    protected override void OnSingletonDestroy()
     {
         // Unsubscribe from events
         if (GameManager.Instance != null)

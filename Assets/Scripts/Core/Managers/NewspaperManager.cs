@@ -18,7 +18,7 @@ public class DayHeadline
     public List<CaseOutcomeHeadline> caseOutcomes = new List<CaseOutcomeHeadline>();
 }
 
-public class NewspaperManager : MonoBehaviour
+public class NewspaperManager : SingletonMonoBehaviour<NewspaperManager>
 {
     public List<DayHeadline> dayHeadlines = new List<DayHeadline>();
     

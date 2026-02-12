@@ -20,16 +20,13 @@ public class CriminalViolation
     }
 }
 
-public class SuspectManager : MonoBehaviour
+public class SuspectManager : SingletonMonoBehaviour<SuspectManager>
 {
     [Header("References")]
     public CitizenDatabase citizenDatabase;
-    
+
     // Current case will be set by GameManager
     private Case currentCase;
-    
-    // Singleton instance
-    public static SuspectManager Instance { get; private set; }
     
     [Header("CCTV Monitors")]
     public List<CCTVMonitor> cctvMonitors = new List<CCTVMonitor>(4); // 4 small monitors
@@ -70,19 +67,8 @@ public class SuspectManager : MonoBehaviour
     private RectTransform rectTransform;
     private CanvasGroup canvasGroup;
 
-    private void Awake()
+    protected override void OnSingletonAwake()
     {
-        // Set up singleton
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-            return;
-        }
-        
         // Initialize CCTV monitors (remove click listeners since we use channel buttons now)
         for (int i = 0; i < cctvMonitors.Count; i++)
         {
@@ -162,7 +148,7 @@ public class SuspectManager : MonoBehaviour
         }
     }
     
-    private void OnDestroy()
+    protected override void OnSingletonDestroy()
     {
         // Disconnect from GameManager events
         if (GameManager.Instance != null)
@@ -170,7 +156,7 @@ public class SuspectManager : MonoBehaviour
             GameManager.Instance.OnCaseOpened -= OnCaseOpened;
             GameManager.Instance.OnCaseClosed -= OnCaseClosed;
         }
-        
+
         // Cleanup channel button listeners
         for (int i = 0; i < channelButtons.Count; i++)
         {

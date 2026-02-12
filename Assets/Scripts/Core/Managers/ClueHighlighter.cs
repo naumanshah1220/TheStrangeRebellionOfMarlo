@@ -6,7 +6,7 @@ using System.Collections.Generic;
 /// <summary>
 /// Handles highlighting of clues when they are re-clicked
 /// </summary>
-public class ClueHighlighter : MonoBehaviour
+public class ClueHighlighter : SingletonMonoBehaviour<ClueHighlighter>
 {
     [Header("Highlight Prefabs")]
     public GameObject underlineHighlightPrefab;
@@ -269,7 +269,7 @@ public class ClueHighlighter : MonoBehaviour
         return null;
     }
 
-    private void OnDestroy()
+    protected override void OnSingletonDestroy()
     {
         ClearAllHighlights();
     }

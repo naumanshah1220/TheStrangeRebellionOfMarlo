@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-public class UIManager : MonoBehaviour
+public class UIManager : SingletonMonoBehaviour<UIManager>
 {
     [Header("Case List")]
     public HorizontalCardHolder caseHand;
@@ -39,19 +39,27 @@ public class UIManager : MonoBehaviour
     public float submitZoneHideY = -500f;
     public float submitZoneAnimationDuration = 0.6f;
     
-    public static UIManager Instance { get; private set; }
-
-    private void Awake()
+    protected override void OnSingletonAwake()
     {
-        if (Instance != null && Instance != this)
-            Destroy(gameObject);
-        else
-            Instance = this;
-            
         // Setup commit button
         if (commitButton != null)
         {
             commitButton.onClick.AddListener(OnCommitButtonPressed);
+        }
+
+        GameEvents.OnCaseSolved += HandleCaseSolved;
+    }
+
+    protected override void OnSingletonDestroy()
+    {
+        GameEvents.OnCaseSolved -= HandleCaseSolved;
+    }
+
+    private void HandleCaseSolved(Case solvedCase)
+    {
+        if (solvedCase != null)
+        {
+            ShowCaseSolvedNotification(solvedCase);
         }
     }
 

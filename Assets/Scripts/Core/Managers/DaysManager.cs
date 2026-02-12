@@ -14,9 +14,8 @@ public class DayCaseSettings
     public int minSecondaryCases = 1;   // Minimum secondary cases to maintain
 }
 
-public class DaysManager : MonoBehaviour
+public class DaysManager : SingletonMonoBehaviour<DaysManager>
 {
-    public static DaysManager Instance { get; private set; }
     
     [Header("Day Settings")]
     [Range(1, 20)] public int currentDay = 1;
@@ -61,17 +60,6 @@ public class DaysManager : MonoBehaviour
 
     private void Start()
     {
-        // Set up singleton
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-            return;
-        }
-        
         caseManager = FindFirstObjectByType<CaseManager>();
         uiManager = FindFirstObjectByType<UIManager>();
         newspaperManager = FindFirstObjectByType<NewspaperManager>();
@@ -86,12 +74,14 @@ public class DaysManager : MonoBehaviour
         if (isDayActive) UpdateTime();
     }
 
+    public event System.Action OnCampaignComplete;
+
     public void StartDay(int dayNumber)
     {
         if (dayNumber > totalDays)
         {
             Debug.Log("Campaign Complete");
-            GameManager.Instance.SetState(GameManager.GameState.GameEnd);
+            OnCampaignComplete?.Invoke();
             return;
         }
 
@@ -332,7 +322,7 @@ public class DaysManager : MonoBehaviour
         }
 
         currentDay++;
-        GameManager.Instance.SaveGame();
+        GameEvents.RaiseDayEnded();
     }
 
     public List<Case> GetCasesForToday() => new List<Case>(todaysPendingCases);

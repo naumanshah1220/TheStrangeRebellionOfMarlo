@@ -2,9 +2,8 @@ using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class MatManager : MonoBehaviour
+public class MatManager : SingletonMonoBehaviour<MatManager>
 {
-    public static MatManager Instance;
 
     [Header("References")]
     public HorizontalCardHolder matHand;
@@ -15,10 +14,7 @@ public class MatManager : MonoBehaviour
 
     public Card currentCaseCard;
 
-    void Awake()
-    {
-        Instance = this;
-    }
+    protected override void OnSingletonAwake() { }
 
     void Start()
     {

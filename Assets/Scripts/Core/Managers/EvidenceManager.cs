@@ -3,25 +3,17 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class EvidenceManager : MonoBehaviour
+public class EvidenceManager : SingletonMonoBehaviour<EvidenceManager>
 {
     [SerializeField] public HorizontalCardHolder evidenceHand;
     [SerializeField] public HorizontalCardHolder matHand;
-
-    public static EvidenceManager Instance { get; private set; }
 
     private Dictionary<Evidence, GameObject> evidenceToInstance = new Dictionary<Evidence, GameObject>();
     private Dictionary<string, Clue> currentCaseClues = new Dictionary<string, Clue>();
 
 
 
-    private void Awake()
-    {
-        if (Instance != null && Instance != this)
-            Destroy(gameObject);
-        else
-            Instance = this;
-    }
+    protected override void OnSingletonAwake() { }
 
     private void Start()
     {
@@ -111,13 +103,19 @@ public class EvidenceManager : MonoBehaviour
         Destroy(go); // clean up temp instance
     }
 
-    // To get all clues for current case:
     public IEnumerable<Clue> GetAllCluesForCurrentCase()
     {
         return currentCaseClues.Values;
     }
 
-    private void OnDestroy()
+    public Clue GetClueByID(string clueID)
+    {
+        if (!string.IsNullOrEmpty(clueID) && currentCaseClues.TryGetValue(clueID, out var clue))
+            return clue;
+        return null;
+    }
+
+    protected override void OnSingletonDestroy()
     {
         if (GameManager.Instance != null)
             GameManager.Instance.OnCaseOpened -= RegisterAllCluesForCase;

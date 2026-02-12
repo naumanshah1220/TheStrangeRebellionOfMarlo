@@ -33,9 +33,8 @@ public class CaseStatus
 /// <summary>
 /// Manages the pool of all cases in the game. Handles case progression and status tracking.
 /// </summary>
-public class CaseManager : MonoBehaviour
+public class CaseManager : SingletonMonoBehaviour<CaseManager>
 {
-    public static CaseManager Instance { get; private set; }
 
     [Header("All Case Data")]
     public List<Case> allCases = new List<Case>();
@@ -43,13 +42,8 @@ public class CaseManager : MonoBehaviour
     // Runtime state
     private Dictionary<string, CaseStatus> caseStatuses = new Dictionary<string, CaseStatus>();
 
-    private void Awake()
+    protected override void OnSingletonAwake()
     {
-        if (Instance == null)
-            Instance = this;
-        else
-            Destroy(gameObject);
-
         InitializeCaseStatuses();
         ResetAllCaseDrafts();
     }
@@ -382,23 +376,7 @@ public class CaseManager : MonoBehaviour
         // Mark case as solved in status tracking
         MarkCaseSolved(solvedCase.caseID);
 
-        // Update player progress
-        if (PlayerProgressManager.Instance != null)
-        {
-            PlayerProgressManager.Instance.AddReward(solvedCase.reward);
-            
-            // Add extra state reward if applicable
-            if (!string.IsNullOrEmpty(solvedCase.lawBroken))
-            {
-                PlayerProgressManager.Instance.AddReward(solvedCase.extraRewardForState);
-                PlayerProgressManager.Instance.ReduceSuspicion(solvedCase.suspicionReduction);
-            }
-        }
-
-        // Notify UI
-        if (UIManager.Instance != null)
-        {
-            UIManager.Instance.ShowCaseSolvedNotification(solvedCase);
-        }
+        // Emit event — subscribers (PlayerProgressManager, UIManager, etc.) handle their own logic
+        GameEvents.RaiseCaseSolved(solvedCase);
     }
 }

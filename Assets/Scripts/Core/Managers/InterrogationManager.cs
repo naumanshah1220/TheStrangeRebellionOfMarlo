@@ -9,9 +9,8 @@ using UnityEngine.UI;
 /// Main interrogation manager - handles suspect switching and conversation flow
 /// ARCHITECTURE: InterrogationManager handles logic, ChatManager handles UI
 /// </summary>
-public class InterrogationManager : MonoBehaviour
+public class InterrogationManager : SingletonMonoBehaviour<InterrogationManager>
 {
-    public static InterrogationManager Instance { get; private set; }
 
     [Header("Chat System")]
     public ChatManager chatManager;
@@ -39,27 +38,14 @@ public class InterrogationManager : MonoBehaviour
     public System.Action<string> OnSuspectChanged;
     public System.Action<string[]> OnNewCluesExtracted;
 
-    private void Awake()
+    protected override void OnSingletonAwake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-        
-        // DialogueSystem functionality has been consolidated into InterrogationManager
-        
         // Setup chat manager events
         if (chatManager != null)
         {
-            // Removed: chatManager.OnPlayerMessageSent += HandleChatPlayerMessage;
-            // This was causing duplicate processing - ChatManager now calls HandleTagQuestion directly
             chatManager.OnSuspectResponseReceived += HandleChatSuspectResponse;
         }
-        
+
         // Setup end interrogation button
         if (endInterrogationButton != null)
         {
@@ -465,15 +451,14 @@ public class InterrogationManager : MonoBehaviour
         isWaitingForResponse = false;
     }
 
-    private void OnDestroy()
+    protected override void OnSingletonDestroy()
     {
         // Cleanup events
         if (chatManager != null)
         {
-            // Removed: chatManager.OnPlayerMessageSent -= HandleChatPlayerMessage;
             chatManager.OnSuspectResponseReceived -= HandleChatSuspectResponse;
         }
-        
+
         if (endInterrogationButton != null)
         {
             endInterrogationButton.onClick.RemoveListener(EndInterrogation);

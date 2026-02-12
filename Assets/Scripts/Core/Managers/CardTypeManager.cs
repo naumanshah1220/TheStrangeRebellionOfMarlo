@@ -6,9 +6,8 @@ using UnityEngine;
 /// Manages different card types and their associated hands
 /// Makes it easy to add new card types and hands to the game
 /// </summary>
-public class CardTypeManager : MonoBehaviour
+public class CardTypeManager : SingletonMonoBehaviour<CardTypeManager>
 {
-    public static CardTypeManager Instance { get; private set; }
 
     [Header("Hands")]
     [Tooltip("All hands in the scene that can hold cards")]
@@ -26,17 +25,7 @@ public class CardTypeManager : MonoBehaviour
     [Header("Animation Easing")]
     public DG.Tweening.Ease cardReturnEase = DG.Tweening.Ease.OutBack;
 
-    private void Awake()
-    {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }
+    protected override void OnSingletonAwake() { }
 
     /// <summary>
     /// Get the appropriate hand for a specific card mode

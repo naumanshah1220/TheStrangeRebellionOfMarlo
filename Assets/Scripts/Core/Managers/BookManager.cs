@@ -6,9 +6,8 @@ using UnityEngine;
 /// Manages book hands and their associated book collections
 /// Allows for easy testing and management of books in the detective game
 /// </summary>
-public class BookManager : MonoBehaviour
+public class BookManager : SingletonMonoBehaviour<BookManager>
 {
-    public static BookManager Instance { get; private set; }
     
     [Header("Book Hands")]
     public HorizontalCardHolder bookHand1;
@@ -17,20 +16,12 @@ public class BookManager : MonoBehaviour
     [Header("Book Collection")]
     public List<Book> allBooks = new List<Book>();
 
-    private void Awake()
+    protected override void OnSingletonAwake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-            SetupEventListeners();
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+        SetupEventListeners();
     }
-    
-    private void OnDestroy()
+
+    protected override void OnSingletonDestroy()
     {
         RemoveEventListeners();
     }

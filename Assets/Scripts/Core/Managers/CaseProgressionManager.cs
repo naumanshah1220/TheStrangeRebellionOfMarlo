@@ -9,7 +9,7 @@ public class CaseSlotIncrease
     public int slotIncrease = 1;
 }
 
-public class CaseProgressionManager : MonoBehaviour
+public class CaseProgressionManager : SingletonMonoBehaviour<CaseProgressionManager>
 {
     [Header("Base Settings")]
     public int baseMaxSimultaneousCases = 3;

@@ -20,9 +20,8 @@ public class ResistanceProgress
     public List<string> helpedStateIds;       // IDs of cases where you helped state
 }
 
-public class PlayerProgressManager : MonoBehaviour
+public class PlayerProgressManager : SingletonMonoBehaviour<PlayerProgressManager>
 {
-    public static PlayerProgressManager Instance { get; private set; }
 
     public FamilyStatus familyStatus = new FamilyStatus();
     public ResistanceProgress resistanceProgress = new ResistanceProgress();
@@ -40,16 +39,27 @@ public class PlayerProgressManager : MonoBehaviour
     public event Action<float> OnResistanceTrustChanged;
     public event Action<float> OnSuspicionLevelChanged;
 
-    private void Awake()
+    protected override void OnSingletonAwake()
     {
-        if (Instance == null)
+        InitializeStatus();
+        GameEvents.OnCaseSolved += HandleCaseSolved;
+    }
+
+    protected override void OnSingletonDestroy()
+    {
+        GameEvents.OnCaseSolved -= HandleCaseSolved;
+    }
+
+    private void HandleCaseSolved(Case solvedCase)
+    {
+        if (solvedCase == null) return;
+
+        AddReward(solvedCase.reward);
+
+        if (!string.IsNullOrEmpty(solvedCase.lawBroken))
         {
-            Instance = this;
-            InitializeStatus();
-        }
-        else
-        {
-            Destroy(gameObject);
+            AddReward(solvedCase.extraRewardForState);
+            ReduceSuspicion(solvedCase.suspicionReduction);
         }
     }
 

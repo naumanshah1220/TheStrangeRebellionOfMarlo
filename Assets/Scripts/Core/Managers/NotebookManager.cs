@@ -9,7 +9,7 @@ using UnityEngine.EventSystems;
 /// <summary>
 /// Main notebook manager that coordinates handwriting animation, text processing, paging, and highlighting
 /// </summary>
-public class NotebookManager : MonoBehaviour
+public class NotebookManager : SingletonMonoBehaviour<NotebookManager>
 {
     [Header("References")]
     public RectTransform notebookPanel;
@@ -195,7 +195,7 @@ public class NotebookManager : MonoBehaviour
         public bool childControlHeight = true;
     }
 
-    private void Awake()
+    protected override void OnSingletonAwake()
     {
         // Verify components are assigned
         if (handwritingAnimator == null) handwritingAnimator = GetComponent<HandwritingAnimator>();
@@ -206,34 +206,34 @@ public class NotebookManager : MonoBehaviour
         notebookPanel.anchoredPosition = closedPosition;
         if (toggleNotebookButton != null)
             toggleNotebookButton.onClick.AddListener(ToggleNotebook);
-            
+
         // Initialize book-style pages
         InitializeBookPages();
-        
+
         // Initialize tab management
         InitializeTabManagement();
-        
+
         // Initialize page navigation
         InitializePageNavigation();
-        
+
         // Initialize layout configuration
         InitializeLayoutConfiguration();
-        
+
         // Get suspects manager reference
         suspectsManager = FindFirstObjectByType<SuspectsListManager>();
     }
 
-    private void OnDestroy()
+    protected override void OnSingletonDestroy()
     {
         if (toggleNotebookButton != null)
             toggleNotebookButton.onClick.RemoveListener(ToggleNotebook);
-            
+
         // Clean up tab buttons
         if (suspectsTab != null)
             suspectsTab.onClick.RemoveListener(() => SwitchToMode(NotebookMode.Suspects));
         if (cluesTab != null)
             cluesTab.onClick.RemoveListener(() => SwitchToMode(NotebookMode.Clues));
-            
+
         // Clean up page navigation buttons
         if (previousPageButton != null)
             previousPageButton.onClick.RemoveListener(PreviousPage);

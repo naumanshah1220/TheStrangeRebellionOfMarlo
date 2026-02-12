@@ -6,9 +6,8 @@ using UnityEngine;
 /// Manages overseer notes and their trigger-based distribution
 /// Similar to BookManager but for overseer notes with trigger system
 /// </summary>
-public class OverseerManager : MonoBehaviour
+public class OverseerManager : SingletonMonoBehaviour<OverseerManager>
 {
-    public static OverseerManager Instance { get; private set; }
     
     [Header("Overseer Hand")]
     public HorizontalCardHolder overseerHand;
@@ -19,17 +18,7 @@ public class OverseerManager : MonoBehaviour
     [Header("Settings")]
     public int maxNotesInHand = 5; // Maximum notes that can be in hand at once
 
-    private void Awake()
-    {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }
+    protected override void OnSingletonAwake() { }
     
     private void Start()
     {
@@ -60,7 +49,7 @@ public class OverseerManager : MonoBehaviour
         Debug.Log("[OverseerManager] Event listeners connected");
     }
     
-    private void OnDestroy()
+    protected override void OnSingletonDestroy()
     {
         RemoveEventListeners();
     }

@@ -7,7 +7,7 @@ using System.Collections.Generic;
 /// <summary>
 /// Handles handwriting animation for notebook text using sprite sheet animations
 /// </summary>
-public class HandwritingAnimator : MonoBehaviour
+public class HandwritingAnimator : SingletonMonoBehaviour<HandwritingAnimator>
 {
     [Header("Sprite Sheet Settings")]
     public Texture2D spriteSheet;
@@ -56,7 +56,7 @@ public class HandwritingAnimator : MonoBehaviour
         }
     }
 
-    private void Awake()
+    protected override void OnSingletonAwake()
     {
         if (spriteSheet != null)
             cellSize = spriteSheet.width / gridCols;

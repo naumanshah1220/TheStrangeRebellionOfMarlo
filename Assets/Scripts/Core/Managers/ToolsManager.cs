@@ -1,9 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ToolsManager : MonoBehaviour
+public class ToolsManager : SingletonMonoBehaviour<ToolsManager>
 {
-    public static ToolsManager Instance { get; private set; }
 
     public List<Tool> tools = new List<Tool>();
     public int activatedToolIndex = -1;
@@ -12,22 +11,10 @@ public class ToolsManager : MonoBehaviour
     private DragManager dM;
     public Camera mainCamera;
 
-    private void Awake()
+    protected override void OnSingletonAwake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(this.gameObject);
-            return;
-        }
-        Instance = this;
-
         if (!mainCamera)
             mainCamera = Camera.main;
-
-        // Optional: Don't destroy on load
-        // DontDestroyOnLoad(this.gameObject);
-
-        //FindAllTools();
     }
 
     private void Start()

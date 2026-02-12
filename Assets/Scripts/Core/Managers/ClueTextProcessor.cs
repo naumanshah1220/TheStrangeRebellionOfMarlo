@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 /// <summary>
 /// Handles detection and processing of detective tags in clue text
 /// </summary>
-public class ClueTextProcessor : MonoBehaviour
+public class ClueTextProcessor : SingletonMonoBehaviour<ClueTextProcessor>
 {
     [Header("Detective Tag Prefabs")]
     public GameObject personTagPrefab;

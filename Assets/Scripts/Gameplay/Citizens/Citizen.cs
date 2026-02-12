@@ -74,7 +74,6 @@ public class Citizen : ScriptableObject
     private Dictionary<string, int> runtimeTimesAskedSinceUnlock = new Dictionary<string, int>();
     
     // Global call counter for debugging
-    private static int globalCallCounter = 0;
     
     // Helper properties
     public string FullName => $"{firstName} {lastName}";
@@ -85,11 +84,8 @@ public class Citizen : ScriptableObject
     /// </summary>
     public TagResponse GetResponseForTag(string tagId)
     {
-        globalCallCounter++;
-        Debug.Log($"[Citizen] *** GetResponseForTag CALL #{globalCallCounter} *** {FullName} - Looking for tag: '{tagId}'");
-        Debug.Log($"[Citizen] Stack trace: {System.Environment.StackTrace}");
-        Debug.Log($"[Citizen] Available tag interactions: {string.Join(", ", System.Array.ConvertAll(tagInteractions, t => $"'{t.tagId}'"))}");
-        
+        Debug.Log($"[Citizen] {FullName} - GetResponseForTag: '{tagId}'");
+
         // Find tag interaction
         TagInteraction tagInteraction = GetTagInteraction(tagId);
         

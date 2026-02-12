@@ -11,9 +11,8 @@ using Random=UnityEngine.Random;
 using UnityEditor;
 #endif
 
-public class GameManager : MonoBehaviour
+public class GameManager : SingletonMonoBehaviour<GameManager>
 {
-    public static GameManager Instance;
     
 
     public enum GameState
@@ -66,10 +65,20 @@ public class GameManager : MonoBehaviour
     public event Action<int> OnDayStarted;
     public event Action OnDayEnded;
 
-    private void Awake()
+    protected override void OnSingletonAwake() { }
+
+    protected override void OnSingletonDestroy()
     {
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
+        GameEvents.OnDayEnded -= SaveGame;
+        if (daysManager != null)
+        {
+            daysManager.OnCampaignComplete -= HandleCampaignComplete;
+        }
+    }
+
+    private void HandleCampaignComplete()
+    {
+        SetState(GameState.GameEnd);
     }
 
     private void Start()
@@ -82,7 +91,11 @@ public class GameManager : MonoBehaviour
         {
             daysManager.onDayStart.AddListener(() => { StartNewDay(daysManager.currentDay); UpdateDebugInfo(); });
             daysManager.onDayEnd.AddListener(() => { EndCurrentDay(); UpdateDebugInfo(); });
+            daysManager.OnCampaignComplete += HandleCampaignComplete;
         }
+
+        // Subscribe to static event bus
+        GameEvents.OnDayEnded += SaveGame;
 
         // Debug button wiring
         if (debugStartDayButton) debugStartDayButton.onClick.AddListener(() => { daysManager.StartDay(daysManager.currentDay); UpdateDebugInfo(); });
@@ -498,17 +511,32 @@ public class GameManager : MonoBehaviour
 
     public IEnumerator CloseCaseRoutine()
     {
-        // 0. Force eject any disc from computer first
         Debug.Log("[GameManager] Starting case closing routine...");
-        
-        // Check if there's a computer with an inserted disc and eject it
+
+        ForceEjectComputerDisc();
+
+        yield return StartCoroutine(ReturnAllCardsToHands());
+
+        yield return StartCoroutine(PlayCaseCloseAnimation());
+
+        TransitionToSubmitPhase();
+
+        yield return StartCoroutine(WaitForCaseSubmission());
+
+        TransitionBackToCaseSelection();
+    }
+
+    private void ForceEjectComputerDisc()
+    {
         ComputerSystem computerSystem = FindFirstObjectByType<ComputerSystem>();
         if (computerSystem != null)
         {
             computerSystem.ForceEjectDiscForCaseClosing();
         }
-        
-        // 1. Move all cards from matHand back to their appropriate hands
+    }
+
+    private IEnumerator ReturnAllCardsToHands()
+    {
         if (evidenceManager?.matHand == null)
         {
             Debug.LogError("[GameManager] EvidenceManager or matHand is null! Cannot close case.");
@@ -516,85 +544,72 @@ public class GameManager : MonoBehaviour
         }
 
         var matHand = evidenceManager.matHand;
-        var cardsToMove = matHand.cards.ToList(); // copy to avoid modifying while looping
+        var cardsToMove = matHand.cards.ToList();
         Debug.Log($"[GameManager] Found {cardsToMove.Count} cards on mat to move back");
 
         if (cardTypeManager != null)
         {
-            Debug.Log("[GameManager] Using CardTypeManager for animated card routing");
-            // Use CardTypeManager to return all cards to their proper hands with animation
             yield return StartCoroutine(cardTypeManager.ReturnAllCardsFromMatToHands());
         }
         else
         {
-            Debug.Log("[GameManager] CardTypeManager not available - using fallback system");
-            // Fallback to old system if CardTypeManager not available
             var evidenceHand = evidenceManager.evidenceHand;
-            
             if (evidenceHand == null)
             {
                 Debug.LogError("[GameManager] EvidenceHand is null! Cannot return cards.");
                 yield break;
             }
 
-        foreach (var card in cardsToMove)
-        {
-                Debug.Log($"[GameManager] Moving {card.mode} card '{card.name}' back to evidence hand (fallback)");
-            matHand.RemoveCard(card);
-            evidenceHand.AddCardToHand(card, -1);
-                // Don't manually call ToggleFullView - let the automatic cardLocation system handle it
-            yield return new WaitForSeconds(0.1f);
+            foreach (var card in cardsToMove)
+            {
+                matHand.RemoveCard(card);
+                evidenceHand.AddCardToHand(card, -1);
+                yield return new WaitForSeconds(0.1f);
+            }
         }
-        }
-        
-        Debug.Log($"[GameManager] Finished moving {cardsToMove.Count} cards from mat");
 
-        // 3. Play file close animation (for now, just log and wait)
+        Debug.Log($"[GameManager] Finished moving {cardsToMove.Count} cards from mat");
+    }
+
+    private IEnumerator PlayCaseCloseAnimation()
+    {
         Debug.Log("[GameManager] Playing case close animation...");
         yield return new WaitForSeconds(0.3f);
+    }
 
-        // 4. Hide evidence hand, show submit case zone
-        Debug.Log("[GameManager] Animating evidence hand out and submit zone in...");
+    private void TransitionToSubmitPhase()
+    {
         uiManager.AnimateEvidenceHandOut();
         uiManager.AnimateSubmitZoneIn();
-        
-
         matManager.EnableCaseSubmission();
+    }
 
-        // 5. Wait for case submission (but only if case is not already submitted via CommitOverlay)
+    private IEnumerator WaitForCaseSubmission()
+    {
         if (!caseSubmitted)
         {
             Debug.Log("[GameManager] Waiting for case submission...");
             while (!caseSubmitted)
             {
-                yield return new WaitForSeconds(1f); // Add delay to reduce log spam
+                yield return new WaitForSeconds(1f);
             }
         }
-        else
-        {
-            Debug.Log("[GameManager] Case already submitted via CommitOverlay, skipping wait...");
-        }
+    }
 
-        // 6. Hide submit zone, show case hand again, update hand
-        Debug.Log("[GameManager] Case submitted - cleaning up UI...");
+    private void TransitionBackToCaseSelection()
+    {
         uiManager.AnimateSubmitZoneOut();
         uiManager.AnimateCaseHandIn();
 
-        // Actually close the case in logic (only if case still exists)
         if (CurrentCase != null)
         {
             CloseCurrentCase();
         }
         else
         {
-            Debug.Log("[GameManager] Case already closed, skipping CloseCurrentCase()");
-            // Still need to update state and load new cases
             SetState(GameState.CaseSelection);
-            LoadNewPendingCases();
         }
-        
-        // 7. Load any pending cases into the case hand (since we now have space)
-        Debug.Log("[GameManager] Loading new pending cases to case hand...");
+
         LoadNewPendingCases();
     }
 
@@ -623,19 +638,12 @@ public class GameManager : MonoBehaviour
         // TODO: implement load system
     }
 
-    public void Update()
-    {
-        UpdateDebugInfo();
-    }
 
     private void UpdateDebugInfo()
     {
         if (debugInfoText == null) return;
 
-        // Time of day (from DaysManager)
-        string timeOfDay = (daysManager != null && daysManager.GetType().GetMethod("GetTimeString") != null)
-            ? daysManager.GetTimeString()
-            : "";
+        string timeOfDay = daysManager != null ? daysManager.GetTimeString() : "";
 
         // Evidence on mat (from EvidenceManager's evidenceHolder)
         int evidencesOnMat = 0;
