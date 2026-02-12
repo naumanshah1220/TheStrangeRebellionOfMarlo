@@ -68,9 +68,9 @@ public class MatManager : SingletonMonoBehaviour<MatManager>
 
     public void EnableCaseSubmission()
     {
-        if (gM.CurrentCase != null && caseSlot.cards.Count > 0)
+        if (gM.CurrentCase != null && caseSlot.Cards.Count > 0)
         {
-            caseSlot.cards[0].canBeSubmitted = true;
+            caseSlot.Cards[0].canBeSubmitted = true;
         }
     }
     

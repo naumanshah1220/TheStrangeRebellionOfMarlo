@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
@@ -239,7 +240,7 @@ public class FingerPrintDusterSystem : MonoBehaviour
             }
             
             // For normal cards, check if card slot already has a card
-            if (cardSlot.cards.Count > 0)
+            if (cardSlot.Cards.Count > 0)
             {
                 return false; // Already has a card
             }
@@ -661,16 +662,16 @@ public class FingerPrintDusterSystem : MonoBehaviour
         if (cardSlot == null) return;
         
         // Check if card was removed externally
-        if (currentCard != null && !cardSlot.cards.Contains(currentCard))
+        if (currentCard != null && !cardSlot.Cards.Contains(currentCard))
         {
             // Card was removed externally - clean up
             OnCardRemoved();
         }
         
         // Update currentCard reference if it's null but we have cards in the slot
-        if (currentCard == null && cardSlot.cards.Count > 0)
+        if (currentCard == null && cardSlot.Cards.Count > 0)
         {
-            currentCard = cardSlot.cards[0];
+            currentCard = cardSlot.Cards[0];
             
             // Find Fingerprint component on the card's bigCardVisual
             if (currentCard.bigCardVisual != null)
@@ -722,11 +723,11 @@ public class FingerPrintDusterSystem : MonoBehaviour
         }
 
         // Enforce single card rule for FingerPrintDuster type hands (but allow torn pieces)
-        if (cardSlot.cards.Count > 1)
+        if (cardSlot.Cards.Count > 1)
         {
             // Check if any of the cards are torn pieces
             bool hasTornPieces = false;
-            foreach (var card in cardSlot.cards)
+            foreach (var card in cardSlot.Cards)
             {
                 if (card?.bigCardVisual != null)
                 {
@@ -748,9 +749,9 @@ public class FingerPrintDusterSystem : MonoBehaviour
                 Debug.LogWarning("[FingerPrintDusterSystem] Multiple cards detected - removing extras");
                 
                 // Keep only the first card, remove others
-                for (int i = cardSlot.cards.Count - 1; i > 0; i--)
+                for (int i = cardSlot.Cards.Count - 1; i > 0; i--)
                 {
-                    Card extraCard = cardSlot.cards[i];
+                    Card extraCard = cardSlot.Cards[i];
                     cardSlot.RemoveCard(extraCard);
                     
                     // Return to appropriate hand
@@ -763,7 +764,7 @@ public class FingerPrintDusterSystem : MonoBehaviour
         }
         
         // Enforce evidence-only rule for FingerPrintDuster type hands
-        foreach (Card card in cardSlot.cards.ToArray()) // ToArray to avoid modification during iteration
+        foreach (Card card in cardSlot.Cards.ToArray()) // ToArray to avoid modification during iteration
         {
             if (card.mode != CardMode.Evidence)
             {

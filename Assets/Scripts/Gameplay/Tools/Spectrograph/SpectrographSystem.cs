@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -66,7 +67,7 @@ public class SpectrographSystem : MonoBehaviour
         if (card.mode != CardMode.Evidence) return false;
         if (cardSlot == null) { Debug.LogError("[SpectrographSystem] cardSlot not assigned"); return false; }
         // Only allow if slot empty (single card)
-        if (cardSlot.cards.Count > 0) return false;
+        if (cardSlot.Cards.Count > 0) return false;
         return true;
     }
 
@@ -98,13 +99,13 @@ public class SpectrographSystem : MonoBehaviour
     private void MonitorCardSlot()
     {
         if (cardSlot == null) return;
-        if (currentCard != null && !cardSlot.cards.Contains(currentCard))
+        if (currentCard != null && !cardSlot.Cards.Contains(currentCard))
         {
             OnCardRemoved();
         }
-        if (currentCard == null && cardSlot.cards.Count > 0)
+        if (currentCard == null && cardSlot.Cards.Count > 0)
         {
-            currentCard = cardSlot.cards[0];
+            currentCard = cardSlot.Cards[0];
             RefreshForCurrentCard();
         }
     }

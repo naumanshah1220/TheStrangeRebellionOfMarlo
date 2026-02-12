@@ -360,9 +360,9 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         var matHand = evidenceManager.matHand;
         
         // Clean up evidence hand
-        if (evidenceHand != null && evidenceHand.cards.Count > 0)
+        if (evidenceHand != null && evidenceHand.Cards.Count > 0)
         {
-            var evidenceCards = evidenceHand.cards.ToList(); // Copy to avoid modification during iteration
+            var evidenceCards = evidenceHand.Cards.ToList(); // Copy to avoid modification during iteration
             Debug.Log($"[GameManager] Deleting {evidenceCards.Count} cards from evidence hand");
             
             foreach (var card in evidenceCards)
@@ -373,9 +373,9 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         }
         
         // Clean up mat hand (evidence and other card types that were on the mat)
-        if (matHand != null && matHand.cards.Count > 0)
+        if (matHand != null && matHand.Cards.Count > 0)
         {
-            var matCards = matHand.cards.ToList(); // Copy to avoid modification during iteration
+            var matCards = matHand.Cards.ToList(); // Copy to avoid modification during iteration
             Debug.Log($"[GameManager] Deleting {matCards.Count} cards from mat hand");
             
             foreach (var card in matCards)
@@ -406,13 +406,13 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
             if (uiManager != null)
             {
                 // Check case hand
-                if (uiManager.caseHand != null && uiManager.caseHand.cards.Contains(caseCard))
+                if (uiManager.caseHand != null && uiManager.caseHand.Cards.Contains(caseCard))
                 {
                     Debug.Log("[GameManager] Found case card in case hand, deleting...");
                     uiManager.caseHand.DeleteCard(caseCard);
                 }
                 // Check case slot (mat manager's case slot)
-                else if (matManager != null && matManager.caseSlot != null && matManager.caseSlot.cards.Contains(caseCard))
+                else if (matManager != null && matManager.caseSlot != null && matManager.caseSlot.Cards.Contains(caseCard))
                 {
                     Debug.Log("[GameManager] Found case card in case slot, deleting...");
                     matManager.caseSlot.DeleteCard(caseCard);
@@ -544,7 +544,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         }
 
         var matHand = evidenceManager.matHand;
-        var cardsToMove = matHand.cards.ToList();
+        var cardsToMove = matHand.Cards.ToList();
         Debug.Log($"[GameManager] Found {cardsToMove.Count} cards on mat to move back");
 
         if (cardTypeManager != null)
@@ -648,7 +648,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         // Evidence on mat (from EvidenceManager's evidenceHolder)
         int evidencesOnMat = 0;
         if (evidenceManager != null && evidenceManager.evidenceHand != null)
-            evidencesOnMat = evidenceManager.matHand.cards.Count;
+            evidencesOnMat = evidenceManager.matHand.Cards.Count;
 
         // Clues found/total (from EvidenceManager & CluesManager)
         int cluesTotal = 0, cluesFound = 0;

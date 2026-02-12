@@ -37,15 +37,15 @@ public class ToolsManager : SingletonMonoBehaviour<ToolsManager>
 
     private void Update()
     {
-        if (dM.isDragging && dM.currentCard)
+        if (dM.IsDragging && dM.CurrentCard)
         {
             // 1. Clear all tools' hover states and trigger hover end events
             for (int i = 0; i < tools.Count; i++)
             {
                 // If tool was previously hovered, trigger hover end event
-                if (tools[i].isHovering && dM.currentCard != null)
+                if (tools[i].isHovering && dM.CurrentCard != null)
                 {
-                    tools[i].OnCardHoverEnd(dM.currentCard);
+                    tools[i].OnCardHoverEnd(dM.CurrentCard);
                 }
             }
 
@@ -61,9 +61,9 @@ public class ToolsManager : SingletonMonoBehaviour<ToolsManager>
                 if (isOverTool)
                 {
                     // Check if tool can accept this card
-                    if (tools[i].CanAcceptCard(dM.currentCard))
+                    if (tools[i].CanAcceptCard(dM.CurrentCard))
                     {
-                        tools[i].OnCardHoverStart(dM.currentCard);
+                        tools[i].OnCardHoverStart(dM.CurrentCard);
                         break; // Only hover one tool at a time
                     }
                 }
@@ -75,9 +75,9 @@ public class ToolsManager : SingletonMonoBehaviour<ToolsManager>
             for (int i = 0; i < tools.Count; i++)
             {
                 // If tool was previously hovered, trigger hover end event
-                if (tools[i].isHovering && dM.currentCard != null)
+                if (tools[i].isHovering && dM.CurrentCard != null)
                 {
-                    tools[i].OnCardHoverEnd(dM.currentCard);
+                    tools[i].OnCardHoverEnd(dM.CurrentCard);
                 }
             }
         }

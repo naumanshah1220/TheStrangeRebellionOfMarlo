@@ -227,7 +227,7 @@ public class OverseerManager : SingletonMonoBehaviour<OverseerManager>
     private bool CanAddNoteToHand()
     {
         if (overseerHand == null) return false;
-        return overseerHand.cards.Count < maxNotesInHand;
+        return overseerHand.Cards.Count < maxNotesInHand;
     }
     
     /// <summary>
@@ -283,7 +283,7 @@ public class OverseerManager : SingletonMonoBehaviour<OverseerManager>
         // Clear all notes from overseer hand
         if (overseerHand != null)
         {
-            overseerHand.cards.Clear();
+            overseerHand.ClearCards();
             // Clear visual children
             foreach (Transform child in overseerHand.transform)
             {

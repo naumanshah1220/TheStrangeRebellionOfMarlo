@@ -348,13 +348,13 @@ public class ComputerSystem : MonoBehaviour
             Debug.Log($"[ComputerSystem] Step 3 passed: Evidence type is Disk");
             
             // Check if disc slot already has a disc
-            if (discSlot != null && discSlot.cards.Count > 0)
+            if (discSlot != null && discSlot.Cards.Count > 0)
             {
-                Debug.Log($"[ComputerSystem] Rejected: Disc slot already has {discSlot.cards.Count} cards");
+                Debug.Log($"[ComputerSystem] Rejected: Disc slot already has {discSlot.Cards.Count} cards");
                 return false; // Already has a disc
             }
             
-            Debug.Log($"[ComputerSystem] Step 4 passed: Disc slot is empty (discSlot: {discSlot != null}, cards: {(discSlot?.cards.Count ?? -1)})");
+            Debug.Log($"[ComputerSystem] Step 4 passed: Disc slot is empty (discSlot: {discSlot != null}, cards: {(discSlot?.Cards.Count ?? -1)})");
             
             // Check if this disc has an associated app
             bool hasAssociatedApp = evidence.HasAssociatedApp;
@@ -516,21 +516,21 @@ public class ComputerSystem : MonoBehaviour
         if (discSlot == null) return;
         
         // Check if disc was removed externally
-        if (currentDiscCard != null && !discSlot.cards.Contains(currentDiscCard))
+        if (currentDiscCard != null && !discSlot.Cards.Contains(currentDiscCard))
         {
             // Disc was removed externally - clean up
             OnDiscRemoved();
         }
         
         // Enforce single disc rule for Computer type hands
-        if (discSlot.cards.Count > 1)
+        if (discSlot.Cards.Count > 1)
         {
             Debug.LogWarning("[ComputerSystem] Multiple discs detected - removing extras");
             
             // Keep only the first disc, remove others
-            for (int i = discSlot.cards.Count - 1; i > 0; i--)
+            for (int i = discSlot.Cards.Count - 1; i > 0; i--)
             {
-                Card extraCard = discSlot.cards[i];
+                Card extraCard = discSlot.Cards[i];
                 discSlot.RemoveCard(extraCard);
                 
                 // Return to appropriate hand
@@ -542,7 +542,7 @@ public class ComputerSystem : MonoBehaviour
         }
         
         // Enforce disc-only rule for Computer type hands
-        foreach (Card card in discSlot.cards.ToArray()) // ToArray to avoid modification during iteration
+        foreach (Card card in discSlot.Cards.ToArray()) // ToArray to avoid modification during iteration
         {
             if (!IsValidDiscCard(card))
             {

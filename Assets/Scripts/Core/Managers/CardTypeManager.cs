@@ -189,7 +189,7 @@ public class CardTypeManager : SingletonMonoBehaviour<CardTypeManager>
         HorizontalCardHolder hand = GetHandForCardMode(mode);
         if (hand != null)
         {
-            foreach (Card card in hand.cards)
+            foreach (Card card in hand.Cards)
             {
                 if (card.mode == mode)
                     cardsOfType.Add(card);
@@ -199,7 +199,7 @@ public class CardTypeManager : SingletonMonoBehaviour<CardTypeManager>
         // Also check mat
         if (matHand != null)
         {
-            foreach (Card card in matHand.cards)
+            foreach (Card card in matHand.Cards)
             {
                 if (card.mode == mode)
                     cardsOfType.Add(card);
@@ -250,7 +250,7 @@ public class CardTypeManager : SingletonMonoBehaviour<CardTypeManager>
     {
         if (matHand == null) yield break;
 
-        var matCardsToMove = new List<Card>(matHand.cards); // Copy to avoid modification during iteration
+        var matCardsToMove = new List<Card>(matHand.Cards); // Copy to avoid modification during iteration
         
         // Handle mat cards first
         foreach (Card card in matCardsToMove)
@@ -272,7 +272,7 @@ public class CardTypeManager : SingletonMonoBehaviour<CardTypeManager>
                     var dusterSystem = tool.GetComponent<FingerPrintDusterSystem>();
                     if (dusterSystem != null && dusterSystem.CardSlot != null)
                     {
-                        var dusterCards = new List<Card>(dusterSystem.CardSlot.cards);
+                        var dusterCards = new List<Card>(dusterSystem.CardSlot.Cards);
                         foreach (var card in dusterCards)
                         {
                             if (card != null) // Check if card still exists

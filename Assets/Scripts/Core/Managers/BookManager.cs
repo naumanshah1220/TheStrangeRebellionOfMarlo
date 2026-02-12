@@ -76,11 +76,11 @@ public class BookManager : SingletonMonoBehaviour<BookManager>
         if (card == null || card.mode != CardMode.Book) 
             return;
 
-        if (bookHand1.CanAcceptCardType(CardMode.Book) && bookHand1.cards.Count == 0)
+        if (bookHand1.CanAcceptCardType(CardMode.Book) && bookHand1.Cards.Count == 0)
         {
             MoveCardToHand(card, bookHand1);
         }
-        else if (bookHand2.CanAcceptCardType(CardMode.Book) && bookHand2.cards.Count == 0)
+        else if (bookHand2.CanAcceptCardType(CardMode.Book) && bookHand2.Cards.Count == 0)
         {
             MoveCardToHand(card, bookHand2);
         }
@@ -94,9 +94,9 @@ public class BookManager : SingletonMonoBehaviour<BookManager>
 
     public void CloseBook(HorizontalCardHolder bookHand)
     {
-        if (bookHand.cards.Count > 0)
+        if (bookHand.Cards.Count > 0)
         {
-            Card card = bookHand.cards.FirstOrDefault();
+            Card card = bookHand.Cards.FirstOrDefault();
             if (card == null || card.mode != CardMode.Book) return;
 
             // Return card to its original hand
@@ -222,7 +222,7 @@ public class BookManager : SingletonMonoBehaviour<BookManager>
         // Check Shelf1
         if (bookHand1 != null)
         {
-            foreach (Card card in bookHand1.cards)
+            foreach (Card card in bookHand1.Cards)
             {
                 if (card.GetCardData() is Book bookData && bookData.id == book.id)
                     return true;
@@ -232,7 +232,7 @@ public class BookManager : SingletonMonoBehaviour<BookManager>
         // Check Shelf2
         if (bookHand2 != null)
         {
-            foreach (Card card in bookHand2.cards)
+            foreach (Card card in bookHand2.Cards)
             {
                 if (card.GetCardData() is Book bookData && bookData.id == book.id)
                     return true;

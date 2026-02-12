@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using DG.Tweening;
 using System.Linq;
@@ -53,7 +52,19 @@ public class HorizontalCardHolder : MonoBehaviour
     [SerializeField] private Card hoveredCard;
 
     [Header("Spawn Settings")]
-    public List<Card> cards = new List<Card>();
+    private List<Card> _cards = new List<Card>();
+
+    /// <summary>
+    /// Read-only view of the cards in this holder. Use AddCardToHand/RemoveCard/DeleteCard to modify.
+    /// </summary>
+    public IReadOnlyList<Card> Cards => _cards;
+    public int CardCount => _cards.Count;
+    public bool ContainsCard(Card card) => _cards.Contains(card);
+
+    /// <summary>
+    /// Clear all cards from this holder without destroying them (for external reset)
+    /// </summary>
+    public void ClearCards() => _cards.Clear();
     [SerializeField] private float fallback_slotSizeModifier = 2;
 
 
@@ -82,12 +93,12 @@ public class HorizontalCardHolder : MonoBehaviour
         // Use legacy system check to maintain original behavior
         if (purpose == HolderPurpose.Hand && acceptedCardTypes == AcceptedCardTypes.Cases)
         {
-            Debug.Log($"[{gameObject.name}] Subscribing to day start event (Case Hand)");
+            Debug.Log($"[HorizontalCardHolder] Subscribing to day start event (Case Hand)");
             daysManager.onDayStart.AddListener(LoadCasesOnDayStart);
         }
         else
         {
-            Debug.Log($"[{gameObject.name}] NOT subscribing to day start event (purpose: {purpose}, acceptedTypes: {acceptedCardTypes})");
+            Debug.Log($"[HorizontalCardHolder] NOT subscribing to day start event (purpose: {purpose}, acceptedTypes: {acceptedCardTypes})");
         }
         
         // Validate new card holder system configuration
@@ -113,28 +124,28 @@ public class HorizontalCardHolder : MonoBehaviour
         // Check for logical inconsistencies
         if (purpose == HolderPurpose.BookShelf && acceptedCardTypes != AcceptedCardTypes.Books)
         {
-            Debug.LogWarning($"[{gameObject.name}] BookShelf should only accept Books! Current: {acceptedCardTypes}");
+            Debug.LogWarning($"[HorizontalCardHolder] BookShelf should only accept Books! Current: {acceptedCardTypes}");
         }
         
         if (purpose == HolderPurpose.ReportFile && acceptedCardTypes != AcceptedCardTypes.Reports)
         {
-            Debug.LogWarning($"[{gameObject.name}] ReportFile should only accept Reports! Current: {acceptedCardTypes}");
+            Debug.LogWarning($"[HorizontalCardHolder] ReportFile should only accept Reports! Current: {acceptedCardTypes}");
         }
         
         // Validate visual mode consistency
         if (purpose == HolderPurpose.Mat && visualMode != VisualMode.BigCards)
         {
-            Debug.LogWarning($"[{gameObject.name}] Mat should use BigCards visual mode! Current: {visualMode}");
+            Debug.LogWarning($"[HorizontalCardHolder] Mat should use BigCards visual mode! Current: {visualMode}");
         }
         
         if (purpose == HolderPurpose.Computer && visualMode != VisualMode.BigCards)
         {
-            Debug.LogWarning($"[{gameObject.name}] Computer should use BigCards visual mode! Current: {visualMode}");
+            Debug.LogWarning($"[HorizontalCardHolder] Computer should use BigCards visual mode! Current: {visualMode}");
         }
         
         if (purpose == HolderPurpose.FingerPrintDuster && visualMode != VisualMode.BigCards)
         {
-            Debug.LogWarning($"[{gameObject.name}] FingerPrintDuster should use BigCards visual mode! Current: {visualMode}");
+            Debug.LogWarning($"[HorizontalCardHolder] FingerPrintDuster should use BigCards visual mode! Current: {visualMode}");
         }
     }
 
@@ -145,12 +156,12 @@ public class HorizontalCardHolder : MonoBehaviour
         // Only load cases if this is actually a case hand
         if (purpose == HolderPurpose.Hand && acceptedCardTypes == AcceptedCardTypes.Cases)
         {
-            Debug.Log($"[{gameObject.name}] Loading {pendingCases.Count} cases for day start");
+            Debug.Log($"[HorizontalCardHolder] Loading {pendingCases.Count} cases for day start");
             LoadCardsFromData(pendingCases, true);
         }
         else
         {
-            Debug.Log($"[{gameObject.name}] Skipping case loading - not a case hand (purpose: {purpose}, acceptedTypes: {acceptedCardTypes})");
+            Debug.Log($"[HorizontalCardHolder] Skipping case loading - not a case hand (purpose: {purpose}, acceptedTypes: {acceptedCardTypes})");
         }
     }
 
@@ -166,136 +177,36 @@ public class HorizontalCardHolder : MonoBehaviour
 
     private IEnumerator SetupCardsAndDealVisuals<T>(List<T> dataList, bool deleteOld)
     {
-        Debug.Log($"[{gameObject.name}] Starting SetupCardsAndDealVisuals with {dataList.Count} items. deleteOld is {deleteOld}.");
+        Debug.Log($"[HorizontalCardHolder] Starting SetupCardsAndDealVisuals with {dataList.Count} items. deleteOld is {deleteOld}.");
         if (deleteOld)
         {
-            // Clear old slots/cards
             foreach (Transform child in transform)
                 Destroy(child.gameObject);
-
-            cards.Clear();
+            _cards.Clear();
         }
 
         rect = GetComponent<RectTransform>();
 
-        // STEP 1: Instantiate all slots immediately
-        int startingIndex = deleteOld ? 0 : cards.Count;
+        int startingIndex = deleteOld ? 0 : _cards.Count;
         List<Card> newlyAddedCards = new List<Card>();
         for (int i = 0; i < dataList.Count; i++)
         {
-            Debug.Log($"[{gameObject.name}] Creating card for item {i} of type {typeof(T)}.");
-            GameObject slot = Instantiate(slotPrefab, transform);
-            slot.transform.localPosition = Vector3.zero;
-            // Note: We'll size the slot after the card is initialized, not here
+            Card card = InstantiateCardInSlot(dataList[i], startingIndex + i);
+            if (card == null) continue;
 
+            NotifyEnhancedCardVisual(card);
+            ResetSlotWidthToBaseline(card.transform.parent.gameObject);
 
-            Card card = slot.GetComponentInChildren<Card>();
-            if (card == null)
-            {
-                Debug.LogError($"No Card found in slot prefab at index {i}");
-                continue;
-            }
-
-            // 🟢 Event & selection setup for each card
-            card.name = (startingIndex + i).ToString();
-            card.parentHolder = this;
-            card.homeHand = this; // Set the initial home hand
-            card.PointerEnterEvent.AddListener(CardPointerEnter);
-            card.PointerExitEvent.AddListener(CardPointerExit);
-            card.BeginDragEvent.AddListener(BeginDrag);
-            card.EndDragEvent.AddListener(EndDrag);
-
-            // 🟢 Initialize the visuals/data with your own method
-            card.Initialize(dataList[i], visualHandler, bigVisualHandler);
-            
-            // Set the deal fly time for the card visual
-            if (card.cardVisual != null)
-            {
-                card.cardVisual.SetDealFlyTime(dealFlyTime);
-            }
-            
-            // Step 1: Check for enhanced card visual and handle evidence hand setup
-            // Use new system: Check if this holder accepts evidence and has hand purpose
-            if (purpose == HolderPurpose.Hand && acceptedCardTypes == AcceptedCardTypes.Evidence)
-            {
-                var enhancedCardVisual = card.GetComponent<EnhancedCardVisual>();
-                
-                if (enhancedCardVisual == null && card.bigCardVisual != null)
-                {
-                    enhancedCardVisual = card.bigCardVisual.GetComponent<EnhancedCardVisual>();
-                }
-                
-                if (enhancedCardVisual != null)
-                {
-                    Debug.Log($"[HorizontalCardHolder] Calling OnAddedToEvidenceHand on {enhancedCardVisual.name}");
-                    enhancedCardVisual.OnAddedToEvidenceHand();
-                }
-                else
-                {
-                    Debug.Log($"[HorizontalCardHolder] No EnhancedCardVisual found on card {card.name}");
-                }
-            }
-            
-            // Ensure slot width is reset to baseline on creation (prevents inherited large sizes)
-            // Only when adaptive squeeze is enabled (otherwise keep HLG-authored behavior)
-            if (enableAdaptiveSqueeze)
-            {
-                var slotRectInit = slot.GetComponent<RectTransform>();
-                if (slotRectInit != null)
-                {
-                    float targetW = baselineSlotWidth > 0 ? baselineSlotWidth : (minSlotPreferredWidth > 0 ? minSlotPreferredWidth : slotRectInit.sizeDelta.x);
-                    slotRectInit.sizeDelta = new Vector2(targetW, slotRectInit.sizeDelta.y);
-                }
-            }
-
-            // Size the slot appropriately for mat placement (only if this holder is Mat)
-            if (purpose == HolderPurpose.Mat)
-            {
-                SizeSlotForBigCard(card, slot);
-            }
-            
-            // Hide visual for "deal in" animation
             if (card.cardVisual != null)
                 card.cardVisual.gameObject.SetActive(false);
-            cards.Add(card);
+            _cards.Add(card);
             newlyAddedCards.Add(card);
         }
 
         yield return new WaitForEndOfFrame();
 
-        // STEP 2: Deal visuals in one by one (MixAndJam style)
-        var cardsToDeal = deleteOld ? cards : newlyAddedCards;
-        isDealing = true; // Start dealing
-        cardsDealingCount = cardsToDeal.Count; // Track only the new cards being dealt
+        yield return StartCoroutine(DealCardsWithAnimation(deleteOld ? _cards : newlyAddedCards));
 
-        for (int i = 0; i < cardsToDeal.Count; i++)
-        {
-            Card card = cardsToDeal[i];
-            if (card.cardVisual != null)
-            {
-                card.cardVisual.gameObject.SetActive(true);
-                card.cardVisual.isFlyingIn = true;
-                card.cardVisual.transform.position = cardStartPoint.position;
-                card.cardVisual.transform.rotation = Quaternion.LookRotation(Camera.main.transform.forward);
-                
-                // Start monitoring this card's animation completion
-                StartCoroutine(MonitorCardAnimation(card));
-            }
-            
-            // Only add delay between cards, not before the first one
-            if (i < cardsToDeal.Count - 1)
-            {
-                yield return new WaitForSeconds(dealDelay);
-            }
-        }
-        
-        // Wait for all dealt cards to finish their animations
-        yield return StartCoroutine(WaitForAllCardsToSettle());
-        
-        isDealing = false; // Dealing complete for this batch
-        cardsDealingCount = 0;
-
-        // Apply adaptive layout after cards are fully dealt
         ApplyAdaptiveLayout();
     }
     
@@ -345,74 +256,120 @@ public class HorizontalCardHolder : MonoBehaviour
     {
         rect = GetComponent<RectTransform>();
 
-        // STEP 1: Instantiate all slots immediately
+        Card card = InstantiateCardInSlot(caseData, _cards.Count);
+        if (card == null) yield break;
 
+        if (card.cardVisual != null)
+            card.cardVisual.gameObject.SetActive(false);
+        _cards.Add(card);
+
+        yield return new WaitForSeconds(dealDelay);
+
+        yield return StartCoroutine(DealCardsWithAnimation(new List<Card> { card }));
+    }
+
+    /// <summary>
+    /// Instantiate a slot from the prefab, find the Card component, wire events, and initialize data.
+    /// Returns null if no Card component is found in the slot prefab.
+    /// </summary>
+    private Card InstantiateCardInSlot(object data, int cardIndex)
+    {
         GameObject slot = Instantiate(slotPrefab, transform);
         slot.transform.localPosition = Vector3.zero;
-        // Note: We'll size the slot after the card is initialized, not here
-
 
         Card card = slot.GetComponentInChildren<Card>();
         if (card == null)
         {
-            Debug.LogError($"No Card found in slot prefab at index");
+            Debug.LogError($"[HorizontalCardHolder] No Card found in slot prefab at index {cardIndex}");
+            return null;
         }
 
-        // 🟢 Event & selection setup for each card
-        card.name = cards.Count.ToString();
+        card.name = cardIndex.ToString();
         card.parentHolder = this;
-        card.homeHand = this; // Set the initial home hand
+        card.homeHand = this;
         card.PointerEnterEvent.AddListener(CardPointerEnter);
         card.PointerExitEvent.AddListener(CardPointerExit);
         card.BeginDragEvent.AddListener(BeginDrag);
         card.EndDragEvent.AddListener(EndDrag);
 
-        // 🟢 Initialize the visuals/data with your own method
-        card.Initialize(caseData, visualHandler, bigVisualHandler);
-        
-        // Set the deal fly time for the card visual
+        card.Initialize(data, visualHandler, bigVisualHandler);
+
         if (card.cardVisual != null)
-        {
             card.cardVisual.SetDealFlyTime(dealFlyTime);
-        }
-        
-        // Size the slot appropriately for mat placement
+
         if (purpose == HolderPurpose.Mat)
-        {
             SizeSlotForBigCard(card, slot);
+
+        return card;
+    }
+
+    /// <summary>
+    /// Notify EnhancedCardVisual when added to an evidence hand (for torn/connectable cards).
+    /// </summary>
+    private void NotifyEnhancedCardVisual(Card card)
+    {
+        if (purpose != HolderPurpose.Hand || acceptedCardTypes != AcceptedCardTypes.Evidence)
+            return;
+
+        var enhancedCardVisual = card.GetComponent<EnhancedCardVisual>();
+        if (enhancedCardVisual == null && card.bigCardVisual != null)
+            enhancedCardVisual = card.bigCardVisual.GetComponent<EnhancedCardVisual>();
+
+        if (enhancedCardVisual != null)
+            enhancedCardVisual.OnAddedToEvidenceHand();
+    }
+
+    /// <summary>
+    /// Reset a slot's width to baseline when adaptive squeeze is enabled.
+    /// </summary>
+    private void ResetSlotWidthToBaseline(GameObject slot)
+    {
+        if (!enableAdaptiveSqueeze || slot == null) return;
+
+        var slotRect = slot.GetComponent<RectTransform>();
+        if (slotRect != null)
+        {
+            float targetW = baselineSlotWidth > 0 ? baselineSlotWidth : (minSlotPreferredWidth > 0 ? minSlotPreferredWidth : slotRect.sizeDelta.x);
+            slotRect.sizeDelta = new Vector2(targetW, slotRect.sizeDelta.y);
         }
-        
-        // Hide visual for "deal in" animation
-        if (card.cardVisual != null)
-            card.cardVisual.gameObject.SetActive(false);
-        cards.Add(card);
+    }
 
-        yield return new WaitForSeconds(dealDelay);
+    /// <summary>
+    /// Deal a list of cards with MixAndJam-style fly-in animation.
+    /// </summary>
+    private IEnumerator DealCardsWithAnimation(IList<Card> cardsToDeal)
+    {
+        isDealing = true;
+        cardsDealingCount = cardsToDeal.Count;
 
-        // STEP 2: Deal visuals in one by one (MixAndJam style)
-        isDealing = true; // Start dealing
-        cardsDealingCount = 1; // Track the single card being dealt
-        
-        card.cardVisual.gameObject.SetActive(true);
-        card.cardVisual.isFlyingIn = true;
-        card.cardVisual.transform.position = cardStartPoint.position;
-        card.cardVisual.transform.rotation = Quaternion.LookRotation(Camera.main.transform.forward);
-        
-        // Start monitoring this card's animation completion
-        yield return StartCoroutine(MonitorCardAnimation(card));
-        
-        isDealing = false; // Dealing complete
+        for (int i = 0; i < cardsToDeal.Count; i++)
+        {
+            Card card = cardsToDeal[i];
+            if (card.cardVisual != null)
+            {
+                card.cardVisual.gameObject.SetActive(true);
+                card.cardVisual.isFlyingIn = true;
+                card.cardVisual.transform.position = cardStartPoint.position;
+                card.cardVisual.transform.rotation = Quaternion.LookRotation(Camera.main.transform.forward);
+                StartCoroutine(MonitorCardAnimation(card));
+            }
+
+            if (i < cardsToDeal.Count - 1)
+                yield return new WaitForSeconds(dealDelay);
+        }
+
+        yield return StartCoroutine(WaitForAllCardsToSettle());
+
+        isDealing = false;
         cardsDealingCount = 0;
     }
-    
-
 
     /// <summary>
     /// Handle selection visuals and card offset (MixAndJam style)
     /// </summary>
     public void SelectCard(Card card)
     {
-        if (!cards.Contains(card))
+        if (!_cards.Contains(card))
             return;
 
         if (card != null && selectedCard != card)
@@ -481,7 +438,7 @@ public class HorizontalCardHolder : MonoBehaviour
             if (hoveredCard != null)
             {
                 Destroy(hoveredCard.transform.parent.gameObject);
-                cards.Remove(hoveredCard);
+                _cards.Remove(hoveredCard);
             }
         }
 
@@ -496,20 +453,20 @@ public class HorizontalCardHolder : MonoBehaviour
         if (isCrossing)
             return;
 
-        for (int i = 0; i < cards.Count; i++)
+        for (int i = 0; i < _cards.Count; i++)
         {
-            if (selectedCard.transform.position.x > cards[i].transform.position.x)
+            if (selectedCard.transform.position.x > _cards[i].transform.position.x)
             {
-                if (selectedCard.ParentIndex() < cards[i].ParentIndex())
+                if (selectedCard.ParentIndex() < _cards[i].ParentIndex())
                 {
                     Swap(i);
                     break;
                 }
             }
 
-            if (selectedCard.transform.position.x < cards[i].transform.position.x)
+            if (selectedCard.transform.position.x < _cards[i].transform.position.x)
             {
-                if (selectedCard.ParentIndex() > cards[i].ParentIndex())
+                if (selectedCard.ParentIndex() > _cards[i].ParentIndex())
                 {
                     Swap(i);
                     break;
@@ -526,31 +483,31 @@ public class HorizontalCardHolder : MonoBehaviour
         isCrossing = true;
 
         Transform focusedParent = selectedCard.transform.parent;
-        Transform crossedParent = cards[index].transform.parent;
+        Transform crossedParent = _cards[index].transform.parent;
 
-        cards[index].transform.SetParent(focusedParent);
-        cards[index].transform.localPosition = cards[index].selected ? new Vector3(0, cards[index].selectionOffset, 0) : Vector3.zero;
+        _cards[index].transform.SetParent(focusedParent);
+        _cards[index].transform.localPosition = _cards[index].selected ? new Vector3(0, _cards[index].selectionOffset, 0) : Vector3.zero;
         selectedCard.transform.SetParent(crossedParent);
 
         isCrossing = false;
 
-        if (cards[index].cardVisual == null)
+        if (_cards[index].cardVisual == null)
             return;
 
-        bool swapIsRight = cards[index].ParentIndex() > selectedCard.ParentIndex();
-        cards[index].cardVisual.Swap(swapIsRight ? -1 : 1);
+        bool swapIsRight = _cards[index].ParentIndex() > selectedCard.ParentIndex();
+        _cards[index].cardVisual.Swap(swapIsRight ? -1 : 1);
 
         // Updated visual indexes for all cards (for proper hand fanning)
-        foreach (Card card in cards)
+        foreach (Card card in _cards)
             card.cardVisual.UpdateIndex(transform.childCount);
     }
 
     public void RemoveCard(Card card)
     {
-        if (cards.Contains(card))
+        if (_cards.Contains(card))
         {
             card.PointerEnterEvent.RemoveAllListeners();
-            cards.Remove(card);
+            _cards.Remove(card);
             card.parentHolder = null;
             card.gameObject.SetActive(false);
 
@@ -562,112 +519,84 @@ public class HorizontalCardHolder : MonoBehaviour
         ApplyAdaptiveLayout();
     }
 
-    public void AddCardToHand(Card card, int index = -1)
+    /// <summary>
+    /// Common setup when a card enters this holder: reactivate slot, set parents,
+    /// wire events, determine visual mode, and set deal fly time.
+    /// Does NOT activate the card's GameObject or add it to the _cards list.
+    /// </summary>
+    private void SetupCardForHolder(Card card)
     {
-        // Reactivate the slot (parent of Card) and CardVisual
+        // Reactivate and reparent the slot
         if (card.transform.parent != null)
             card.transform.parent.gameObject.SetActive(true);
         card.transform.parent.SetParent(transform);
-        
-        // When a card is added to a new hand, update its parent and, if it's a true "Hand", its home.
+
+        // Set ownership
         card.parentHolder = this;
         if (purpose == HolderPurpose.Hand)
-        {
             card.homeHand = this;
-        }
 
-        // Set visuals to appropriate handlers
+        // Set visual parents to this holder's handlers
         if (card.cardVisual != null)
             card.cardVisual.transform.SetParent(visualHandler);
         if (card.bigCardVisual != null)
             card.bigCardVisual.transform.SetParent(bigVisualHandler != null ? bigVisualHandler : visualHandler);
-        
+
+        // Wire event listeners
         card.PointerEnterEvent.AddListener(CardPointerEnter);
         card.PointerExitEvent.AddListener(CardPointerExit);
         card.BeginDragEvent.AddListener(BeginDrag);
         card.EndDragEvent.AddListener(EndDrag);
 
-
-        // Determine card location and scale based on new holder system
-        if (card.parentHolder.ShowsSmallCards())
+        // Determine card location and scale based on visual mode
+        if (ShowsSmallCards())
         {
-            // Cards in hands show small visuals
             card.cardLocation = CardLocation.Hand;
-            card.transform.localScale = new Vector3(1, 1, 1);
-            
-            // When returning from a mat, scale down the slot to its original size
+            card.transform.localScale = Vector3.one;
             if (card.transform.parent != null)
-            {
                 ResetSlotSize(card.transform.parent.gameObject);
-            }
         }
-        else if (card.parentHolder.ShowsBigCards())
+        else
         {
-            // Cards in big visual holders show big visuals
-            if (card.parentHolder.purpose == HolderPurpose.Mat && card.mode == CardMode.Case)
-            {
-                card.cardLocation = CardLocation.Slot;
-            }
-            else
-            {
-                card.cardLocation = CardLocation.Mat;
-            }
-            
-            Vector3 bigCardScale = GetBigCardScale(card);
-            card.transform.localScale = bigCardScale;
-            
-            // Resize the slot for big cards
+            card.cardLocation = (purpose == HolderPurpose.Mat && card.mode == CardMode.Case)
+                ? CardLocation.Slot : CardLocation.Mat;
+            card.transform.localScale = GetBigCardScale(card);
             if (card.transform.parent != null)
-            {
                 SizeSlotForBigCard(card, card.transform.parent.gameObject);
-            }
         }
 
-        // Let the automatic cardLocation system handle visual switching
-        // The cardLocation property setter will automatically call UpdateVisualBasedOnLocation()
+        if (card.cardVisual != null)
+            card.cardVisual.SetDealFlyTime(dealFlyTime);
+    }
 
+    public void AddCardToHand(Card card, int index = -1)
+    {
+        SetupCardForHolder(card);
         card.gameObject.SetActive(true);
 
-        // Set the deal fly time for the card visual
-        if (card.cardVisual != null)
+        if (!_cards.Contains(card))
         {
-            card.cardVisual.SetDealFlyTime(dealFlyTime);
-        }
-
-        if (!cards.Contains(card))
-        {
-            // Insert at specified index, or add to end
-            if (index < 0 || index > cards.Count)
-                cards.Add(card);
+            if (index < 0 || index > _cards.Count)
+                _cards.Add(card);
             else
-                cards.Insert(index, card);
+                _cards.Insert(index, card);
 
-            // For free-form placement, disable automatic layout positioning
             if (!enableFreeFormPlacement)
             {
-                // Set sibling index for layout
+                int siblingIdx = index < 0 ? _cards.Count - 1 : index;
                 if (card.transform.parent != null)
-                    card.transform.parent.SetSiblingIndex(index < 0 ? cards.Count - 1 : index);
-
-                if (card.cardVisual.transform != null)
-                {
-            
-                    card.cardVisual.transform.SetSiblingIndex(index < 0 ? cards.Count - 1 : index);
-                }
+                    card.transform.parent.SetSiblingIndex(siblingIdx);
+                if (card.cardVisual != null && card.cardVisual.transform != null)
+                    card.cardVisual.transform.SetSiblingIndex(siblingIdx);
             }
             else
             {
-                // For free-form, disable any Layout Group components
                 DisableLayoutGroups();
             }
         }
 
-        // Update adaptive layout when a card is added/repositioned (layout-only; avoid moving free-form slots)
         ApplyAdaptiveLayout();
     }
-
-    // Note: Visual switching is now handled automatically by the cardLocation property setter
-    // which calls UpdateVisualBasedOnLocation() when the location changes
 
     public void AddCardToHandAtPosition(Card card, Vector2 screenPosition)
     {
@@ -678,7 +607,7 @@ public class HorizontalCardHolder : MonoBehaviour
         }
 
         // Check if card is already in this hand (repositioning)
-        bool isRepositioning = cards.Contains(card);
+        bool isRepositioning = _cards.Contains(card);
         
         if (!isRepositioning)
         {
@@ -724,72 +653,15 @@ public class HorizontalCardHolder : MonoBehaviour
             return;
         }
 
-        // Reactivate slot (parent of Card) and reparent to this holder, but keep card inactive until after placement
-        if (card.transform.parent != null)
+        SetupCardForHolder(card);
+
+        if (!_cards.Contains(card))
         {
-            card.transform.parent.gameObject.SetActive(true);
-            card.transform.parent.SetParent(transform);
+            _cards.Add(card);
+            DisableLayoutGroups();
         }
 
-        // Update parent references
-        card.parentHolder = this;
-        if (purpose == HolderPurpose.Hand)
-        {
-            card.homeHand = this;
-        }
-
-        // Set visual parents
-        if (card.cardVisual != null)
-            card.cardVisual.transform.SetParent(visualHandler);
-        if (card.bigCardVisual != null)
-            card.bigCardVisual.transform.SetParent(bigVisualHandler != null ? bigVisualHandler : visualHandler);
-
-        // Hook listeners (same as AddCardToHand)
-        card.PointerEnterEvent.AddListener(CardPointerEnter);
-        card.PointerExitEvent.AddListener(CardPointerExit);
-        card.BeginDragEvent.AddListener(BeginDrag);
-        card.EndDragEvent.AddListener(EndDrag);
-
-        // Determine visuals (big-visual mats vs hands)
-        if (ShowsSmallCards())
-        {
-            card.cardLocation = CardLocation.Hand;
-            card.transform.localScale = new Vector3(1, 1, 1);
-            if (card.transform.parent != null)
-            {
-                ResetSlotSize(card.transform.parent.gameObject);
-            }
-        }
-        else
-        {
-            // Big visual holder (mat/tools)
-            card.cardLocation = (purpose == HolderPurpose.Mat && card.mode == CardMode.Case) ? CardLocation.Slot : CardLocation.Mat;
-            Vector3 bigCardScale = GetBigCardScale(card);
-            card.transform.localScale = bigCardScale;
-            if (card.transform.parent != null)
-            {
-                SizeSlotForBigCard(card, card.transform.parent.gameObject);
-            }
-        }
-
-        // Ensure card present in list
-        if (!cards.Contains(card))
-        {
-            cards.Add(card);
-            if (!enableFreeFormPlacement)
-            {
-                if (card.transform.parent != null)
-                    card.transform.parent.SetSiblingIndex(cards.Count - 1);
-                if (card.cardVisual.transform != null)
-                    card.cardVisual.transform.SetSiblingIndex(cards.Count - 1);
-            }
-            else
-            {
-                DisableLayoutGroups();
-            }
-        }
-
-        // Compute and set exact local position for the slot
+        // Set exact position before activation to avoid one-frame flash
         RectTransform holderRect = GetComponent<RectTransform>();
         if (holderRect != null)
         {
@@ -798,21 +670,11 @@ public class HorizontalCardHolder : MonoBehaviour
             target.localPosition = new Vector3(local.x, local.y, 0);
         }
 
-        // Activate after placement to avoid one-frame flash at default position
         card.gameObject.SetActive(true);
 
-        // Ensure correct sizing (again) and bring to front
-        if (card.transform.parent != null)
-        {
-            if (!ShowsSmallCards()) SizeSlotForBigCard(card, card.transform.parent.gameObject);
-        }
+        if (card.transform.parent != null && !ShowsSmallCards())
+            SizeSlotForBigCard(card, card.transform.parent.gameObject);
         BringCardToFront(card);
-
-        // Deal fly time remains as configured
-        if (card.cardVisual != null)
-        {
-            card.cardVisual.SetDealFlyTime(dealFlyTime);
-        }
 
         ApplyAdaptiveLayout();
     }
@@ -821,40 +683,8 @@ public class HorizontalCardHolder : MonoBehaviour
     {
         if (!enableFreeFormPlacement) return;
 
-        Vector3 localPos = new Vector3(localPoint.x, localPoint.y, 0);
-        // Position the card slot (parent of the card)
-        Transform targetTransform = card.transform.parent != null ? card.transform.parent : card.transform;
-        Vector3 oldPosition = targetTransform.localPosition;
-        
-        targetTransform.localPosition = localPos;
-    }
-
-    private void PositionCardAtWorldPoint(Card card, Vector3 worldPosition)
-    {
-        if (!enableFreeFormPlacement) return;
-
-        // Convert world position to local position within bounds
-        Vector3 localPos = transform.InverseTransformPoint(worldPosition);
-        
-        // Clamp to bounds
-        RectTransform holderRect = GetComponent<RectTransform>();
-        if (holderRect != null)
-        {
-            Vector2 holderSize = holderRect.sizeDelta;
-            localPos.x = Mathf.Clamp(localPos.x, -holderSize.x / 2, holderSize.x / 2);
-            localPos.y = Mathf.Clamp(localPos.y, -holderSize.y / 2, holderSize.y / 2);
-            localPos.z = 0;
-        }
-
-        // Position the card slot (parent of the card)
-        if (card.transform.parent != null)
-        {
-            card.transform.parent.localPosition = localPos;
-        }
-        else
-        {
-            card.transform.localPosition = localPos;
-        }
+        Transform target = card.transform.parent != null ? card.transform.parent : card.transform;
+        target.localPosition = new Vector3(localPoint.x, localPoint.y, 0);
     }
 
     private void BringCardToFront(Card card)
@@ -862,10 +692,10 @@ public class HorizontalCardHolder : MonoBehaviour
         if (!enableFreeFormPlacement) return;
 
         // Move card to end of list (visual front)
-        if (cards.Contains(card))
+        if (_cards.Contains(card))
         {
-            cards.Remove(card);
-            cards.Add(card);
+            _cards.Remove(card);
+            _cards.Add(card);
             
             // IMPORTANT: Move the card slot to last sibling for proper hit detection
             if (card.transform.parent != null)
@@ -890,24 +720,24 @@ public class HorizontalCardHolder : MonoBehaviour
         if (!enableFreeFormPlacement) return;
 
         // Update sibling indices based on cards list order
-        for (int i = 0; i < cards.Count; i++)
+        for (int i = 0; i < _cards.Count; i++)
         {
             // Update card slot sibling index for hit detection
-            if (cards[i].transform.parent != null)
+            if (_cards[i].transform.parent != null)
             {
-                cards[i].transform.parent.SetSiblingIndex(i);
+                _cards[i].transform.parent.SetSiblingIndex(i);
             }
             
             // Update big card visual sibling index
-            if (cards[i].bigCardVisual != null)
+            if (_cards[i].bigCardVisual != null)
             {
-                cards[i].bigCardVisual.transform.SetSiblingIndex(i);
+                _cards[i].bigCardVisual.transform.SetSiblingIndex(i);
             }
             
             // Update small card visual sibling index
-            if (cards[i].cardVisual != null)
+            if (_cards[i].cardVisual != null)
             {
-                cards[i].cardVisual.transform.SetSiblingIndex(i);
+                _cards[i].cardVisual.transform.SetSiblingIndex(i);
             }
         }
     }
@@ -917,7 +747,7 @@ public class HorizontalCardHolder : MonoBehaviour
         if (!enableFreeFormPlacement || card == null) return;
 
         // Reset the card's sibling order to its position in the cards list
-        int cardIndex = cards.IndexOf(card);
+        int cardIndex = _cards.IndexOf(card);
         if (cardIndex >= 0)
         {
             // Update card slot sibling index for hit detection
@@ -946,7 +776,7 @@ public class HorizontalCardHolder : MonoBehaviour
 
     public void MoveCardToPosition(Card card, Vector3 worldPosition)
     {
-        if (!enableFreeFormPlacement || !cards.Contains(card)) return;
+        if (!enableFreeFormPlacement || !_cards.Contains(card)) return;
 
         // Convert world position to local for UI positioning
         Vector3 localPos = transform.InverseTransformPoint(worldPosition);
@@ -1090,7 +920,7 @@ public class HorizontalCardHolder : MonoBehaviour
             return;
 
         bool showSmall = ShowsSmallCards();
-        bool shouldSqueeze = enableAdaptiveSqueeze && cards.Count >= minCardsToSqueeze;
+        bool shouldSqueeze = enableAdaptiveSqueeze && _cards.Count >= minCardsToSqueeze;
 
         // Let the group compress only when many cards AND we're a small-visual hand
         bool allowGroupExpand = shouldSqueeze && showSmall;
@@ -1157,36 +987,19 @@ public class HorizontalCardHolder : MonoBehaviour
             hoveredCard = null;
         
         // Remove from cards list first
-        if (cards.Contains(card))
-            cards.Remove(card);
+        if (_cards.Contains(card))
+            _cards.Remove(card);
         
-        // Clean up visual objects that might be in different handlers
         if (card.bigCardVisual != null)
-        {
-
             Destroy(card.bigCardVisual.gameObject);
-        }
-        
+
         if (card.cardVisual != null)
-        {
-
             Destroy(card.cardVisual.gameObject);
-        }
-        
-        // Destroy the card slot (parent) if it exists
+
         if (card.transform.parent != null)
-        {
-
             Destroy(card.transform.parent.gameObject);
-        }
         else
-        {
-            // If no parent slot, destroy the card directly
-
             Destroy(card.gameObject);
-        }
-        
-
     }
 
     /// <summary>
@@ -1252,30 +1065,6 @@ public class HorizontalCardHolder : MonoBehaviour
     {
         // If it's not big-visual by new or legacy rules, it's small-visual
         return !ShowsBigCards();
-    }
-
-    /// <summary>
-    /// Get the visual mode as a string for debugging
-    /// </summary>
-    public string GetVisualModeDescription()
-    {
-        return visualMode == VisualMode.SmallCards ? "Small Cards" : "Big Cards";
-    }
-
-    /// <summary>
-    /// Get the accepted card types as a string for debugging
-    /// </summary>
-    public string GetAcceptedCardTypesDescription()
-    {
-        return acceptedCardTypes.ToString();
-    }
-
-    /// <summary>
-    /// Get the holder purpose as a string for debugging
-    /// </summary>
-    public string GetPurposeDescription()
-    {
-        return purpose.ToString();
     }
 
     #endregion
