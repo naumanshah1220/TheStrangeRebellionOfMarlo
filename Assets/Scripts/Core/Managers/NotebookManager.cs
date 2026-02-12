@@ -4,7 +4,6 @@ using TMPro;
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
-using UnityEngine.EventSystems;
 
 /// <summary>
 /// Main notebook manager that coordinates handwriting animation, text processing, paging, and highlighting
@@ -100,7 +99,6 @@ public class NotebookManager : SingletonMonoBehaviour<NotebookManager>
 
     // State
     private bool isOpen = false;
-    private Coroutine currentAnimation;
     private Dictionary<string, ClueNoteInfo> addedClues = new Dictionary<string, ClueNoteInfo>();
     
     // Book-style page management
@@ -139,27 +137,18 @@ public class NotebookManager : SingletonMonoBehaviour<NotebookManager>
             pageType = type;
         }
         
-        public bool IsPageFull(int maxNotesPerPage)
+        public bool IsPageFull(int maxPerSide)
         {
-            // For suspects, use 4 per side (8 total per page)
-            // For clues, use maxNotesPerPage (10 per side)
-            int maxPerSide = pageType == PageType.Suspects ? 4 : maxNotesPerPage;
             return leftPageNoteCount >= maxPerSide && rightPageNoteCount >= maxPerSide;
         }
-        
-        public bool CanAddNote(int maxNotesPerPage)
+
+        public bool CanAddNote(int maxPerSide)
         {
-            // For suspects, use 4 per side (8 total per page)
-            // For clues, use maxNotesPerPage (10 per side)
-            int maxPerSide = pageType == PageType.Suspects ? 4 : maxNotesPerPage;
             return leftPageNoteCount < maxPerSide || rightPageNoteCount < maxPerSide;
         }
-        
-        public bool ShouldAddToLeftPage(int maxNotesPerPage)
+
+        public bool ShouldAddToLeftPage(int maxPerSide)
         {
-            // For suspects, use 4 per side (8 total per page)
-            // For clues, use maxNotesPerPage (10 per side)
-            int maxPerSide = pageType == PageType.Suspects ? 4 : maxNotesPerPage;
             return leftPageNoteCount < maxPerSide;
         }
     }
@@ -259,7 +248,7 @@ public class NotebookManager : SingletonMonoBehaviour<NotebookManager>
         if (string.IsNullOrEmpty(clueText)) return;
         
         // Check if this clue contains suspect tags
-        if (ContainsSuspectTags(clueText))
+        if (SuspectTagParser.ContainsSuspectTags(clueText))
         {
             // Handle suspect clues with special behavior
             StartCoroutine(AddSuspectClueRoutine(clueText, clueId, true));
@@ -299,9 +288,6 @@ public class NotebookManager : SingletonMonoBehaviour<NotebookManager>
     /// </summary>
     public void ToggleNotebook()
     {
-        if (currentAnimation != null)
-            StopCoroutine(currentAnimation);
-
         isOpen = !isOpen;
         notebookPanel.DOAnchorPos(
             isOpen ? openPosition : closedPosition,
@@ -421,15 +407,15 @@ public class NotebookManager : SingletonMonoBehaviour<NotebookManager>
         
         var suspectsPage = bookPages[targetPageIndex];
         
-        // Add to left page first, then right page (4 suspects per side)
-        if (suspectsPage.ShouldAddToLeftPage(4)) // Use 4 for suspects (4 per side)
+        // Add to left page first, then right page
+        if (suspectsPage.ShouldAddToLeftPage(maxSuspectsPerPage))
         {
             Debug.Log($"[NotebookManager] Adding suspect to left page {targetPageIndex}");
             suspectsPage.leftPageNotes.Add(suspectEntry);
             suspectsPage.leftPageNoteCount++;
             suspectEntry.transform.SetParent(leftPageParent, false);
         }
-        else if (suspectsPage.rightPageNoteCount < 4) // Max 4 suspects on right side
+        else if (suspectsPage.rightPageNoteCount < maxSuspectsPerPage)
         {
             Debug.Log($"[NotebookManager] Adding suspect to right page {targetPageIndex}");
             suspectsPage.rightPageNotes.Add(suspectEntry);
@@ -459,7 +445,7 @@ public class NotebookManager : SingletonMonoBehaviour<NotebookManager>
         if (currentMode == mode) return;
         
         // Cancel any active drag operations before switching modes
-        CancelAllActiveDrags();
+        DragManager.Instance.CancelAllActiveDrags();
         
         currentMode = mode;
         
@@ -1097,7 +1083,7 @@ public class NotebookManager : SingletonMonoBehaviour<NotebookManager>
         if (currentBookPageIndex > 0)
         {
             // Cancel any active drag operations before page navigation
-            CancelAllActiveDrags();
+            DragManager.Instance.CancelAllActiveDrags();
             
             currentBookPageIndex--;
             UpdatePageDisplay();
@@ -1116,7 +1102,7 @@ public class NotebookManager : SingletonMonoBehaviour<NotebookManager>
         if (currentBookPageIndex < bookPages.Count - 1)
         {
             // Cancel any active drag operations before page navigation
-            CancelAllActiveDrags();
+            DragManager.Instance.CancelAllActiveDrags();
             
             currentBookPageIndex++;
             UpdatePageDisplay();
@@ -1234,7 +1220,7 @@ public class NotebookManager : SingletonMonoBehaviour<NotebookManager>
         // Look for a suspects page with space (max 8 suspects per page: 4 left + 4 right)
         for (int i = 0; i < bookPages.Count; i++)
         {
-            if (bookPages[i].pageType == PageType.Suspects && bookPages[i].CanAddNote(4)) // Use 4 for suspects (4 per side)
+            if (bookPages[i].pageType == PageType.Suspects && bookPages[i].CanAddNote(maxSuspectsPerPage))
             {
                 return i;
             }
@@ -1261,30 +1247,18 @@ public class NotebookManager : SingletonMonoBehaviour<NotebookManager>
     }
 
     /// <summary>
-    /// Check if clue text contains suspect tags
-    /// </summary>
-    private bool ContainsSuspectTags(string clueText)
-    {
-        return clueText.Contains("<suspect>") || 
-               clueText.Contains("<suspect_fname>") || 
-               clueText.Contains("<suspect_lname>") || 
-               clueText.Contains("<suspect_id>") || 
-               clueText.Contains("<suspect_portrait>");
-    }
-    
-    /// <summary>
     /// Handle suspect clues with special discovery behavior
     /// </summary>
     private IEnumerator AddSuspectClueRoutine(string clueText, string clueId, bool autoClose)
     {
         // Step 1: Cancel any active drag operations before page flip
-        CancelAllActiveDrags();
+        DragManager.Instance.CancelAllActiveDrags();
         
         // Step 2: Add the clue to notebook first (with suspect tags)
         OpenNotebook();
         
         // Process suspect tags - convert nested tags to individual tags and remove portrait tags
-        string processedClueText = ProcessSuspectTags(clueText);
+        string processedClueText = SuspectTagParser.ProcessSuspectTags(clueText);
         
         // Only add the clue if it has visible content after processing
         if (!string.IsNullOrWhiteSpace(processedClueText.Trim()))
@@ -1314,274 +1288,26 @@ public class NotebookManager : SingletonMonoBehaviour<NotebookManager>
     }
     
     /// <summary>
-    /// Cancel all active drag operations to prevent stuck tags
-    /// </summary>
-    private void CancelAllActiveDrags()
-    {
-        Debug.Log("[NotebookManager] Cancelling all active drag operations");
-        
-        // Cancel DraggableTag drags
-        var draggableTags = FindObjectsByType<DraggableTag>(FindObjectsSortMode.None);
-        foreach (var tag in draggableTags)
-        {
-            if (tag != null)
-            {
-                // Try to call ForceEndDrag if it exists
-                var method = tag.GetType().GetMethod("ForceEndDrag");
-                if (method != null)
-                {
-                    method.Invoke(tag, null);
-                }
-                else
-                {
-                    // Fallback: try to call ReturnToOriginalPosition
-                    var returnMethod = tag.GetType().GetMethod("ReturnToOriginalPosition");
-                    if (returnMethod != null)
-                    {
-                        returnMethod.Invoke(tag, null);
-                    }
-                }
-            }
-        }
-        
-        // Cancel SuspectTag drags
-        var suspectTags = FindObjectsByType<SuspectTag>(FindObjectsSortMode.None);
-        foreach (var tag in suspectTags)
-        {
-            if (tag != null)
-            {
-                // Try to call ForceEndDrag if it exists
-                var method = tag.GetType().GetMethod("ForceEndDrag");
-                if (method != null)
-                {
-                    method.Invoke(tag, null);
-                }
-                else
-                {
-                    // Fallback: try to call ReturnToOriginalPosition
-                    var returnMethod = tag.GetType().GetMethod("ReturnToOriginalPosition");
-                    if (returnMethod != null)
-                    {
-                        returnMethod.Invoke(tag, null);
-                    }
-                }
-            }
-        }
-        
-        // Cancel any other draggable components
-        var draggableComponents = FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
-        foreach (var component in draggableComponents)
-        {
-            if (component is IBeginDragHandler || component is IDragHandler || component is IEndDragHandler)
-            {
-                // Try to call ForceEndDrag if it exists
-                var method = component.GetType().GetMethod("ForceEndDrag");
-                if (method != null)
-                {
-                    method.Invoke(component, null);
-                }
-            }
-        }
-        
-        Debug.Log("[NotebookManager] Drag cancellation complete");
-    }
-    
-    /// <summary>
-    /// Process suspect tags - convert nested structure to individual tags and handle portraits
-    /// </summary>
-    private string ProcessSuspectTags(string clueText)
-    {
-        string result = clueText;
-        
-        // First, handle nested <suspect> tags
-        var suspectMatches = System.Text.RegularExpressions.Regex.Matches(result, @"<suspect>(.*?)</suspect>", System.Text.RegularExpressions.RegexOptions.Singleline);
-        
-        foreach (System.Text.RegularExpressions.Match match in suspectMatches)
-        {
-            string suspectContent = match.Groups[1].Value;
-            string processedSuspectContent = ProcessNestedSuspectContent(suspectContent);
-            
-            // Replace the entire <suspect>...</suspect> block with processed content
-            result = result.Replace(match.Value, processedSuspectContent);
-        }
-        
-        // Then handle any remaining individual suspect tags (for backward compatibility)
-        result = ProcessSuspectPortraitTags(result);
-        
-        return result;
-    }
-    
-    /// <summary>
-    /// Process the content inside a <suspect> tag
-    /// </summary>
-    private string ProcessNestedSuspectContent(string suspectContent)
-    {
-        string result = suspectContent;
-        
-        // Extract and convert nested tags to individual suspect tags
-        result = System.Text.RegularExpressions.Regex.Replace(result, @"<fname>(.*?)</fname>", @"<suspect_fname>$1</suspect_fname>");
-        result = System.Text.RegularExpressions.Regex.Replace(result, @"<lname>(.*?)</lname>", @"<suspect_lname>$1</suspect_lname>");
-        result = System.Text.RegularExpressions.Regex.Replace(result, @"<id>(.*?)</id>", @"<suspect_id>$1</suspect_id>");
-        
-        // Remove portrait tags from visible text (they shouldn't be displayed)
-        result = System.Text.RegularExpressions.Regex.Replace(result, @"<portrait>(.*?)</portrait>", "");
-        
-        // Clean up any double spaces
-        result = System.Text.RegularExpressions.Regex.Replace(result, @"\s+", " ").Trim();
-        
-        return result;
-    }
-    
-    /// <summary>
-    /// Process suspect portrait tags and remove them from visible text
-    /// </summary>
-    private string ProcessSuspectPortraitTags(string clueText)
-    {
-        // Remove portrait tags from the text since they shouldn't be visible
-        string result = System.Text.RegularExpressions.Regex.Replace(clueText, @"<suspect_portrait>(.*?)</suspect_portrait>", "");
-        
-        // Clean up any double spaces
-        result = System.Text.RegularExpressions.Regex.Replace(result, @"\s+", " ").Trim();
-        
-        return result;
-    }
-    
-    /// <summary>
     /// Process suspect discovery from clue text
     /// </summary>
     private IEnumerator ProcessSuspectDiscovery(string originalClueText)
     {
-        // Extract all suspect information from the clue
-        var suspectGroups = ExtractGroupedSuspectInformation(originalClueText);
-        
+        var suspectGroups = SuspectTagParser.ExtractGroupedSuspectInformation(originalClueText);
+
         if (suspectGroups.Count == 0)
-        {
             yield break;
-        }
-        
-        // Process each suspect discovery
+
         foreach (var suspectData in suspectGroups)
         {
             yield return StartCoroutine(DiscoverSuspectInformation(suspectData));
-            yield return new WaitForSeconds(0.3f); // Small delay between suspects if multiple
+            yield return new WaitForSeconds(0.3f);
         }
     }
-    
-    /// <summary>
-    /// Extract grouped suspect information from clue text
-    /// </summary>
-    private List<List<SuspectDiscoveryInfo>> ExtractGroupedSuspectInformation(string clueText)
-    {
-        var suspectGroups = new List<List<SuspectDiscoveryInfo>>();
-        
-        // First, handle nested <suspect> tags (new format)
-        var suspectMatches = System.Text.RegularExpressions.Regex.Matches(clueText, @"<suspect>(.*?)</suspect>", System.Text.RegularExpressions.RegexOptions.Singleline);
-        
-        foreach (System.Text.RegularExpressions.Match match in suspectMatches)
-        {
-            string suspectContent = match.Groups[1].Value;
-            var suspectInfo = ExtractSuspectInfoFromNestedContent(suspectContent);
-            
-            if (suspectInfo.Count > 0)
-            {
-                suspectGroups.Add(suspectInfo);
-            }
-        }
-        
-        // Then handle individual suspect tags (for backward compatibility)
-        // Only process these if no nested suspects were found
-        if (suspectGroups.Count == 0)
-        {
-            var individualInfo = ExtractIndividualSuspectInformation(clueText);
-            if (individualInfo.Count > 0)
-            {
-                suspectGroups.Add(individualInfo);
-            }
-        }
-        
-        return suspectGroups;
-    }
-    
-    /// <summary>
-    /// Extract suspect information from nested content
-    /// </summary>
-    private List<SuspectDiscoveryInfo> ExtractSuspectInfoFromNestedContent(string suspectContent)
-    {
-        var discoveries = new List<SuspectDiscoveryInfo>();
-        
-        // Extract first names
-        var fnameMatches = System.Text.RegularExpressions.Regex.Matches(suspectContent, @"<fname>(.*?)</fname>");
-        foreach (System.Text.RegularExpressions.Match match in fnameMatches)
-        {
-            discoveries.Add(new SuspectDiscoveryInfo { fieldType = "suspect_fname", value = match.Groups[1].Value });
-        }
-        
-        // Extract last names
-        var lnameMatches = System.Text.RegularExpressions.Regex.Matches(suspectContent, @"<lname>(.*?)</lname>");
-        foreach (System.Text.RegularExpressions.Match match in lnameMatches)
-        {
-            discoveries.Add(new SuspectDiscoveryInfo { fieldType = "suspect_lname", value = match.Groups[1].Value });
-        }
-        
-        // Extract IDs
-        var idMatches = System.Text.RegularExpressions.Regex.Matches(suspectContent, @"<id>(.*?)</id>");
-        foreach (System.Text.RegularExpressions.Match match in idMatches)
-        {
-            discoveries.Add(new SuspectDiscoveryInfo { fieldType = "suspect_id", value = match.Groups[1].Value });
-        }
-        
-        // Extract portraits (citizen IDs for lookup)
-        var portraitMatches = System.Text.RegularExpressions.Regex.Matches(suspectContent, @"<portrait>(.*?)</portrait>");
-        foreach (System.Text.RegularExpressions.Match match in portraitMatches)
-        {
-            discoveries.Add(new SuspectDiscoveryInfo { fieldType = "suspect_portrait", value = match.Groups[1].Value });
-        }
-        
-        return discoveries;
-    }
-    
-    /// <summary>
-    /// Extract individual suspect information (backward compatibility)
-    /// </summary>
-    private List<SuspectDiscoveryInfo> ExtractIndividualSuspectInformation(string clueText)
-    {
-        var discoveries = new List<SuspectDiscoveryInfo>();
-        
-        // Extract first names
-        var fnameMatches = System.Text.RegularExpressions.Regex.Matches(clueText, @"<suspect_fname>(.*?)</suspect_fname>");
-        foreach (System.Text.RegularExpressions.Match match in fnameMatches)
-        {
-            discoveries.Add(new SuspectDiscoveryInfo { fieldType = "suspect_fname", value = match.Groups[1].Value });
-        }
-        
-        // Extract last names
-        var lnameMatches = System.Text.RegularExpressions.Regex.Matches(clueText, @"<suspect_lname>(.*?)</suspect_lname>");
-        foreach (System.Text.RegularExpressions.Match match in lnameMatches)
-        {
-            discoveries.Add(new SuspectDiscoveryInfo { fieldType = "suspect_lname", value = match.Groups[1].Value });
-        }
-        
-        // Extract IDs
-        var idMatches = System.Text.RegularExpressions.Regex.Matches(clueText, @"<suspect_id>(.*?)</suspect_id>");
-        foreach (System.Text.RegularExpressions.Match match in idMatches)
-        {
-            discoveries.Add(new SuspectDiscoveryInfo { fieldType = "suspect_id", value = match.Groups[1].Value });
-        }
-        
-        // Extract portraits (citizen IDs for lookup)
-        var portraitMatches = System.Text.RegularExpressions.Regex.Matches(clueText, @"<suspect_portrait>(.*?)</suspect_portrait>");
-        foreach (System.Text.RegularExpressions.Match match in portraitMatches)
-        {
-            discoveries.Add(new SuspectDiscoveryInfo { fieldType = "suspect_portrait", value = match.Groups[1].Value });
-        }
-        
-        return discoveries;
-    }
-    
+
     /// <summary>
     /// Discover information about a suspect
     /// </summary>
-    private IEnumerator DiscoverSuspectInformation(List<SuspectDiscoveryInfo> suspectData)
+    private IEnumerator DiscoverSuspectInformation(List<SuspectsListManager.SuspectDiscoveryInfo> suspectData)
     {
         var suspectsManager = SuspectsListManager.Instance;
         if (suspectsManager == null)
@@ -1589,48 +1315,9 @@ public class NotebookManager : SingletonMonoBehaviour<NotebookManager>
             Debug.LogError("[NotebookManager] SuspectsListManager not found!");
             yield break;
         }
-        
-        // Convert to SuspectsListManager's SuspectDiscoveryInfo format
-        var suspectDiscoveryList = new List<SuspectsListManager.SuspectDiscoveryInfo>();
-        foreach (var info in suspectData)
-        {
-            var discoveryInfo = new SuspectsListManager.SuspectDiscoveryInfo
-            {
-                fieldType = info.fieldType,
-                value = info.value
-            };
-            suspectDiscoveryList.Add(discoveryInfo);
-        }
-        
-        // Use the new grouped discovery method
-        suspectsManager.DiscoverGroupedSuspectInfo(suspectDiscoveryList);
-        
-        yield return new WaitForSeconds(1.0f); // Wait for suspect entry to fade in
-    }
-    
-    /// <summary>
-    /// Data structure for suspect discovery information
-    /// </summary>
-    [System.Serializable]
-    private class SuspectDiscoveryInfo
-    {
-        public string fieldType;
-        public string value;
-    }
 
-    /// <summary>
-    /// Group suspect information that likely belongs to the same suspect (backward compatibility)
-    /// </summary>
-    private List<List<SuspectDiscoveryInfo>> GroupSuspectInformation(List<SuspectDiscoveryInfo> discoveries)
-    {
-        // This method is now deprecated in favor of ExtractGroupedSuspectInformation
-        // Kept for backward compatibility
-        var grouped = new List<List<SuspectDiscoveryInfo>>();
-        if (discoveries.Count > 0)
-        {
-            grouped.Add(discoveries);
-        }
-        return grouped;
+        suspectsManager.DiscoverGroupedSuspectInfo(suspectData);
+        yield return new WaitForSeconds(1.0f);
     }
 
     /// <summary>

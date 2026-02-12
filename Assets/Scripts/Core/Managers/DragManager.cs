@@ -674,6 +674,33 @@ public class DragManager : SingletonMonoBehaviour<DragManager>
 
     #endregion
 
+    #region Drag Cancellation
+
+    /// <summary>
+    /// Cancel all active drag operations (DraggableTag and SuspectTag).
+    /// Called before page flips, tab switches, etc. to prevent stuck tags.
+    /// </summary>
+    public void CancelAllActiveDrags()
+    {
+        Debug.Log("[DragManager] Cancelling all active drag operations");
+
+        var draggableTags = FindObjectsByType<DraggableTag>(FindObjectsSortMode.None);
+        foreach (var tag in draggableTags)
+        {
+            if (tag != null)
+                tag.ForceEndDrag();
+        }
+
+        var suspectTags = FindObjectsByType<SuspectTag>(FindObjectsSortMode.None);
+        foreach (var tag in suspectTags)
+        {
+            if (tag != null)
+                tag.ForceEndDrag();
+        }
+    }
+
+    #endregion
+
     #region Utility
 
     private bool IsPointerOverArea(Vector2 screenPos, RectTransform area)
