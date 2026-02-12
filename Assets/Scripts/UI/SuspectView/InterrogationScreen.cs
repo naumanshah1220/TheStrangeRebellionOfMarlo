@@ -3,14 +3,21 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-public class DetailedSuspectView : MonoBehaviour
+public class InterrogationScreen : MonoBehaviour
 {
     [Header("Display Components")]
     public Image suspectImage; // Large detailed suspect display
     public TextMeshProUGUI suspectNameText;
     public TextMeshProUGUI suspectInfoText; // Age, occupation, etc.
     public Image backgroundPanel;
-    
+
+    [Header("Drop Zone")]
+    public TextMeshProUGUI dragHereText;       // "Drag suspect here" prompt
+    public TextMeshProUGUI errorText;          // Error message overlay
+    public Sprite defaultInactiveSprite;       // Image when no suspect assigned
+    public float errorMessageDuration = 2.0f;
+    public float errorFadeDuration = 0.5f;
+
     [Header("Interaction Buttons")]
     public Button interrogateButton;
     public Button arrestButton;
@@ -33,7 +40,10 @@ public class DetailedSuspectView : MonoBehaviour
     // Animation
     private Coroutine animationCoroutine;
     private int currentFrame = 0;
-    
+
+    private bool isCaseOpen = false;
+    private Coroutine errorMessageCoroutine;
+
     private void Awake()
     {
         // Setup button listeners
@@ -51,18 +61,22 @@ public class DetailedSuspectView : MonoBehaviour
         {
             interrogationPanel.SetActive(false);
             isInInterrogationMode = false; // Ensure state is synced
-            Debug.Log("[DetailedSuspectView] Interrogation panel initialized and hidden");
+            Debug.Log("[InterrogationScreen] Interrogation panel initialized and hidden");
         }
         else
         {
-            Debug.LogError("[DetailedSuspectView] interrogationPanel reference is missing! Please assign it in the Inspector.");
+            Debug.LogError("[InterrogationScreen] interrogationPanel reference is missing! Please assign it in the Inspector.");
         }
         
         // Validate interrogation manager reference
         if (interrogationManager == null)
         {
-            Debug.LogError("[DetailedSuspectView] interrogationManager reference is missing! Please assign it in the Inspector.");
+            Debug.LogError("[InterrogationScreen] interrogationManager reference is missing! Please assign it in the Inspector.");
         }
+
+        // Initialize drop zone elements
+        if (errorText != null) errorText.alpha = 0f;
+        if (dragHereText != null) dragHereText.gameObject.SetActive(false);
     }
     
     private void OnDestroy()
@@ -80,7 +94,7 @@ public class DetailedSuspectView : MonoBehaviour
     
     public void SetSuspect(Citizen suspect, SuspectAnimationSet animationSet)
     {
-        Debug.Log($"[DetailedSuspectView] SetSuspect called - New: '{suspect?.FullName}', Current: '{currentSuspect?.FullName}', InInterrogationMode: {isInInterrogationMode}");
+        Debug.Log($"[InterrogationScreen] SetSuspect called - New: '{suspect?.FullName}', Current: '{currentSuspect?.FullName}', InInterrogationMode: {isInInterrogationMode}");
         
         // If we're switching suspects while in interrogation mode, this should only happen
         // when interrogation mode is disabled (channel switching is prevented during interrogation)
@@ -96,7 +110,7 @@ public class DetailedSuspectView : MonoBehaviour
         {
             // Switch the interrogation manager to the new suspect
             interrogationManager.SwitchToSuspect(suspect.citizenID);
-            Debug.Log($"[DetailedSuspectView] Switched interrogation context to: {suspect.FullName} (ID: {suspect.citizenID})");
+            Debug.Log($"[InterrogationScreen] Switched interrogation context to: {suspect.FullName} (ID: {suspect.citizenID})");
             
             // Update the suspect name in the interrogation UI if it exists
             UpdateInterrogationUI();
@@ -112,6 +126,8 @@ public class DetailedSuspectView : MonoBehaviour
         {
             SetAnimationState(currentAnimationState);
         }
+
+        UpdateDragTextVisibility();
     }
     
     private void UpdateSuspectInfo()
@@ -221,7 +237,7 @@ public class DetailedSuspectView : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning($"[DetailedSuspectView] No sprite sheet found for state: {state}");
+            Debug.LogWarning($"[InterrogationScreen] No sprite sheet found for state: {state}");
         }
     }
     
@@ -279,28 +295,28 @@ public class DetailedSuspectView : MonoBehaviour
         SuspectManager suspectManager = SuspectManager.Instance;
         if (suspectManager != null)
         {
-            suspectManager.HideDetailedView();
+            suspectManager.HideInterrogationScreen();
         }
     }
     
     private void OnInterrogateClicked()
     {
-        Debug.Log($"[DetailedSuspectView] Interrogate button clicked - currentSuspect: {currentSuspect?.FullName}, isInInterrogationMode: {isInInterrogationMode}");
+        Debug.Log($"[InterrogationScreen] Interrogate button clicked - currentSuspect: {currentSuspect?.FullName}, isInInterrogationMode: {isInInterrogationMode}");
         
         if (currentSuspect == null) 
         {
-            Debug.LogWarning("[DetailedSuspectView] Cannot start interrogation - no suspect selected");
+            Debug.LogWarning("[InterrogationScreen] Cannot start interrogation - no suspect selected");
             return;
         }
         
         if (!isInInterrogationMode)
         {
-            Debug.Log("[DetailedSuspectView] Starting interrogation...");
+            Debug.Log("[InterrogationScreen] Starting interrogation...");
             StartInterrogation();
         }
         else
         {
-            Debug.Log("[DetailedSuspectView] Ending interrogation...");
+            Debug.Log("[InterrogationScreen] Ending interrogation...");
             EndInterrogation();
         }
     }
@@ -315,16 +331,8 @@ public class DetailedSuspectView : MonoBehaviour
         {
             suspectManager.SetInterrogationMode(true);
             
-            // Find the suspect index and update animation
-            var suspects = suspectManager.GetCurrentSuspects();
-            for (int i = 0; i < suspects.Count; i++)
-            {
-                if (suspects[i] == currentSuspect)
-                {
-                    suspectManager.SetSuspectAnimationState(i, SuspectAnimationState.BeingInterrogated);
-                    break;
-                }
-            }
+            // Update animation on the single monitor
+            suspectManager.SetMonitorSuspectAnimationState(SuspectAnimationState.BeingInterrogated);
             
             // Mark suspect as interrogated in case management
             suspectManager.MarkSuspectInterrogated(currentSuspect);
@@ -339,7 +347,7 @@ public class DetailedSuspectView : MonoBehaviour
         // Update button appearance for toggle state
         UpdateInterrogateButtonAppearance(true);
         
-        Debug.Log($"[DetailedSuspectView] Started interrogating {currentSuspect.FullName} - Channel switching disabled");
+        Debug.Log($"[InterrogationScreen] Started interrogating {currentSuspect.FullName} - Channel switching disabled");
     }
     
     public void EndInterrogation()
@@ -352,15 +360,8 @@ public class DetailedSuspectView : MonoBehaviour
         {
             suspectManager.SetInterrogationMode(false);
             
-            var suspects = suspectManager.GetCurrentSuspects();
-            for (int i = 0; i < suspects.Count; i++)
-            {
-                if (suspects[i] == currentSuspect)
-                {
-                    suspectManager.SetSuspectAnimationState(i, SuspectAnimationState.Idle);
-                    break;
-                }
-            }
+            // Update animation on the single monitor
+            suspectManager.SetMonitorSuspectAnimationState(SuspectAnimationState.Idle);
         }
         
         // Hide interrogation UI
@@ -375,7 +376,7 @@ public class DetailedSuspectView : MonoBehaviour
         // Update button appearance for toggle state
         UpdateInterrogateButtonAppearance(false);
         
-        Debug.Log($"[DetailedSuspectView] Ended interrogation with {currentSuspect.FullName} - Channel switching enabled");
+        Debug.Log($"[InterrogationScreen] Ended interrogation with {currentSuspect.FullName} - Channel switching enabled");
     }
     
     /// <summary>
@@ -410,22 +411,22 @@ public class DetailedSuspectView : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("[DetailedSuspectView] Could not find NotebookManager to open");
+            Debug.LogWarning("[InterrogationScreen] Could not find NotebookManager to open");
         }
     }
     
     private void ShowInterrogationUI()
     {
-        Debug.Log($"[DetailedSuspectView] ShowInterrogationUI called - panel null: {interrogationPanel == null}, manager null: {interrogationManager == null}");
+        Debug.Log($"[InterrogationScreen] ShowInterrogationUI called - panel null: {interrogationPanel == null}, manager null: {interrogationManager == null}");
         
         if (interrogationPanel != null)
         {
             interrogationPanel.SetActive(true);
-            Debug.Log($"[DetailedSuspectView] Showed interrogation panel for {currentSuspect?.FullName}");
+            Debug.Log($"[InterrogationScreen] Showed interrogation panel for {currentSuspect?.FullName}");
         }
         else
         {
-            Debug.LogError("[DetailedSuspectView] interrogationPanel is null, cannot show. Please check the Inspector assignment.");
+            Debug.LogError("[InterrogationScreen] interrogationPanel is null, cannot show. Please check the Inspector assignment.");
             return; // Don't proceed if panel is missing
         }
         
@@ -441,15 +442,15 @@ public class DetailedSuspectView : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning("[DetailedSuspectView] interrogationManager.chatManager is null");
+                Debug.LogWarning("[InterrogationScreen] interrogationManager.chatManager is null");
             }
         }
         else
         {
             if (interrogationManager == null)
-                Debug.LogError("[DetailedSuspectView] interrogationManager is null");
+                Debug.LogError("[InterrogationScreen] interrogationManager is null");
             if (currentSuspect == null)
-                Debug.LogError("[DetailedSuspectView] currentSuspect is null");
+                Debug.LogError("[InterrogationScreen] currentSuspect is null");
         }
     }
     
@@ -462,22 +463,22 @@ public class DetailedSuspectView : MonoBehaviour
         if (interrogationManager != null && interrogationManager.chatManager != null)
         {
             interrogationManager.chatManager.ShowDropZone();
-            Debug.Log("[DetailedSuspectView] Explicitly showed dropzone for interrogation mode");
+            Debug.Log("[InterrogationScreen] Explicitly showed dropzone for interrogation mode");
         }
     }
     
     private void HideInterrogationUI()
     {
-        Debug.Log($"[DetailedSuspectView] HideInterrogationUI called - panel null: {interrogationPanel == null}");
+        Debug.Log($"[InterrogationScreen] HideInterrogationUI called - panel null: {interrogationPanel == null}");
         
         if (interrogationPanel != null)
         {
             interrogationPanel.SetActive(false);
-            Debug.Log($"[DetailedSuspectView] Hid interrogation panel for {currentSuspect?.FullName}");
+            Debug.Log($"[InterrogationScreen] Hid interrogation panel for {currentSuspect?.FullName}");
         }
         else
         {
-            Debug.LogError("[DetailedSuspectView] interrogationPanel is null, cannot hide. Please check the Inspector assignment.");
+            Debug.LogError("[InterrogationScreen] interrogationPanel is null, cannot hide. Please check the Inspector assignment.");
         }
     }
     
@@ -487,7 +488,7 @@ public class DetailedSuspectView : MonoBehaviour
         // when switching between suspects. For now, the interrogation manager handles
         // most of the state switching, but this can be extended if needed.
         
-        Debug.Log($"[DetailedSuspectView] Updated interrogation UI for: {currentSuspect?.FullName}");
+        Debug.Log($"[InterrogationScreen] Updated interrogation UI for: {currentSuspect?.FullName}");
     }
     
     private void OnArrestClicked()
@@ -502,7 +503,7 @@ public class DetailedSuspectView : MonoBehaviour
         }
         else
         {
-            Debug.LogError("[DetailedSuspectView] UIManager not found! Cannot initiate arrest.");
+            Debug.LogError("[InterrogationScreen] UIManager not found! Cannot initiate arrest.");
         }
     }
     
@@ -510,15 +511,15 @@ public class DetailedSuspectView : MonoBehaviour
     {
         if (currentSuspect == null) return;
         
-        // Delegate to SuspectManager to handle release
+        // Delegate to SuspectManager to release from single monitor
         SuspectManager suspectManager = SuspectManager.Instance;
         if (suspectManager != null)
         {
-            suspectManager.ReleaseSuspect(currentSuspect);
+            suspectManager.ReleaseSuspectFromMonitor();
         }
         else
         {
-            Debug.LogError("[DetailedSuspectView] SuspectManager not found!");
+            Debug.LogError("[InterrogationScreen] SuspectManager not found!");
         }
     }
     
@@ -526,7 +527,7 @@ public class DetailedSuspectView : MonoBehaviour
     {
         if (currentSuspect == null) return;
         
-        Debug.Log($"[DetailedSuspectView] Viewing file for {currentSuspect.FullName}");
+        Debug.Log($"[InterrogationScreen] Viewing file for {currentSuspect.FullName}");
         // TODO: Open detailed citizen file/dossier view
     }
     
@@ -551,14 +552,99 @@ public class DetailedSuspectView : MonoBehaviour
         }
         
         if (suspectImage != null)
-            suspectImage.sprite = null;
-            
+            suspectImage.sprite = defaultInactiveSprite;
+
         if (suspectNameText != null)
             suspectNameText.text = "";
-            
+
         if (suspectInfoText != null)
             suspectInfoText.text = "";
-        
+
         UpdateButtonStates();
+        UpdateDragTextVisibility();
+    }
+
+    /// <summary>
+    /// Check if the view is available for a new suspect (no current suspect assigned)
+    /// </summary>
+    public bool IsAvailable()
+    {
+        return currentSuspect == null;
+    }
+
+    /// <summary>
+    /// Get the current suspect assigned to this view
+    /// </summary>
+    public Citizen GetCurrentSuspect()
+    {
+        return currentSuspect;
+    }
+
+    /// <summary>
+    /// Set whether a case is currently open (controls drag-here text visibility)
+    /// </summary>
+    public void SetCaseOpen(bool caseOpen)
+    {
+        isCaseOpen = caseOpen;
+        UpdateDragTextVisibility();
+    }
+
+    /// <summary>
+    /// Show an error message on the view with fade animation
+    /// </summary>
+    public void ShowErrorMessage(string message)
+    {
+        if (errorText == null) return;
+
+        if (errorMessageCoroutine != null)
+        {
+            StopCoroutine(errorMessageCoroutine);
+        }
+
+        errorMessageCoroutine = StartCoroutine(DisplayErrorMessage(message));
+    }
+
+    private IEnumerator DisplayErrorMessage(string message)
+    {
+        if (errorText == null) yield break;
+
+        errorText.text = message;
+
+        // Fade in
+        float startTime = Time.time;
+        while (Time.time < startTime + errorFadeDuration)
+        {
+            float t = (Time.time - startTime) / errorFadeDuration;
+            errorText.alpha = t;
+            yield return null;
+        }
+        errorText.alpha = 1f;
+
+        // Hold
+        yield return new WaitForSeconds(errorMessageDuration);
+
+        // Fade out
+        startTime = Time.time;
+        while (Time.time < startTime + errorFadeDuration)
+        {
+            float t = (Time.time - startTime) / errorFadeDuration;
+            errorText.alpha = 1f - t;
+            yield return null;
+        }
+        errorText.alpha = 0f;
+
+        errorMessageCoroutine = null;
+    }
+
+    /// <summary>
+    /// Update drag text visibility based on case state and view availability
+    /// </summary>
+    private void UpdateDragTextVisibility()
+    {
+        if (dragHereText != null)
+        {
+            bool shouldShow = isCaseOpen && currentSuspect == null;
+            dragHereText.gameObject.SetActive(shouldShow);
+        }
     }
 } 

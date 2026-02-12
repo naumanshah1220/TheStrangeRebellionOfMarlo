@@ -232,7 +232,7 @@ public class SuspectTag : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
         isDragging = false;
         
         // Check if dropped on a valid monitor
-        CCTVMonitor targetMonitor = FindMonitorAtPosition(eventData.position);
+        InterrogationScreen targetMonitor = FindMonitorAtPosition(eventData.position);
         
         if (targetMonitor != null && CanDropOnMonitor(targetMonitor))
         {
@@ -426,7 +426,7 @@ public class SuspectTag : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
     {
         if (dragCopy == null) return;
         
-        CCTVMonitor targetMonitor = FindMonitorAtPosition(eventData.position);
+        InterrogationScreen targetMonitor = FindMonitorAtPosition(eventData.position);
         Image dragCopyImage = dragCopy.GetComponent<Image>();
         
         if (dragCopyImage != null)
@@ -456,16 +456,13 @@ public class SuspectTag : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
             else
             {
                 dragCopyImage.color = normalColor;
-                
-                // Reset any monitor border colors
-                CCTVMonitor[] allMonitors = FindObjectsByType<CCTVMonitor>(FindObjectsSortMode.None);
-                foreach (var monitor in allMonitors)
+
+                // Reset the active monitor border color
+                var activeMonitor = SuspectManager.Instance?.interrogationScreen;
+                if (activeMonitor != null)
                 {
-                    var monitorBorder = monitor.GetComponent<Image>();
-                    if (monitorBorder != null)
-                    {
-                        monitorBorder.color = Color.white; // Reset to default
-                    }
+                    var monitorBorder = activeMonitor.GetComponent<Image>();
+                    if (monitorBorder != null) monitorBorder.color = Color.white;
                 }
             }
         }
@@ -474,7 +471,7 @@ public class SuspectTag : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
     /// <summary>
     /// Find monitor at screen position
     /// </summary>
-    private CCTVMonitor FindMonitorAtPosition(Vector2 screenPosition)
+    private InterrogationScreen FindMonitorAtPosition(Vector2 screenPosition)
     {
         // Raycast to find monitors
         PointerEventData pointerData = new PointerEventData(EventSystem.current)
@@ -489,14 +486,14 @@ public class SuspectTag : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
         foreach (var result in results)
         {
             
-            var monitor = result.gameObject.GetComponent<CCTVMonitor>();
+            var monitor = result.gameObject.GetComponent<InterrogationScreen>();
             if (monitor != null)
             {
                 return monitor;
             }
             
             // Also check parent objects
-            monitor = result.gameObject.GetComponentInParent<CCTVMonitor>();
+            monitor = result.gameObject.GetComponentInParent<InterrogationScreen>();
             if (monitor != null)
             {
                 return monitor;
@@ -509,7 +506,7 @@ public class SuspectTag : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
     /// <summary>
     /// Check if we can drop on the given monitor
     /// </summary>
-    private bool CanDropOnMonitor(CCTVMonitor monitor)
+    private bool CanDropOnMonitor(InterrogationScreen monitor)
     {
         if (monitor == null) return false;
         
@@ -520,7 +517,7 @@ public class SuspectTag : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
     /// <summary>
     /// Drop suspect on monitor
     /// </summary>
-    private void DropOnMonitor(CCTVMonitor monitor)
+    private void DropOnMonitor(InterrogationScreen monitor)
     {
         if (monitor == null || suspectData == null) return;
         
@@ -571,32 +568,19 @@ public class SuspectTag : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
             return;
         }
         
-        // Validation 3: Check if suspect is already assigned to another monitor
+        // Validation 3: Check if suspect is already assigned to the monitor
         if (suspectManager.IsSuspectAssignedToAnyMonitor(citizen))
         {
-            int currentMonitorIndex = suspectManager.GetMonitorIndexForSuspect(citizen);
-            Debug.LogWarning($"[SuspectTag] Suspect {citizen.FullName} is already assigned to monitor {currentMonitorIndex}");
+            Debug.LogWarning($"[SuspectTag] Suspect {citizen.FullName} is already on the monitor");
             monitor.ShowErrorMessage("Suspect already assigned");
             ReturnToOriginalPosition();
             return;
         }
-        
-        // Find the monitor index
-        int monitorIndex = suspectManager.cctvMonitors.IndexOf(monitor);
-        if (monitorIndex >= 0)
-        {
-            // Add citizen to current suspects list and display on monitor
-            suspectManager.AssignCitizenToMonitor(citizen, monitorIndex);
-            
-            Debug.Log($"[SuspectTag] Successfully assigned {citizen.FullName} to monitor {monitorIndex}");
-        }
-        else
-        {
-            Debug.LogError("[SuspectTag] Could not find monitor index in SuspectManager");
-            monitor.ShowErrorMessage("System error");
-            ReturnToOriginalPosition();
-            return;
-        }
+
+        // Call suspect to the single monitor
+        suspectManager.CallSuspectToMonitor(citizen);
+
+        Debug.Log($"[SuspectTag] Successfully called {citizen.FullName} to monitor");
         
         // Animate drag copy to monitor position and then cleanup
         if (dragCopy != null)
@@ -638,12 +622,12 @@ public class SuspectTag : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
     /// <summary>
     /// Get the monitor's center position in the same coordinate space as the drag copy
     /// </summary>
-    private Vector3 GetMonitorCenterPosition(CCTVMonitor monitor)
+    private Vector3 GetMonitorCenterPosition(InterrogationScreen monitor)
     {
         if (dragCanvas == null || monitor == null) return Vector3.zero;
         
         // Get the monitor's Image component (the actual display area)
-        Image monitorImage = monitor.monitorImage;
+        Image monitorImage = monitor.suspectImage;
         if (monitorImage == null)
         {
             // Fallback to getting Image component from the monitor GameObject
@@ -760,15 +744,12 @@ public class SuspectTag : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
             backgroundImage.color = normalColor;
         }
         
-        // Reset any monitor border colors
-        CCTVMonitor[] allMonitors = FindObjectsByType<CCTVMonitor>(FindObjectsSortMode.None);
-        foreach (var monitor in allMonitors)
+        // Reset the active monitor border color
+        var activeMonitor = SuspectManager.Instance?.interrogationScreen;
+        if (activeMonitor != null)
         {
-            var monitorBorder = monitor.GetComponent<Image>();
-            if (monitorBorder != null)
-            {
-                monitorBorder.color = Color.white; // Reset to default
-            }
+            var monitorBorder = activeMonitor.GetComponent<Image>();
+            if (monitorBorder != null) monitorBorder.color = Color.white;
         }
     }
     
