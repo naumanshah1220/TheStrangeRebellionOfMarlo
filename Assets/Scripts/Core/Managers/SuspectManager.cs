@@ -283,15 +283,6 @@ public class SuspectManager : SingletonMonoBehaviour<SuspectManager>
     }
 
     /// <summary>
-    /// Set animation state for a specific suspect (backward compat — routes to single monitor)
-    /// </summary>
-    public void SetSuspectAnimationState(int suspectIndex, SuspectAnimationState state)
-    {
-        // Route to the single-monitor method regardless of index
-        SetMonitorSuspectAnimationState(state);
-    }
-
-    /// <summary>
     /// Clear the single monitor
     /// </summary>
     private void ClearMonitor()
@@ -304,17 +295,6 @@ public class SuspectManager : SingletonMonoBehaviour<SuspectManager>
 
         if (interrogationScreen != null)
             interrogationScreen.SetCaseOpen(false);
-    }
-
-    /// <summary>
-    /// Get current suspects (backward compat — returns 0-or-1 item list)
-    /// </summary>
-    public List<Citizen> GetCurrentSuspects()
-    {
-        var list = new List<Citizen>();
-        if (currentMonitorSuspect != null)
-            list.Add(currentMonitorSuspect);
-        return list;
     }
 
     /// <summary>
@@ -447,21 +427,6 @@ public class SuspectManager : SingletonMonoBehaviour<SuspectManager>
 
         // Clear current case
         currentCase = null;
-    }
-
-    /// <summary>
-    /// Release a suspect (backward compat wrapper). If the suspect matches the monitor, releases them.
-    /// </summary>
-    public void ReleaseSuspect(Citizen suspect)
-    {
-        if (suspect != null && suspect == currentMonitorSuspect)
-        {
-            ReleaseSuspectFromMonitor();
-        }
-        else
-        {
-            Debug.LogWarning($"[SuspectManager] Cannot release {suspect?.FullName} - not on monitor");
-        }
     }
 
     /// <summary>
