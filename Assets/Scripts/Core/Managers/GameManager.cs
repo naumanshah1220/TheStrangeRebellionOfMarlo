@@ -90,7 +90,18 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         if (daysManager != null)
         {
             daysManager.onDayStart.AddListener(() => { StartNewDay(daysManager.currentDay); UpdateDebugInfo(); });
-            daysManager.onDayEnd.AddListener(() => { EndCurrentDay(); UpdateDebugInfo(); });
+            daysManager.onDayEnd.AddListener(() =>
+            {
+                EndCurrentDay();
+                UpdateDebugInfo();
+                FlowController.Instance?.BeginNightSummary();
+            });
+            daysManager.onFailDay.AddListener(() =>
+            {
+                EndCurrentDay();
+                UpdateDebugInfo();
+                FlowController.Instance?.BeginNightSummary();
+            });
             daysManager.OnCampaignComplete += HandleCampaignComplete;
         }
 

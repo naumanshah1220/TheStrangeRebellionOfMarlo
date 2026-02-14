@@ -18,6 +18,9 @@ public static class GameEvents
     // Clue discovery
     public static event Action<string> OnClueDiscovered;
 
+    // Flow state changes (FlowController transitions)
+    public static event Action<FlowState, FlowState> OnFlowStateChanged;
+
     // --- Raise helpers ---
 
     public static void RaiseDayStarted(int dayNumber)
@@ -50,6 +53,11 @@ public static class GameEvents
         OnClueDiscovered?.Invoke(clueId);
     }
 
+    public static void RaiseFlowStateChanged(FlowState oldState, FlowState newState)
+    {
+        OnFlowStateChanged?.Invoke(oldState, newState);
+    }
+
     /// <summary>
     /// Unsubscribe all listeners. Call on application quit or full reset.
     /// </summary>
@@ -61,5 +69,6 @@ public static class GameEvents
         OnCaseClosed = null;
         OnCaseSolved = null;
         OnClueDiscovered = null;
+        OnFlowStateChanged = null;
     }
 }

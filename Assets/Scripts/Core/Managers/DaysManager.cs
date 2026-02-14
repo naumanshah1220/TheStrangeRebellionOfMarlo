@@ -49,7 +49,7 @@ public class DaysManager : SingletonMonoBehaviour<DaysManager>
     private UIManager uiManager;
     private NewspaperManager newspaperManager;
     private CaseProgressionManager progressionManager;
-    private float todaysEarnings = 0f;
+    public float TodaysEarnings { get; private set; }
 
     public List<Case> todaysTotalCases = new List<Case>();    // All cases shown in slots
     public List<Case> todaysPendingCases = new List<Case>();  // Currently active cases (in hand)
@@ -86,24 +86,14 @@ public class DaysManager : SingletonMonoBehaviour<DaysManager>
         }
 
         currentDay = dayNumber;
-        todaysEarnings = 0f;
+        TodaysEarnings = 0f;
         StartCoroutine(StartDayRoutine());
     }
 
     private IEnumerator StartDayRoutine()
     {
-        // Show newspaper headline based on yesterday's cases
-        if (newspaperManager && currentDay > 1)
-        {
-            string headline = newspaperManager.GetHeadlineForDay(currentDay, todaysTotalCases);
-            if (!string.IsNullOrEmpty(headline))
-            {
-                if (newspaperPanel) newspaperPanel.SetActive(true);
-                if (headlineText) headlineText.text = headline;
-                yield return new WaitForSeconds(headlineDisplayTime);
-                if (newspaperPanel) newspaperPanel.SetActive(false);
-            }
-        }
+        // Newspaper display is now handled by DayBriefingPanel via FlowController.
+        yield return null;
 
         // Reset day state but keep track of unsolved cases
         unsolvedCasesFromPreviousDay = new List<Case>(todaysPendingCases);
@@ -270,7 +260,7 @@ public class DaysManager : SingletonMonoBehaviour<DaysManager>
         if (!todaysClosedCases.Contains(closedCase))
         {
             todaysClosedCases.Add(closedCase);
-            todaysEarnings += closedCase.reward;
+            TodaysEarnings += closedCase.reward;
             caseManager.MarkCaseSolved(closedCase.caseID);
 
             // Update progression
@@ -314,14 +304,14 @@ public class DaysManager : SingletonMonoBehaviour<DaysManager>
         if (hasUnsolvedCoreCases)
         {
             onFailDay?.Invoke();
-            todaysEarnings = 0; // No pay if core cases are unsolved
+            TodaysEarnings = 0; // No pay if core cases are unsolved
         }
         else
         {
             onDayEnd?.Invoke();
         }
 
-        currentDay++;
+        // Day counter is now owned by FlowController.AdvanceToNextDay()
         GameEvents.RaiseDayEnded();
     }
 
