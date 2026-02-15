@@ -34,6 +34,7 @@
       "address": "14 Birchwood Lane, Block C",
       "occupation": "Records Clerk",
       "nervousnessLevel": 0.6,
+      "initialStress": 0.42,
       "isGuilty": true,
       "criminalHistory": [],
       "tagInteractions": [
@@ -84,8 +85,55 @@
               "clickableClues": []
             }
           ],
-          "unlocksTruthForTagIds": ["missing_ledger"]
+          "unlocksTruthForTagIds": ["missing_ledger"],
+          "contradictedByEvidenceTagIds": ["clue_access_logs"],
+          "contradictionResponse": {
+            "responseSequence": ["Where did you get that?", "Fine... I was at the office. I went back after hours."],
+            "isLie": false,
+            "stressImpact": 0.1,
+            "responseType": "Defensive",
+            "clickableClues": [
+              {
+                "clueId": "clue_elena_after_hours",
+                "clickableText": "went back after hours",
+                "noteText": "<person>Elena Vasquez</person> admitted to returning to the <location>Records Office</location> after hours on the night of the 14th",
+                "highlightColor": { "r": 1.0, "g": 0.4, "b": 0.4, "a": 1.0 },
+                "oneTimeOnly": true
+              }
+            ]
+          },
+          "responseVariants": [
+            {
+              "variantId": "high_stress_denial",
+              "conditions": [{ "type": "StressAbove", "threshold": 0.7 }],
+              "responses": [
+                {
+                  "responseSequence": ["Stop asking me that!", "I was HOME. I told you already!"],
+                  "isLie": true,
+                  "stressImpact": 0.05,
+                  "responseType": "Hostile"
+                }
+              ],
+              "weight": 1.0
+            }
+          ]
         }
+      ],
+      "lawyeredUpResponses": [
+        "I'm not saying another word without legal representation.",
+        "You can't just interrogate me like this. I have rights.",
+        "Get me a lawyer. Now."
+      ],
+      "rattledResponses": [
+        "I... wait, what was the question? You're confusing me.",
+        "Please, just... I can't think when you keep pushing like this.",
+        "My hands won't stop shaking. Can we take a break?"
+      ],
+      "shutdownResponses": [
+        "...",
+        "No comment.",
+        "I have nothing more to say.",
+        "Leave me alone."
       ]
     },
     {
@@ -100,6 +148,7 @@
       "address": "7 Ironside Terrace, Block A",
       "occupation": "Records Office Supervisor",
       "nervousnessLevel": 0.2,
+      "initialStress": 0.28,
       "isGuilty": false,
       "criminalHistory": [
         {
@@ -130,6 +179,21 @@
           ],
           "unlocksTruthForTagIds": []
         }
+      ],
+      "lawyeredUpResponses": [
+        "I think it's best I speak with my union representative before continuing.",
+        "I've cooperated fully. If you want more, get my lawyer involved.",
+        "This conversation is over until I have counsel present."
+      ],
+      "rattledResponses": [
+        "Look, I've been running that office for fifteen years and now THIS happens...",
+        "You're making me nervous. I didn't do anything wrong!",
+        "I need a moment. This is all too much."
+      ],
+      "shutdownResponses": [
+        "I refuse to answer any more questions.",
+        "...",
+        "No. I'm done talking."
       ]
     }
   ],

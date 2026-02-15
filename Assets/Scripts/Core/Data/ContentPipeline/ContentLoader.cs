@@ -196,6 +196,7 @@ public static class ContentLoader
         citizen.address = json.address;
         citizen.occupation = json.occupation ?? "";
         citizen.nervousnessLevel = json.nervousnessLevel;
+        citizen.initialStress = json.initialStress;
         citizen.isGuilty = json.isGuilty;
 
         // Portrait
@@ -262,6 +263,11 @@ public static class ContentLoader
             for (int i = 0; i < json.genericResponses.Count; i++)
                 citizen.genericResponses[i] = ConvertTagResponse(json.genericResponses[i]);
         }
+
+        // Stress zone fallback responses
+        citizen.lawyeredUpResponses = json.lawyeredUpResponses ?? new string[0];
+        citizen.rattledResponses = json.rattledResponses ?? new string[0];
+        citizen.shutdownResponses = json.shutdownResponses ?? new string[0];
 
         return citizen;
     }
@@ -349,6 +355,14 @@ public static class ContentLoader
                 ti.unlockedFollowupResponses = new TagResponse[0];
             }
 
+            // Evidence contradiction
+            ti.contradictedByEvidenceTagIds = tj.contradictedByEvidenceTagIds?.ToArray() ?? new string[0];
+            if (tj.contradictionResponse != null)
+                ti.contradictionResponse = ConvertTagResponse(tj.contradictionResponse);
+
+            // Response variants
+            ti.responseVariants = ConvertResponseVariantGroups(tj.responseVariants);
+
             result[i] = ti;
         }
         return result;
@@ -386,7 +400,64 @@ public static class ContentLoader
             tr.clickableClues = new ClickableClueSegment[0];
         }
 
+        // Interrogation graph fields
+        tr.conditions = ConvertResponseConditions(json.conditions);
+        tr.stressImpact = json.stressImpact;
+        tr.responseType = ParseEnum(json.responseType, ResponseType.Normal);
+
         return tr;
+    }
+
+    // ── Response condition conversion ────────────────────────────
+
+    private static ResponseCondition[] ConvertResponseConditions(List<ResponseConditionJson> jsonList)
+    {
+        if (jsonList == null || jsonList.Count == 0) return null;
+
+        var result = new ResponseCondition[jsonList.Count];
+        for (int i = 0; i < jsonList.Count; i++)
+        {
+            var cj = jsonList[i];
+            result[i] = new ResponseCondition
+            {
+                type = ParseEnum(cj.type, ResponseCondition.ConditionType.TagAsked),
+                targetId = cj.targetId,
+                minCount = cj.minCount,
+                threshold = cj.threshold
+            };
+        }
+        return result;
+    }
+
+    private static ResponseVariantGroup[] ConvertResponseVariantGroups(List<ResponseVariantGroupJson> jsonList)
+    {
+        if (jsonList == null || jsonList.Count == 0) return null;
+
+        var result = new ResponseVariantGroup[jsonList.Count];
+        for (int i = 0; i < jsonList.Count; i++)
+        {
+            var vj = jsonList[i];
+            var group = new ResponseVariantGroup
+            {
+                variantId = vj.variantId,
+                weight = vj.weight,
+                conditions = ConvertResponseConditions(vj.conditions)
+            };
+
+            if (vj.responses != null && vj.responses.Count > 0)
+            {
+                group.responses = new TagResponse[vj.responses.Count];
+                for (int r = 0; r < vj.responses.Count; r++)
+                    group.responses[r] = ConvertTagResponse(vj.responses[r]);
+            }
+            else
+            {
+                group.responses = new TagResponse[0];
+            }
+
+            result[i] = group;
+        }
+        return result;
     }
 
     // ── Steps conversion ─────────────────────────────────────────

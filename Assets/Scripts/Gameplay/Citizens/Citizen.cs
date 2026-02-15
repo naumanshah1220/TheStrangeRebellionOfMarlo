@@ -29,7 +29,10 @@ public class Citizen : ScriptableObject
     [Tooltip("How nervous this suspect gets under pressure (affects response timing)")]
     [Range(0f, 1f)]
     public float nervousnessLevel = 0.3f;
-    
+
+    [Tooltip("Override starting stress (0-1). Negative means auto-calculate from nervousnessLevel.")]
+    public float initialStress = -1f;
+
     [Tooltip("Whether this person is guilty in the current case")]
     public bool isGuilty = false;
     
@@ -63,6 +66,42 @@ public class Citizen : ScriptableObject
     [System.NonSerialized]
     private int genericQuestionCount = 0;
     
+    // Stress system
+    [System.NonSerialized]
+    private float runtimeStress = 0f;
+    [System.NonSerialized]
+    private HashSet<string> runtimeContradictionsUsed = new HashSet<string>();
+    public float CurrentStress => runtimeStress;
+
+    // Stress zone thresholds
+    private const float ZONE_LAWYERED_UP_MAX = 0.2f;
+    private const float ZONE_DEFLECTING_MAX = 0.4f;
+    private const float ZONE_SWEET_SPOT_MAX = 0.7f;
+    private const float ZONE_RATTLED_MAX = 0.8f;
+
+    // Tone deltas
+    private const float TONE_CALM_DELTA = -0.08f;
+    private const float TONE_NEUTRAL_DELTA = 0.02f;
+    private const float TONE_FIRM_DELTA = 0.10f;
+
+    // Zone-specific fallback responses (populated from JSON)
+    [System.NonSerialized]
+    public string[] lawyeredUpResponses = new string[0];
+    [System.NonSerialized]
+    public string[] rattledResponses = new string[0];
+    [System.NonSerialized]
+    public string[] shutdownResponses = new string[0];
+
+    // Tone runtime state
+    [System.NonSerialized]
+    private InterrogationTone runtimeTone = InterrogationTone.Neutral;
+    [System.NonSerialized]
+    private int lawyeredUpIndex = 0;
+    [System.NonSerialized]
+    private int rattledFallbackIndex = 0;
+    [System.NonSerialized]
+    private int shutdownIndex = 0;
+
     // Discrepancy / truth-unlock runtime state
     [System.NonSerialized]
     private HashSet<string> runtimeTruthUnlocked = new HashSet<string>();
@@ -79,6 +118,69 @@ public class Citizen : ScriptableObject
     public string FullName => $"{firstName} {lastName}";
     public bool HasCriminalRecord => criminalHistory.Count > 0;
     
+    // ── Stress Zone API ──────────────────────────────────────────
+
+    public StressZone GetCurrentStressZone()
+    {
+        if (runtimeStress < ZONE_LAWYERED_UP_MAX) return StressZone.LawyeredUp;
+        if (runtimeStress < ZONE_DEFLECTING_MAX) return StressZone.Deflecting;
+        if (runtimeStress < ZONE_SWEET_SPOT_MAX) return StressZone.SweetSpot;
+        if (runtimeStress < ZONE_RATTLED_MAX) return StressZone.Rattled;
+        return StressZone.Shutdown;
+    }
+
+    public void SetInterrogationTone(InterrogationTone tone)
+    {
+        runtimeTone = tone;
+        Debug.Log($"[Citizen] {FullName} - Tone set to {tone}");
+    }
+
+    public InterrogationTone GetInterrogationTone() => runtimeTone;
+
+    private void ApplyToneDelta()
+    {
+        float delta;
+        switch (runtimeTone)
+        {
+            case InterrogationTone.Calm: delta = TONE_CALM_DELTA; break;
+            case InterrogationTone.Firm: delta = TONE_FIRM_DELTA; break;
+            default: delta = TONE_NEUTRAL_DELTA; break;
+        }
+        float oldStress = runtimeStress;
+        runtimeStress = Mathf.Clamp01(runtimeStress + delta);
+        Debug.Log($"[Citizen] {FullName} - Tone {runtimeTone}: stress {oldStress:F2} → {runtimeStress:F2} ({delta:+0.00;-0.00})");
+    }
+
+    private TagResponse GetShutdownResponse()
+    {
+        if (shutdownResponses == null || shutdownResponses.Length == 0)
+            return new TagResponse { responseSequence = new string[] { "..." }, isLie = false };
+        string line = shutdownResponses[shutdownIndex % shutdownResponses.Length];
+        shutdownIndex++;
+        Debug.Log($"[Citizen] {FullName} - SHUTDOWN zone response: '{line}'");
+        return new TagResponse { responseSequence = new string[] { line }, isLie = false };
+    }
+
+    private TagResponse GetLawyeredUpResponse()
+    {
+        if (lawyeredUpResponses == null || lawyeredUpResponses.Length == 0)
+            return new TagResponse { responseSequence = new string[] { "I want to speak to a lawyer." }, isLie = false };
+        string line = lawyeredUpResponses[lawyeredUpIndex % lawyeredUpResponses.Length];
+        lawyeredUpIndex++;
+        Debug.Log($"[Citizen] {FullName} - LAWYERED UP zone response: '{line}'");
+        return new TagResponse { responseSequence = new string[] { line }, isLie = false };
+    }
+
+    private TagResponse GetRattledFallbackResponse()
+    {
+        if (rattledResponses == null || rattledResponses.Length == 0)
+            return new TagResponse { responseSequence = new string[] { "I... I can't think straight." }, isLie = false };
+        string line = rattledResponses[rattledFallbackIndex % rattledResponses.Length];
+        rattledFallbackIndex++;
+        Debug.Log($"[Citizen] {FullName} - RATTLED fallback response: '{line}'");
+        return new TagResponse { responseSequence = new string[] { line }, isLie = false };
+    }
+
     /// <summary>
     /// Get response for a specific tag using the new TagInteraction system
     /// </summary>
@@ -86,13 +188,40 @@ public class Citizen : ScriptableObject
     {
         Debug.Log($"[Citizen] {FullName} - GetResponseForTag: '{tagId}'");
 
+        // Apply tone stress delta before anything else
+        ApplyToneDelta();
+
+        // Determine current stress zone
+        StressZone zone = GetCurrentStressZone();
+        Debug.Log($"[Citizen] {FullName} - Stress: {runtimeStress:F2}, Zone: {zone}");
+
+        // Shutdown: refuse to speak entirely
+        if (zone == StressZone.Shutdown)
+            return GetShutdownResponse();
+
+        // Lawyered Up: demands lawyer, won't answer
+        if (zone == StressZone.LawyeredUp)
+            return GetLawyeredUpResponse();
+
         // Find tag interaction
         TagInteraction tagInteraction = GetTagInteraction(tagId);
-        
+
         if (tagInteraction != null)
         {
             Debug.Log($"[Citizen] {FullName} - Found specific interaction for tag: '{tagId}'");
-            
+
+            // Check if this tag is evidence that contradicts another interaction's lies
+            // Contradictions always fire regardless of stress zone (player earned the evidence)
+            TagResponse contradictionResult = CheckIfEvidenceContradicts(tagId);
+            if (contradictionResult != null)
+            {
+                Debug.Log($"[Citizen] {FullName} - Evidence contradiction triggered for tag: '{tagId}'");
+                int timesAskedContra = GetRuntimeTimesAsked(tagId);
+                SetRuntimeTimesAsked(tagId, timesAskedContra + 1);
+                ApplyStressImpact(contradictionResult);
+                return ApplyNervousnessModifications(contradictionResult, timesAskedContra + 1);
+            }
+
             // Check truth unlock state for this tag
             bool truthUnlockedForThisTag = runtimeTruthUnlocked.Contains(tagId);
             
@@ -166,23 +295,50 @@ public class Citizen : ScriptableObject
                 // Maintain base times asked counter for compatibility
                 int times = GetRuntimeTimesAsked(tagId);
                 SetRuntimeTimesAsked(tagId, times + 1);
-                
+
+                // Apply stress
+                ApplyStressImpact(response);
+                ApplyRepeatedQuestionStress(times + 1);
+
                 // Apply nervousness modifications
                 response = ApplyNervousnessModifications(response, GetRuntimeTimesAsked(tagId));
-                
+
                 // Asking this tag might also unlock truth for others (self-unlock allowed)
                 ApplyTruthUnlocks(tagInteraction);
-                
+
                 return response;
             }
             else
             {
-                // Truth not unlocked yet; proceed with normal specific responses
+                // Truth not unlocked yet; check for response variants first
                 int currentTimesAsked = GetRuntimeTimesAsked(tagId);
                 Debug.Log($"[Citizen] {FullName} - Times asked for '{tagId}': {currentTimesAsked}");
-                
-                TagResponse baseResponse = GetResponseForTimesAsked(tagInteraction, currentTimesAsked);
-                Debug.Log($"[Citizen] {FullName} - Using specific response: '{baseResponse.GetCombinedResponse()}'");
+
+                TagResponse baseResponse;
+
+                // Try variant selection if variants are authored
+                bool usedVariant = false;
+                var eligibleVariants = FilterEligibleVariants(tagInteraction.responseVariants);
+                if (eligibleVariants.Count > 0)
+                {
+                    var selectedVariant = WeightedRandomSelect(eligibleVariants);
+                    Debug.Log($"[Citizen] {FullName} - Using variant '{selectedVariant.variantId}' for tag '{tagId}'");
+                    baseResponse = FindFirstEligibleResponse(selectedVariant.responses, currentTimesAsked);
+                    usedVariant = true;
+                }
+                else
+                {
+                    baseResponse = GetResponseForTimesAsked(tagInteraction, currentTimesAsked);
+                }
+
+                // Rattled zone: if no per-tag variant was selected, use citizen-level rattled fallback
+                if (zone == StressZone.Rattled && !usedVariant
+                    && rattledResponses != null && rattledResponses.Length > 0)
+                {
+                    baseResponse = GetRattledFallbackResponse();
+                }
+
+                Debug.Log($"[Citizen] {FullName} - Using response: '{baseResponse.GetCombinedResponse()}'");
                 
                 // Track denial if the chosen response is a lie
                 if (baseResponse != null && baseResponse.isLie)
@@ -192,18 +348,31 @@ public class Citizen : ScriptableObject
                 
                 // Increment for next time
                 SetRuntimeTimesAsked(tagId, currentTimesAsked + 1);
-                
+
+                // Apply stress
+                ApplyStressImpact(baseResponse);
+                ApplyRepeatedQuestionStress(currentTimesAsked + 1);
+
                 // Apply nervousness modifications
                 TagResponse responseMod = ApplyNervousnessModifications(baseResponse, currentTimesAsked + 1);
-                
+
                 // Asking this tag might also unlock truth for others
                 ApplyTruthUnlocks(tagInteraction);
-                
+
                 return responseMod;
             }
         }
         else
         {
+            // Even without a specific interaction, this tag might be evidence contradicting another tag's lies
+            TagResponse contradictionResult = CheckIfEvidenceContradicts(tagId);
+            if (contradictionResult != null)
+            {
+                Debug.Log($"[Citizen] {FullName} - Evidence contradiction triggered for unknown tag: '{tagId}'");
+                ApplyStressImpact(contradictionResult);
+                return ApplyNervousnessModifications(contradictionResult, 1);
+            }
+
             Debug.Log($"[Citizen] {FullName} - No specific interaction found for tag: '{tagId}', using generic response");
             // Suspect doesn't know about this tag - use generic response
             return GetGenericResponse();
@@ -211,15 +380,13 @@ public class Citizen : ScriptableObject
     }
     
     /// <summary>
-    /// Get response for a specific number of times asked
+    /// Get response for a specific number of times asked, respecting conditions
     /// </summary>
     private TagResponse GetResponseForTimesAsked(TagInteraction interaction, int timesAsked)
     {
         if (interaction.responses.Length == 0) return new TagResponse();
-        
-        // If asked more times than we have responses, use the last response
-        int responseIndex = Mathf.Min(timesAsked, interaction.responses.Length - 1);
-        return interaction.responses[responseIndex];
+
+        return FindFirstEligibleResponse(interaction.responses, timesAsked);
     }
     
     /// <summary>
@@ -352,6 +519,240 @@ public class Citizen : ScriptableObject
         return modifiedResponse;
     }
     
+    // ── Response Variants ─────────────────────────────────────
+
+    /// <summary>
+    /// Filter variant groups whose conditions are all met
+    /// </summary>
+    private List<ResponseVariantGroup> FilterEligibleVariants(ResponseVariantGroup[] variants)
+    {
+        var eligible = new List<ResponseVariantGroup>();
+        if (variants == null) return eligible;
+
+        for (int i = 0; i < variants.Length; i++)
+        {
+            if (AllConditionsMet(variants[i].conditions))
+                eligible.Add(variants[i]);
+        }
+        return eligible;
+    }
+
+    /// <summary>
+    /// Weighted random selection from eligible variant groups
+    /// </summary>
+    private ResponseVariantGroup WeightedRandomSelect(List<ResponseVariantGroup> eligible)
+    {
+        if (eligible == null || eligible.Count == 0) return null;
+        if (eligible.Count == 1) return eligible[0];
+
+        float totalWeight = 0f;
+        for (int i = 0; i < eligible.Count; i++)
+            totalWeight += Mathf.Max(eligible[i].weight, 0.01f);
+
+        float roll = Random.Range(0f, totalWeight);
+        float cumulative = 0f;
+        for (int i = 0; i < eligible.Count; i++)
+        {
+            cumulative += Mathf.Max(eligible[i].weight, 0.01f);
+            if (roll <= cumulative) return eligible[i];
+        }
+
+        return eligible[eligible.Count - 1];
+    }
+
+    // ── Evidence Contradiction ─────────────────────────────────
+
+    /// <summary>
+    /// Check if a presented tag is evidence that contradicts any of this citizen's lies.
+    /// Returns a contradiction response if found, null otherwise.
+    /// </summary>
+    private TagResponse CheckIfEvidenceContradicts(string tagId)
+    {
+        if (tagInteractions == null) return null;
+        if (runtimeContradictionsUsed == null) runtimeContradictionsUsed = new HashSet<string>();
+
+        for (int i = 0; i < tagInteractions.Length; i++)
+        {
+            var interaction = tagInteractions[i];
+            if (interaction.contradictedByEvidenceTagIds == null || interaction.contradictedByEvidenceTagIds.Length == 0)
+                continue;
+
+            for (int j = 0; j < interaction.contradictedByEvidenceTagIds.Length; j++)
+            {
+                if (string.Equals(interaction.contradictedByEvidenceTagIds[j], tagId, System.StringComparison.OrdinalIgnoreCase))
+                {
+                    // Check the interaction has lies and hasn't been contradicted yet
+                    string contradictionKey = $"{interaction.tagId}:{tagId}";
+                    if (runtimeContradictionsUsed.Contains(contradictionKey))
+                        continue;
+
+                    bool hasLies = false;
+                    if (interaction.responses != null)
+                    {
+                        for (int r = 0; r < interaction.responses.Length; r++)
+                        {
+                            if (interaction.responses[r].isLie) { hasLies = true; break; }
+                        }
+                    }
+                    if (!hasLies) continue;
+
+                    return HandleEvidenceContradiction(interaction, tagId, contradictionKey);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Handle a confirmed evidence contradiction: mark used, unlock truth, bump stress, return response
+    /// </summary>
+    private TagResponse HandleEvidenceContradiction(TagInteraction interaction, string evidenceTagId, string contradictionKey)
+    {
+        runtimeContradictionsUsed.Add(contradictionKey);
+
+        // Unlock truth for the contradicted tag
+        if (!runtimeTruthUnlocked.Contains(interaction.tagId))
+        {
+            runtimeTruthUnlocked.Add(interaction.tagId);
+            Debug.Log($"[Citizen] {FullName} - Evidence '{evidenceTagId}' contradicted '{interaction.tagId}' — truth unlocked!");
+        }
+
+        // Mark as previously denied (they were lying)
+        runtimeDeniedTags.Add(interaction.tagId);
+
+        // Stress bump for being caught
+        float oldStress = runtimeStress;
+        runtimeStress = Mathf.Clamp01(runtimeStress + 0.3f);
+        Debug.Log($"[Citizen] {FullName} - Contradiction stress {oldStress:F2} → {runtimeStress:F2} (+0.30)");
+
+        // Return contradictionResponse if authored, else fall through to unlockedInitialResponseIfPreviouslyDenied
+        if (interaction.contradictionResponse != null &&
+            interaction.contradictionResponse.responseSequence != null &&
+            interaction.contradictionResponse.responseSequence.Length > 0)
+        {
+            return interaction.contradictionResponse;
+        }
+
+        // Fallback to the unlocked initial response for previously denied
+        if (interaction.unlockedInitialResponseIfPreviouslyDenied != null &&
+            interaction.unlockedInitialResponseIfPreviouslyDenied.responseSequence != null &&
+            interaction.unlockedInitialResponseIfPreviouslyDenied.responseSequence.Length > 0)
+        {
+            return interaction.unlockedInitialResponseIfPreviouslyDenied;
+        }
+
+        // Ultimate fallback
+        return new TagResponse
+        {
+            responseSequence = new string[] { "..." },
+            isLie = false
+        };
+    }
+
+    // ── Condition Evaluation ────────────────────────────────────
+
+    /// <summary>
+    /// Evaluate a single response condition against current runtime state
+    /// </summary>
+    private bool EvaluateCondition(ResponseCondition condition)
+    {
+        if (condition == null) return true;
+
+        switch (condition.type)
+        {
+            case ResponseCondition.ConditionType.TagAsked:
+                return GetRuntimeTimesAsked(condition.targetId) >= condition.minCount;
+
+            case ResponseCondition.ConditionType.TagNotAsked:
+                return GetRuntimeTimesAsked(condition.targetId) == 0;
+
+            case ResponseCondition.ConditionType.ClueDiscovered:
+                return CluesManager.Instance != null && CluesManager.Instance.IsClueFound(condition.targetId);
+
+            case ResponseCondition.ConditionType.ClueNotDiscovered:
+                return CluesManager.Instance == null || !CluesManager.Instance.IsClueFound(condition.targetId);
+
+            case ResponseCondition.ConditionType.TruthUnlocked:
+                return runtimeTruthUnlocked != null && runtimeTruthUnlocked.Contains(condition.targetId);
+
+            case ResponseCondition.ConditionType.StressAbove:
+                return runtimeStress >= condition.threshold;
+
+            case ResponseCondition.ConditionType.StressBelow:
+                return runtimeStress < condition.threshold;
+
+            default:
+                return true;
+        }
+    }
+
+    /// <summary>
+    /// Check if all conditions in an array are met (null/empty = always met)
+    /// </summary>
+    private bool AllConditionsMet(ResponseCondition[] conditions)
+    {
+        if (conditions == null || conditions.Length == 0) return true;
+        for (int i = 0; i < conditions.Length; i++)
+        {
+            if (!EvaluateCondition(conditions[i])) return false;
+        }
+        return true;
+    }
+
+    /// <summary>
+    /// Find the first eligible response starting from timesAsked index, checking conditions.
+    /// Falls back to last response if no conditions match.
+    /// </summary>
+    private TagResponse FindFirstEligibleResponse(TagResponse[] responses, int timesAsked)
+    {
+        if (responses == null || responses.Length == 0) return new TagResponse();
+
+        int startIndex = Mathf.Min(timesAsked, responses.Length - 1);
+
+        // Try from startIndex forward to find one whose conditions are met
+        for (int i = startIndex; i < responses.Length; i++)
+        {
+            if (AllConditionsMet(responses[i].conditions))
+                return responses[i];
+        }
+
+        // Try from startIndex backward
+        for (int i = startIndex - 1; i >= 0; i--)
+        {
+            if (AllConditionsMet(responses[i].conditions))
+                return responses[i];
+        }
+
+        // Ultimate fallback: last response regardless of conditions
+        return responses[responses.Length - 1];
+    }
+
+    /// <summary>
+    /// Apply stress impact from a delivered response
+    /// </summary>
+    private void ApplyStressImpact(TagResponse response)
+    {
+        if (response == null) return;
+        float oldStress = runtimeStress;
+        runtimeStress = Mathf.Clamp01(runtimeStress + response.stressImpact);
+        if (Mathf.Abs(response.stressImpact) > 0.001f)
+            Debug.Log($"[Citizen] {FullName} - Stress {oldStress:F2} → {runtimeStress:F2} (impact: {response.stressImpact:+0.00;-0.00})");
+    }
+
+    /// <summary>
+    /// Apply stress from repeated questioning (>2 asks for the same tag)
+    /// </summary>
+    private void ApplyRepeatedQuestionStress(int timesAsked)
+    {
+        if (timesAsked > 2)
+        {
+            float oldStress = runtimeStress;
+            runtimeStress = Mathf.Clamp01(runtimeStress + 0.05f);
+            Debug.Log($"[Citizen] {FullName} - Repeated question stress {oldStress:F2} → {runtimeStress:F2} (+0.05)");
+        }
+    }
+
     /// <summary>
     /// Reset conversation state (for new interrogation sessions)
     /// </summary>
@@ -364,7 +765,19 @@ public class Citizen : ScriptableObject
             runtimeTimesAsked.Clear();
             
         genericQuestionCount = 0;
-        
+
+        // Reset stress — use explicit initialStress if set, otherwise derive from nervousness
+        runtimeStress = initialStress >= 0f
+            ? Mathf.Clamp01(initialStress)
+            : Mathf.Lerp(0.25f, 0.45f, nervousnessLevel);
+        if (runtimeContradictionsUsed == null) runtimeContradictionsUsed = new HashSet<string>(); else runtimeContradictionsUsed.Clear();
+
+        // Reset tone and cycling counters
+        runtimeTone = InterrogationTone.Neutral;
+        lawyeredUpIndex = 0;
+        rattledFallbackIndex = 0;
+        shutdownIndex = 0;
+
         // Reset discrepancy state
         if (runtimeTruthUnlocked == null) runtimeTruthUnlocked = new HashSet<string>(); else runtimeTruthUnlocked.Clear();
         if (runtimeDeniedTags == null) runtimeDeniedTags = new HashSet<string>(); else runtimeDeniedTags.Clear();
@@ -385,7 +798,8 @@ public class Citizen : ScriptableObject
             if (!runtimeTruthUnlocked.Contains(targetTagId))
             {
                 runtimeTruthUnlocked.Add(targetTagId);
-                Debug.Log($"[Citizen] {FullName} - Truth unlocked for tag '{targetTagId}' by asking '{interaction.tagId}'");
+                runtimeStress = Mathf.Clamp01(runtimeStress + 0.2f);
+                Debug.Log($"[Citizen] {FullName} - Truth unlocked for tag '{targetTagId}' by asking '{interaction.tagId}' (stress +0.2 → {runtimeStress:F2})");
             }
         }
     }

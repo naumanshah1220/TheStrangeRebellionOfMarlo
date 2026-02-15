@@ -103,6 +103,7 @@ public class CitizenJson
 
     // Interrogation
     public float nervousnessLevel = 0.3f;
+    public float initialStress = -1f;
     public bool isGuilty;
 
     // Tag interactions
@@ -111,6 +112,11 @@ public class CitizenJson
     // Generic questions/responses (optional override)
     public List<GenericQuestionJson> genericQuestions;
     public List<TagResponseJson> genericResponses;
+
+    // Stress zone fallback responses
+    public string[] lawyeredUpResponses;
+    public string[] rattledResponses;
+    public string[] shutdownResponses;
 }
 
 [System.Serializable]
@@ -162,6 +168,13 @@ public class TagInteractionJson
     public TagResponseJson unlockedInitialResponseIfPreviouslyDenied;
     public TagResponseJson unlockedInitialResponseIfNotDenied;
     public List<TagResponseJson> unlockedFollowupResponses = new List<TagResponseJson>();
+
+    // Evidence contradiction
+    public List<string> contradictedByEvidenceTagIds;
+    public TagResponseJson contradictionResponse;
+
+    // Response variants
+    public List<ResponseVariantGroupJson> responseVariants;
 }
 
 [System.Serializable]
@@ -171,6 +184,29 @@ public class TagResponseJson
     public bool isLie;
     public float responseDelayOverride;
     public List<ClickableClueSegmentJson> clickableClues = new List<ClickableClueSegmentJson>();
+
+    // Interrogation graph
+    public List<ResponseConditionJson> conditions;
+    public float stressImpact;
+    public string responseType;
+}
+
+[System.Serializable]
+public class ResponseConditionJson
+{
+    public string type;     // ConditionType enum as string
+    public string targetId;
+    public int minCount = 1;
+    public float threshold;
+}
+
+[System.Serializable]
+public class ResponseVariantGroupJson
+{
+    public string variantId;
+    public List<TagResponseJson> responses;
+    public List<ResponseConditionJson> conditions;
+    public float weight = 1f;
 }
 
 [System.Serializable]

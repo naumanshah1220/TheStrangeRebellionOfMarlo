@@ -13,6 +13,17 @@ public enum ResponseType
     Hostile      // Angry/aggressive
 }
 
+public enum InterrogationTone { Calm, Neutral, Firm }
+
+public enum StressZone
+{
+    LawyeredUp, // [0.0 - 0.2)
+    Deflecting, // [0.2 - 0.4)
+    SweetSpot,  // [0.4 - 0.7)
+    Rattled,    // [0.7 - 0.8)
+    Shutdown    // [0.8 - 1.0]
+}
+
 /// <summary>
 /// Tag interaction system for suspect questioning
 /// </summary>
@@ -40,9 +51,20 @@ public class TagInteraction
     [Tooltip("If the player has unlocked truth for THIS tag before ever asking about it, use this calm truthful response once")]
     public TagResponse unlockedInitialResponseIfNotDenied;
     
-    [Tooltip("Follow-up responses for subsequent times after truth has been unlocked for THIS tag")] 
+    [Tooltip("Follow-up responses for subsequent times after truth has been unlocked for THIS tag")]
     public TagResponse[] unlockedFollowupResponses = new TagResponse[0];
-    
+
+    [Header("Evidence Contradiction")]
+    [Tooltip("Evidence tag IDs that contradict this interaction's lies")]
+    public string[] contradictedByEvidenceTagIds = new string[0];
+
+    [Tooltip("Response when evidence contradicts this interaction")]
+    public TagResponse contradictionResponse;
+
+    [Header("Response Variants")]
+    [Tooltip("Alternative response sets selected by conditions and weight")]
+    public ResponseVariantGroup[] responseVariants;
+
     /// <summary>
     /// Get the current response based on how many times this tag has been asked
     /// </summary>
@@ -81,7 +103,16 @@ public class TagResponse
     [Header("Clickable Clue Segments")]
     [Tooltip("Define clickable parts of the response that add notes to the notebook")]
     public ClickableClueSegment[] clickableClues = new ClickableClueSegment[0];
-    
+
+    [Header("Interrogation Graph")]
+    [Tooltip("All conditions must be met for this response to be eligible")]
+    public ResponseCondition[] conditions;
+
+    [Tooltip("Stress delta applied to citizen when this response is delivered")]
+    public float stressImpact = 0f;
+
+    public ResponseType responseType = ResponseType.Normal;
+
     /// <summary>
     /// Get all responses as a single string separated by periods
     /// </summary>
@@ -157,6 +188,40 @@ public class CitizenConversation
 {
     public Citizen citizen;
     public List<ConversationMessage> messages = new List<ConversationMessage>();
+}
+
+/// <summary>
+/// A condition that must be met for a response or variant to be eligible
+/// </summary>
+[System.Serializable]
+public class ResponseCondition
+{
+    public enum ConditionType
+    {
+        TagAsked,           // tagId asked >= minCount times
+        TagNotAsked,        // tagId never asked
+        ClueDiscovered,     // clueId found
+        ClueNotDiscovered,  // clueId NOT found
+        TruthUnlocked,      // truth unlocked for tagId
+        StressAbove,        // citizen stress >= threshold
+        StressBelow         // citizen stress < threshold
+    }
+    public ConditionType type;
+    public string targetId;
+    public int minCount = 1;
+    public float threshold = 0f;
+}
+
+/// <summary>
+/// A group of variant responses with conditions and weighted selection
+/// </summary>
+[System.Serializable]
+public class ResponseVariantGroup
+{
+    public string variantId;
+    public TagResponse[] responses;
+    public ResponseCondition[] conditions;
+    public float weight = 1f;
 }
 
 /// <summary>
