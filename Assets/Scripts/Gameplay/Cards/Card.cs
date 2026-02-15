@@ -29,6 +29,8 @@ public class Card : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
 
     [Header("Visual")]
     [SerializeField] private GameObject cardVisualPrefab;
+    [Tooltip("Used when ICardData.GetFullCardPrefab() is null (e.g. JSON-loaded evidence)")]
+    [SerializeField] private GameObject fallbackBigCardPrefab;
     [HideInInspector] public CardVisual cardVisual;
     [HideInInspector] public BigCardVisual bigCardVisual;
 
@@ -162,19 +164,27 @@ public class Card : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
                     break;
             }
 
-            // Create big card visual if prefab exists - use dedicated big visual handler
-            if (bigCardVisual == null && cardDataInterface.GetFullCardPrefab() != null)
+            // Create big card visual - use dedicated big visual handler
+            // Prefer the card data's own prefab; fall back to the generic one on the slot prefab
+            GameObject bigCardPrefab = cardDataInterface.GetFullCardPrefab() ?? fallbackBigCardPrefab;
+            bool usingFallback = cardDataInterface.GetFullCardPrefab() == null && fallbackBigCardPrefab != null;
+            if (bigCardVisual == null && bigCardPrefab != null)
             {
-                GameObject fullCardInstance = Instantiate(cardDataInterface.GetFullCardPrefab(), bigVisualHandler ? bigVisualHandler.transform : canvas.transform);
+                GameObject fullCardInstance = Instantiate(bigCardPrefab, bigVisualHandler ? bigVisualHandler.transform : canvas.transform);
                 bigCardVisual = fullCardInstance.GetComponent<BigCardVisual>();
                 if (bigCardVisual != null)
                 {
-                fullCardInstance.transform.localPosition = Vector3.zero;
-                fullCardInstance.transform.localRotation = Quaternion.identity;
-                fullCardInstance.transform.localScale = Vector3.one;
-                bigCardVisual.Initialize(this);
-                fullCardInstance.SetActive(false);
-            }
+                    fullCardInstance.transform.localPosition = Vector3.zero;
+                    fullCardInstance.transform.localRotation = Quaternion.identity;
+                    fullCardInstance.transform.localScale = Vector3.one;
+                    bigCardVisual.Initialize(this);
+
+                    // Dynamically populate fallback BigCardVisual with evidence data
+                    if (usingFallback && mode == CardMode.Evidence && evidenceInformation != null)
+                        bigCardVisual.PopulateFromEvidence(evidenceInformation);
+
+                    fullCardInstance.SetActive(false);
+                }
             }
         }
         else

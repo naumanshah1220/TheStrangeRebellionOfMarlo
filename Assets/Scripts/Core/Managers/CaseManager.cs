@@ -36,16 +36,38 @@ public class CaseStatus
 public class CaseManager : SingletonMonoBehaviour<CaseManager>
 {
 
-    [Header("All Case Data")]
-    public List<Case> allCases = new List<Case>();
+    private List<Case> allCases = new List<Case>();
+
+    /// <summary>Read-only access to the full case list.</summary>
+    public IReadOnlyList<Case> AllCases => allCases;
 
     // Runtime state
     private Dictionary<string, CaseStatus> caseStatuses = new Dictionary<string, CaseStatus>();
 
     protected override void OnSingletonAwake()
     {
+        LoadJsonCases();
         InitializeCaseStatuses();
         ResetAllCaseDrafts();
+    }
+
+    /// <summary>
+    /// Loads all cases from StreamingAssets JSON. JSON is the single source of truth.
+    /// </summary>
+    private void LoadJsonCases()
+    {
+        var result = ContentLoader.LoadAllContent();
+        if (result == null) return;
+
+        allCases.AddRange(result.cases);
+        Debug.Log($"[CaseManager] Loaded {result.cases.Count} case(s) from JSON.");
+    }
+
+    private void Start()
+    {
+        var suspectManager = FindFirstObjectByType<SuspectManager>();
+        if (suspectManager?.citizenDatabase != null)
+            suspectManager.citizenDatabase.MergeCaseSuspects(allCases);
     }
 
     private void ResetAllCaseDrafts()

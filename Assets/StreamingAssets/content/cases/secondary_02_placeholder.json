@@ -1,0 +1,25 @@
+{
+  "caseID": "secondary_02",
+  "title": "Placeholder — Secondary Case 2",
+  "description": "Placeholder secondary case. Replace with real content.",
+  "caseType": "Secondary",
+  "firstAvailableDay": 1,
+  "coreSequenceNumber": 0,
+  "reward": 45.0,
+  "requiredPreviousCaseIds": [],
+  "unlocksNextCaseIds": [],
+  "lawBroken": "",
+  "suspects": [],
+  "culpritCitizenID": "",
+  "evidences": [],
+  "steps": [],
+  "verdictSchema": {
+    "sentenceTemplate": "I accuse {suspect} of {violation}.",
+    "slots": [
+      { "slotId": "suspect", "displayLabel": "Who", "type": "Suspect", "required": true, "optionSource": "CaseOnly" },
+      { "slotId": "violation", "displayLabel": "Crime", "type": "Violation", "required": true, "optionSource": "GlobalOnly" }
+    ],
+    "justification": { "required": true, "minRequired": 1 }
+  },
+  "solutions": []
+}

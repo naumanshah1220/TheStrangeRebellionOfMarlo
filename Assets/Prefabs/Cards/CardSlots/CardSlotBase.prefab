@@ -65,6 +65,10 @@ PrefabInstance:
       propertyPath: instantiateVisual
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 133173175211647385, guid: 38aa6ba35be5144dc931edb1e6e43818, type: 3}
+      propertyPath: fallbackBigCardPrefab
+      value: 
+      objectReference: {fileID: 5749132006840449694, guid: 57cd5b74809dd2446a60cc167bfae7c7, type: 3}
     - target: {fileID: 6964580406683806308, guid: 38aa6ba35be5144dc931edb1e6e43818, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5

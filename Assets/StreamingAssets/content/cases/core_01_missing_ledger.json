@@ -1,0 +1,207 @@
+{
+  "caseID": "core_01",
+  "title": "The Missing Ledger",
+  "description": "A critical government ledger tracking ration distribution has vanished from the Municipal Records Office. The Council demands answers — someone will be held accountable.",
+  "caseType": "Core",
+  "firstAvailableDay": 1,
+  "coreSequenceNumber": 1,
+  "reward": 75.0,
+  "requiredPreviousCaseIds": [],
+  "unlocksNextCaseIds": ["core_02"],
+
+  "cardImagePath": "Cases/core_01/card",
+
+  "lawBroken": "Obstruction of State Records (Pattern Violation §3.1)",
+  "extraRewardForState": 25.0,
+  "suspicionReduction": 0.0,
+  "involvesResistance": true,
+  "resistanceChoice": "Elena took the ledger to expose ration fraud. You can convict her or lose it in paperwork.",
+  "stateChoice": "Convict Elena as the Council expects. Quick, clean, rewarded.",
+
+  "minDiscoveredCluesToAllowCommit": 2,
+  "allowCommitWithLowConfidence": true,
+
+  "suspects": [
+    {
+      "citizenID": "citizen_elena",
+      "firstName": "Elena",
+      "lastName": "Vasquez",
+      "picturePath": "Portraits/citizen_elena",
+      "dateOfBirth": "03/15/1989",
+      "gender": "Female",
+      "ethnicity": "Hispanic",
+      "maritalStatus": "Single",
+      "address": "14 Birchwood Lane, Block C",
+      "occupation": "Records Clerk",
+      "nervousnessLevel": 0.6,
+      "isGuilty": true,
+      "criminalHistory": [],
+      "tagInteractions": [
+        {
+          "tagId": "missing_ledger",
+          "tagQuestion": "What do you know about the missing ledger?",
+          "responses": [
+            {
+              "responseSequence": ["I don't know what you're talking about.", "Lots of files go missing. It's a big office."],
+              "isLie": true,
+              "clickableClues": []
+            },
+            {
+              "responseSequence": ["I already told you. I don't know anything about any ledger."],
+              "isLie": true,
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": [],
+          "unlockedInitialResponseIfPreviouslyDenied": {
+            "responseSequence": ["Fine.", "I took it. But you don't understand — the numbers were wrong. They were starving Block D."],
+            "isLie": false,
+            "clickableClues": [
+              {
+                "clueId": "clue_elena_confession",
+                "clickableText": "I took it",
+                "noteText": "<person>Elena Vasquez</person> confessed to taking the <item>government ledger</item>",
+                "highlightColor": { "r": 1.0, "g": 0.92, "b": 0.0, "a": 1.0 },
+                "oneTimeOnly": true
+              },
+              {
+                "clueId": "clue_ration_fraud",
+                "clickableText": "starving Block D",
+                "noteText": "<person>Elena</person> claims the ledger revealed <location>Block D</location> was being deliberately under-rationed",
+                "highlightColor": { "r": 0.3, "g": 0.8, "b": 1.0, "a": 1.0 },
+                "oneTimeOnly": true
+              }
+            ]
+          }
+        },
+        {
+          "tagId": "elena_schedule",
+          "tagQuestion": "Where were you on the night of the 14th?",
+          "responses": [
+            {
+              "responseSequence": ["Home. I was home all night."],
+              "isLie": true,
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": ["missing_ledger"]
+        }
+      ]
+    },
+    {
+      "citizenID": "citizen_gregor",
+      "firstName": "Gregor",
+      "lastName": "Holtz",
+      "picturePath": "Portraits/citizen_gregor",
+      "dateOfBirth": "11/02/1975",
+      "gender": "Male",
+      "ethnicity": "Caucasian",
+      "maritalStatus": "Married",
+      "address": "7 Ironside Terrace, Block A",
+      "occupation": "Records Office Supervisor",
+      "nervousnessLevel": 0.2,
+      "isGuilty": false,
+      "criminalHistory": [
+        {
+          "offense": "Minor filing irregularity",
+          "date": "06/10/2022",
+          "description": "Late submission of quarterly reports",
+          "severity": "Minor"
+        }
+      ],
+      "tagInteractions": [
+        {
+          "tagId": "missing_ledger",
+          "tagQuestion": "The ledger went missing on your watch. Explain.",
+          "responses": [
+            {
+              "responseSequence": ["I run a tight ship. Someone must have taken it after hours.", "Check the access logs — I signed out at 17:00 sharp."],
+              "isLie": false,
+              "clickableClues": [
+                {
+                  "clueId": "clue_access_logs",
+                  "clickableText": "access logs",
+                  "noteText": "<person>Gregor Holtz</person> suggests checking the <item>access logs</item> for after-hours entry",
+                  "highlightColor": { "r": 1.0, "g": 0.92, "b": 0.0, "a": 1.0 },
+                  "oneTimeOnly": true
+                }
+              ]
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        }
+      ]
+    }
+  ],
+  "culpritCitizenID": "citizen_elena",
+
+  "evidences": [
+    {
+      "id": "ev_access_log",
+      "title": "Office Access Log",
+      "description": "The sign-in/sign-out sheet for the Municipal Records Office. Shows after-hours entry on the night of the 14th.",
+      "type": "Document",
+      "cardImagePath": "Evidence/core_01/ev_access_log_card"
+    },
+    {
+      "id": "ev_elena_note",
+      "title": "Handwritten Note",
+      "description": "A torn note found in Elena's desk: 'The numbers don't add up. Block D is getting half rations. Someone has to do something.'",
+      "type": "Document",
+      "cardImagePath": "Evidence/core_01/ev_elena_note_card"
+    }
+  ],
+
+  "steps": [
+    {
+      "stepId": "step_examine_evidence",
+      "stepNumber": 1,
+      "description": "Examine the physical evidence",
+      "requiredClueIds": [],
+      "unlockedClueIds": ["clue_access_logs"]
+    },
+    {
+      "stepId": "step_interrogate",
+      "stepNumber": 2,
+      "description": "Interrogate the suspects",
+      "requiredClueIds": ["clue_access_logs"],
+      "unlockedClueIds": []
+    }
+  ],
+
+  "verdictSchema": {
+    "sentenceTemplate": "I accuse {suspect} of {violation}.",
+    "slots": [
+      {
+        "slotId": "suspect",
+        "displayLabel": "Who",
+        "type": "Suspect",
+        "required": true,
+        "optionSource": "CaseOnly"
+      },
+      {
+        "slotId": "violation",
+        "displayLabel": "Crime",
+        "type": "Violation",
+        "required": true,
+        "optionSource": "GlobalOnly"
+      }
+    ],
+    "justification": {
+      "required": true,
+      "minRequired": 1
+    }
+  },
+
+  "solutions": [
+    {
+      "answers": [
+        { "slotId": "suspect", "acceptedOptionIds": ["citizen_elena"] },
+        { "slotId": "violation", "acceptedOptionIds": ["obstruction_of_records", "theft"] }
+      ],
+      "requiredJustificationTagIds": ["clue_elena_confession"],
+      "bonusJustificationTagIds": ["clue_ration_fraud"],
+      "minConfidenceToApprove": 80
+    }
+  ]
+}

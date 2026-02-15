@@ -65,12 +65,14 @@ MonoBehaviour:
   selected: 0
   selectionOffset: 25
   cardVisualPrefab: {fileID: 7310339964073049012, guid: bddd0263814164da396aa8d1438dd810, type: 3}
+  fallbackBigCardPrefab: {fileID: 0}
   cardVisual: {fileID: 0}
   bigCardVisual: {fileID: 0}
   mode: 0
   canBeSubmitted: 0
   isDragLocked: 0
   parentHolder: {fileID: 0}
+  homeHand: {fileID: 0}
   isHovering: 0
   isDragging: 0
   wasDragged: 0

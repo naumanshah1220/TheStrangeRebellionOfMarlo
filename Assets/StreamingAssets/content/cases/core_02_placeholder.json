@@ -1,0 +1,25 @@
+{
+  "caseID": "core_02",
+  "title": "Placeholder — Core Case 2",
+  "description": "Placeholder case. Replace with real content.",
+  "caseType": "Core",
+  "firstAvailableDay": 1,
+  "coreSequenceNumber": 2,
+  "reward": 80.0,
+  "requiredPreviousCaseIds": ["core_01"],
+  "unlocksNextCaseIds": ["core_03"],
+  "lawBroken": "",
+  "suspects": [],
+  "culpritCitizenID": "",
+  "evidences": [],
+  "steps": [],
+  "verdictSchema": {
+    "sentenceTemplate": "I accuse {suspect} of {violation}.",
+    "slots": [
+      { "slotId": "suspect", "displayLabel": "Who", "type": "Suspect", "required": true, "optionSource": "CaseOnly" },
+      { "slotId": "violation", "displayLabel": "Crime", "type": "Violation", "required": true, "optionSource": "GlobalOnly" }
+    ],
+    "justification": { "required": true, "minRequired": 1 }
+  },
+  "solutions": []
+}

@@ -287,6 +287,48 @@ public class BigCardVisual : MonoBehaviour//, IEvidenceDraggable
     public Transform GetTiltParent() => tiltParent;
     public Transform GetShakeParent() => shakeParent;
     
+    /// <summary>
+    /// Dynamically populates the fallback BigCardVisual with evidence data.
+    /// Sets the main image on page 0 and title/description text if found.
+    /// Called by Card.Initialize() when using the fallback prefab (no custom BigCardVisual).
+    /// </summary>
+    public void PopulateFromEvidence(Evidence evidence)
+    {
+        if (evidence == null) return;
+
+        // Find the first page
+        GameObject page0 = (pageObjects != null && pageObjects.Count > 0) ? pageObjects[0] : null;
+        if (page0 == null) return;
+
+        // Set the main image on page 0 (the page itself or a child named "EvidenceImage")
+        Image evidenceImage = null;
+
+        // First try a named child
+        var namedChild = page0.transform.Find("EvidenceImage");
+        if (namedChild != null)
+            evidenceImage = namedChild.GetComponent<Image>();
+
+        // Fall back to the Image on the page itself
+        if (evidenceImage == null)
+            evidenceImage = page0.GetComponent<Image>();
+
+        if (evidenceImage != null && evidence.cardImage != null)
+        {
+            evidenceImage.sprite = evidence.cardImage;
+            evidenceImage.preserveAspect = true;
+        }
+
+        // Try to set title/description text on page 0
+        var textComponents = page0.GetComponentsInChildren<TMPro.TMP_Text>(true);
+        if (textComponents.Length > 0)
+        {
+            // Use the first text component for title + description
+            textComponents[0].text = $"<b>{evidence.title}</b>\n\n{evidence.description}";
+        }
+
+        Debug.Log($"[BigCardVisual] Populated fallback from evidence '{evidence.id}': {evidence.title}");
+    }
+
     // Legacy API removed: GetDisplayImage()
 
     public void AnimateTilt(float zAngle, float duration = 0.3f)

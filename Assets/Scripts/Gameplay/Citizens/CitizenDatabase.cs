@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEngine;
 
@@ -7,10 +8,6 @@ public class CitizenDatabase : ScriptableObject
 {
     [Header("CSV Database")]
     [SerializeField] private bool loadFromCSV = true;
-    
-    [Header("ScriptableObject Citizens")]
-    [Tooltip("Citizens created as ScriptableObjects - these override CSV citizens with matching IDs")]
-    public List<Citizen> scriptableObjectCitizens = new List<Citizen>();
     
     [Header("Generic Questions & Responses")]
     [Tooltip("Generic questions used for all database citizens")]
@@ -37,6 +34,7 @@ public class CitizenDatabase : ScriptableObject
     // Runtime data
     private Dictionary<string, Citizen> citizenLookup;
     private List<DatabaseCitizen> databaseCitizens = new List<DatabaseCitizen>();
+    private List<Citizen> caseSuspects = new List<Citizen>();
     private bool isInitialized = false;
     
     private void OnEnable()
@@ -66,26 +64,26 @@ public class CitizenDatabase : ScriptableObject
         isInitialized = true;
         
         if (showDebugInfo)
-            Debug.Log($"[CitizenDatabase] Database initialization complete. Total citizens: {GetCitizenCount()} ({GetCSVCitizenCount()} CSV, {GetScriptableObjectCitizenCount()} ScriptableObject)");
+            Debug.Log($"[CitizenDatabase] Database initialization complete. Total citizens: {GetCitizenCount()} ({GetCSVCitizenCount()} CSV, {caseSuspects.Count} case suspects)");
     }
     
     /// <summary>
-    /// Load citizen data from CSV file
+    /// Load citizen data from CSV file in StreamingAssets
     /// </summary>
     private void LoadCitizenDataFromCSV()
     {
-        // Manually load CSV from Resources folder
-        TextAsset csvFile = Resources.Load<TextAsset>("citizens_database");
-        
-        if (csvFile == null)
+        string csvPath = Path.Combine(Application.streamingAssetsPath, "content", "citizens_database.csv");
+
+        if (!File.Exists(csvPath))
         {
-            Debug.LogError("[CitizenDatabase] Could not load CSV file from Resources/citizens_database.csv. Make sure the file exists at Assets/Resources/citizens_database.csv");
+            Debug.LogError($"[CitizenDatabase] Could not find CSV file at {csvPath}");
             return;
         }
-        
+
         try
         {
-            var csvData = CSVReader.Read(csvFile);
+            string csvText = File.ReadAllText(csvPath);
+            var csvData = CSVReader.Read(csvText);
             databaseCitizens.Clear();
             
             foreach (var row in csvData)
@@ -169,16 +167,11 @@ public class CitizenDatabase : ScriptableObject
             }
         }
         
-        // Then add/override with ScriptableObject citizens
-        foreach (var citizen in scriptableObjectCitizens)
+        // Then add/override with case suspects
+        foreach (var citizen in caseSuspects)
         {
             if (citizen != null && !string.IsNullOrEmpty(citizen.citizenID))
             {
-                if (citizenLookup.ContainsKey(citizen.citizenID))
-                {
-                    if (showDebugInfo)
-                        Debug.Log($"[CitizenDatabase] ScriptableObject citizen {citizen.FullName} overriding CSV citizen with ID: {citizen.citizenID}");
-                }
                 citizenLookup[citizen.citizenID] = citizen;
             }
         }
@@ -250,7 +243,7 @@ public class CitizenDatabase : ScriptableObject
     }
     
     /// <summary>
-    /// Get all citizens (both CSV and ScriptableObject)
+    /// Get all citizens (CSV + case suspects)
     /// </summary>
     public List<Citizen> GetAllCitizens()
     {
@@ -331,57 +324,26 @@ public class CitizenDatabase : ScriptableObject
     }
     
     /// <summary>
-    /// Add a new ScriptableObject citizen to the database
+    /// Merge suspects from loaded cases into the citizen lookup.
+    /// Call this after cases are loaded (e.g. from CaseManager.Start).
     /// </summary>
-    public void AddScriptableObjectCitizen(Citizen citizen)
+    public void MergeCaseSuspects(IReadOnlyList<Case> cases)
     {
-        if (citizen == null)
+        caseSuspects.Clear();
+        foreach (var c in cases)
         {
-            Debug.LogError("[CitizenDatabase] Cannot add null citizen");
-            return;
+            if (c?.suspects == null) continue;
+            foreach (var suspect in c.suspects)
+            {
+                if (suspect != null && !string.IsNullOrEmpty(suspect.citizenID))
+                    caseSuspects.Add(suspect);
+            }
         }
-        
-        if (string.IsNullOrEmpty(citizen.citizenID))
-        {
-            Debug.LogError("[CitizenDatabase] Cannot add citizen without ID");
-            return;
-        }
-        
-        // Check if citizen already exists in ScriptableObject list
-        if (scriptableObjectCitizens.Any(c => c.citizenID == citizen.citizenID))
-        {
-            Debug.LogError($"[CitizenDatabase] ScriptableObject citizen with ID {citizen.citizenID} already exists");
-            return;
-        }
-        
-        scriptableObjectCitizens.Add(citizen);
+
         BuildLookupDictionary();
-        
-        if (showDebugInfo)
-            Debug.Log($"[CitizenDatabase] Added ScriptableObject citizen: {citizen.FullName} ({citizen.citizenID})");
+        Debug.Log($"[CitizenDatabase] Merged {caseSuspects.Count} case suspect(s) into database (total: {citizenLookup.Count}).");
     }
-    
-    /// <summary>
-    /// Remove a ScriptableObject citizen from the database
-    /// </summary>
-    public bool RemoveScriptableObjectCitizen(string citizenId)
-    {
-        var citizen = scriptableObjectCitizens.FirstOrDefault(c => c.citizenID == citizenId);
-        if (citizen != null)
-        {
-            scriptableObjectCitizens.Remove(citizen);
-            BuildLookupDictionary();
-            
-            if (showDebugInfo)
-                Debug.Log($"[CitizenDatabase] Removed ScriptableObject citizen: {citizen.FullName} ({citizenId})");
-            return true;
-        }
-        
-        if (showDebugInfo)
-            Debug.LogWarning($"[CitizenDatabase] Could not find ScriptableObject citizen to remove: {citizenId}");
-        return false;
-    }
-    
+
     /// <summary>
     /// Get total number of citizens
     /// </summary>
@@ -389,21 +351,13 @@ public class CitizenDatabase : ScriptableObject
     {
         return GetAllCitizens().Count;
     }
-    
+
     /// <summary>
     /// Get number of CSV citizens
     /// </summary>
     public int GetCSVCitizenCount()
     {
         return databaseCitizens.Count;
-    }
-    
-    /// <summary>
-    /// Get number of ScriptableObject citizens
-    /// </summary>
-    public int GetScriptableObjectCitizenCount()
-    {
-        return scriptableObjectCitizens.Count;
     }
     
     /// <summary>
@@ -420,7 +374,7 @@ public class CitizenDatabase : ScriptableObject
             BuildLookupDictionary();
             
             if (showDebugInfo)
-                Debug.Log($"[CitizenDatabase] CSV data reloaded. Total citizens: {GetCitizenCount()} ({GetCSVCitizenCount()} CSV, {GetScriptableObjectCitizenCount()} ScriptableObject)");
+                Debug.Log($"[CitizenDatabase] CSV data reloaded. Total citizens: {GetCitizenCount()} ({GetCSVCitizenCount()} CSV, {caseSuspects.Count} case suspects)");
         }
         else
         {
@@ -440,7 +394,7 @@ public class CitizenDatabase : ScriptableObject
     private void RebuildDatabaseMenu()
     {
         InitializeDatabase();
-        Debug.Log($"[CitizenDatabase] Database rebuilt. {GetCitizenCount()} total citizens ({GetCSVCitizenCount()} CSV, {GetScriptableObjectCitizenCount()} ScriptableObject)");
+        Debug.Log($"[CitizenDatabase] Database rebuilt. {GetCitizenCount()} total citizens ({GetCSVCitizenCount()} CSV, {caseSuspects.Count} case suspects)");
     }
     
     [ContextMenu("Reload CSV Data")]

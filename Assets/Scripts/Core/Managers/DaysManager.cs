@@ -67,6 +67,48 @@ public class DaysManager : SingletonMonoBehaviour<DaysManager>
 
         if (!caseManager || !newspaperManager || !progressionManager)
             Debug.LogError("Required managers not found!");
+
+        LoadDayScheduleFromJson();
+    }
+
+    /// <summary>
+    /// Merges day schedule from JSON manifest into dayCaseSettings.
+    /// For days that exist in both Inspector and JSON, JSON values override.
+    /// For days only in Inspector, they're kept as-is.
+    /// </summary>
+    private void LoadDayScheduleFromJson()
+    {
+        var result = ContentLoader.LoadAllContent();
+        if (result?.manifest?.daySchedule == null || result.manifest.daySchedule.Count == 0)
+            return;
+
+        if (dayCaseSettings == null)
+            dayCaseSettings = new List<DayCaseSettings>();
+
+        int merged = 0;
+        foreach (var entry in result.manifest.daySchedule)
+        {
+            var existing = dayCaseSettings.Find(s => s.day == entry.day);
+            if (existing != null)
+            {
+                // JSON overrides Inspector for this day
+                existing.maxCasesForDay = entry.maxCasesForDay;
+                existing.maxCoreCases = entry.maxCoreCases;
+                existing.minSecondaryCases = entry.minSecondaryCases;
+            }
+            else
+            {
+                dayCaseSettings.Add(new DayCaseSettings
+                {
+                    day = entry.day,
+                    maxCasesForDay = entry.maxCasesForDay,
+                    maxCoreCases = entry.maxCoreCases,
+                    minSecondaryCases = entry.minSecondaryCases
+                });
+            }
+            merged++;
+        }
+        Debug.Log($"[DaysManager] Merged {merged} day schedule(s) from JSON manifest.");
     }
 
     private void Update()
