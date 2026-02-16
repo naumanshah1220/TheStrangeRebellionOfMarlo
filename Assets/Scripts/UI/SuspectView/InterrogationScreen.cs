@@ -364,14 +364,14 @@ public class InterrogationScreen : MonoBehaviour
             suspectManager.SetMonitorSuspectAnimationState(SuspectAnimationState.Idle);
         }
         
+        // End the interrogation logic (clears currentSuspectId, chat, stress panel, etc.)
+        if (interrogationManager != null)
+        {
+            interrogationManager.EndInterrogation();
+        }
+
         // Hide interrogation UI
         HideInterrogationUI();
-        
-        // Hide the chat drop zone since interrogation is ending
-        if (interrogationManager != null && interrogationManager.chatManager != null)
-        {
-            interrogationManager.chatManager.HideDropZoneImmediate();
-        }
         
         // Update button appearance for toggle state
         UpdateInterrogateButtonAppearance(false);

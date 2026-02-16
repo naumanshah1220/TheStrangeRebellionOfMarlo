@@ -1,0 +1,53 @@
+{
+  "days": [
+    {
+      "day": 1,
+      "headline": "",
+      "subheadline": "",
+      "familyLetter": {
+        "from": "Lena",
+        "body": "Marlo,\n\nThe children are excited about your new position. Eli keeps telling his friends that his father catches criminals. I didn't correct him.\n\nWe believe in you. Come home safe.\n\n\u2014 Lena"
+      },
+      "unlockNotices": [],
+      "caseOutcomeHeadlines": []
+    },
+    {
+      "day": 2,
+      "headline": "COUNCIL APPROVES NEW SURVEILLANCE MEASURES",
+      "subheadline": "Citizens urged to report pattern violations in their districts",
+      "familyLetter": {
+        "from": "Lena",
+        "body": "Marlo,\n\nWe're running low on a few things. The ration cards only stretch so far this month. Eli needs new shoes \u2014 he's growing so fast.\n\nDon't work too late. The children miss you at dinner.\n\n\u2014 Lena"
+      },
+      "unlockNotices": [],
+      "caseOutcomeHeadlines": [
+        {
+          "caseId": "core_01",
+          "headlineIfSolved": "PATTERN VIOLATION RESOLVED: LEDGER THIEF APPREHENDED",
+          "headlineIfUnsolved": "MISSING LEDGER CASE GROWS COLD \u2014 BUREAU UNDER SCRUTINY",
+          "priority": 2
+        }
+      ]
+    },
+    {
+      "day": 3,
+      "headline": "DISTRICT 7 CURFEW EXTENDED AFTER UNREST",
+      "subheadline": "Council spokesperson: 'Order will be maintained at all costs'",
+      "familyLetter": {
+        "from": "Lena",
+        "body": "Marlo,\n\nThere was a disturbance in the market today. Soldiers everywhere. The children were frightened.\n\nI told them everything is fine. Is everything fine?\n\nPlease be careful.\n\n\u2014 Lena"
+      },
+      "unlockNotices": [
+        "SPECTROGRAPH ACCESS GRANTED \u2014 Chemical analysis now available"
+      ],
+      "caseOutcomeHeadlines": [
+        {
+          "caseId": "core_02",
+          "headlineIfSolved": "SECOND PATTERN OFFENDER IDENTIFIED THROUGH BUREAU ANALYSIS",
+          "headlineIfUnsolved": "UNSOLVED CASES MOUNT AS BUREAU RESOURCES STRAINED",
+          "priority": 2
+        }
+      ]
+    }
+  ]
+}

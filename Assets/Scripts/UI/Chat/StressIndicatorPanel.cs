@@ -13,6 +13,7 @@ public class StressIndicatorPanel : MonoBehaviour
     [SerializeField] private HeartbeatLine heartbeatLine;
     [SerializeField] private Image stressBarFill;
     [SerializeField] private TextMeshProUGUI zoneLabel;
+    [SerializeField] private GameObject toneSelectorPanel;
 
     [Header("Bar Settings")]
     [SerializeField] private float barLerpSpeed = 5f;
@@ -40,6 +41,13 @@ public class StressIndicatorPanel : MonoBehaviour
     {
         if (InterrogationManager.Instance != null)
             InterrogationManager.Instance.OnSuspectChanged += OnSuspectChanged;
+
+        // Start hidden — will show when a suspect is actively interrogated
+        wasActive = false;
+        if (heartbeatLine != null) heartbeatLine.enabled = false;
+        if (stressBarFill != null) stressBarFill.gameObject.SetActive(false);
+        if (zoneLabel != null) zoneLabel.gameObject.SetActive(false);
+        if (toneSelectorPanel != null) toneSelectorPanel.SetActive(false);
     }
 
     private void OnDisable()
@@ -50,13 +58,27 @@ public class StressIndicatorPanel : MonoBehaviour
         barColorTween?.Kill();
     }
 
+    private bool wasActive;
+
     private void Update()
     {
         var conversation = InterrogationManager.Instance != null
             ? InterrogationManager.Instance.GetCurrentConversation()
             : null;
 
-        if (conversation == null || conversation.citizen == null) return;
+        bool hasActiveSuspect = conversation != null && conversation.citizen != null;
+
+        // Hide/show the entire panel based on whether we have an active suspect
+        if (hasActiveSuspect != wasActive)
+        {
+            wasActive = hasActiveSuspect;
+            if (heartbeatLine != null) heartbeatLine.enabled = hasActiveSuspect;
+            if (stressBarFill != null) stressBarFill.gameObject.SetActive(hasActiveSuspect);
+            if (zoneLabel != null) zoneLabel.gameObject.SetActive(hasActiveSuspect);
+            if (toneSelectorPanel != null) toneSelectorPanel.SetActive(hasActiveSuspect);
+        }
+
+        if (!hasActiveSuspect) return;
 
         float stress = conversation.citizen.CurrentStress;
         StressZone zone = conversation.citizen.GetCurrentStressZone();

@@ -21,6 +21,14 @@
   "minDiscoveredCluesToAllowCommit": 2,
   "allowCommitWithLowConfidence": true,
 
+  "clueVerdictMappings": [
+    { "clueId": "clue_access_logs", "slotId": "violation", "optionId": "trespassing", "label": "Trespassing" },
+    { "clueId": "clue_elena_after_hours", "slotId": "violation", "optionId": "unauthorized_access", "label": "Unauthorized Access" },
+    { "clueId": "clue_elena_confession", "slotId": "violation", "optionId": "obstruction_of_records", "label": "Obstruction of Records" },
+    { "clueId": "clue_elena_confession", "slotId": "violation", "optionId": "theft", "label": "Theft of State Property" },
+    { "clueId": "clue_ration_discrepancy", "slotId": "violation", "optionId": "fraud", "label": "Ration Fraud" }
+  ],
+
   "suspects": [
     {
       "citizenID": "citizen_elena",
@@ -39,17 +47,21 @@
       "criminalHistory": [],
       "tagInteractions": [
         {
-          "tagId": "missing_ledger",
-          "tagQuestion": "What do you know about the missing ledger?",
+          "tagId": "clue_access_logs",
+          "tagQuestion": "Tell me about this after-hours entry in the access log.",
           "responses": [
             {
               "responseSequence": ["I don't know what you're talking about.", "Lots of files go missing. It's a big office."],
               "isLie": true,
+              "stressImpact": 0.08,
+              "responseType": "Evasive",
               "clickableClues": []
             },
             {
               "responseSequence": ["I already told you. I don't know anything about any ledger."],
               "isLie": true,
+              "stressImpact": 0.12,
+              "responseType": "Defensive",
               "clickableClues": []
             }
           ],
@@ -57,6 +69,8 @@
           "unlockedInitialResponseIfPreviouslyDenied": {
             "responseSequence": ["Fine.", "I took it. But you don't understand — the numbers were wrong. They were starving Block D."],
             "isLie": false,
+            "stressImpact": 0.15,
+            "responseType": "Emotional",
             "clickableClues": [
               {
                 "clueId": "clue_elena_confession",
@@ -76,16 +90,18 @@
           }
         },
         {
-          "tagId": "elena_schedule",
-          "tagQuestion": "Where were you on the night of the 14th?",
+          "tagId": "clue_gregor_signout",
+          "tagQuestion": "Gregor signed out at 17:00. Where were you after that?",
           "responses": [
             {
               "responseSequence": ["Home. I was home all night."],
               "isLie": true,
+              "stressImpact": 0.1,
+              "responseType": "Evasive",
               "clickableClues": []
             }
           ],
-          "unlocksTruthForTagIds": ["missing_ledger"],
+          "unlocksTruthForTagIds": ["clue_access_logs"],
           "contradictedByEvidenceTagIds": ["clue_access_logs"],
           "contradictionResponse": {
             "responseSequence": ["Where did you get that?", "Fine... I was at the office. I went back after hours."],
@@ -117,6 +133,70 @@
               "weight": 1.0
             }
           ]
+        },
+        {
+          "tagId": "clue_ration_discrepancy",
+          "tagQuestion": "Block D is getting half rations. What do you know about that?",
+          "responses": [
+            {
+              "responseSequence": ["How do you know about that?", "The numbers were wrong. Someone in the Council office was skimming rations from Block D. I saw it in the ledger."],
+              "isLie": false,
+              "stressImpact": 0.12,
+              "responseType": "Emotional",
+              "clickableClues": [
+                {
+                  "clueId": "clue_ration_fraud",
+                  "clickableText": "skimming rations",
+                  "noteText": "<person>Elena</person> confirms that someone in the <location>Council office</location> was diverting rations meant for <location>Block D</location>",
+                  "highlightColor": { "r": 0.3, "g": 0.8, "b": 1.0, "a": 1.0 },
+                  "oneTimeOnly": true
+                }
+              ]
+            }
+          ],
+          "unlocksTruthForTagIds": ["clue_access_logs"]
+        },
+        {
+          "tagId": "clue_elena_after_hours",
+          "tagQuestion": "You were at the Records Office after hours on the 14th. What were you doing there?",
+          "responses": [
+            {
+              "responseSequence": ["I already told you. I went back because something didn't sit right about the ration numbers.", "I needed to check the ledger. I couldn't sleep knowing what I'd seen."],
+              "isLie": false,
+              "stressImpact": 0.05,
+              "responseType": "Emotional",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": ["clue_access_logs"]
+        },
+        {
+          "tagId": "clue_elena_confession",
+          "tagQuestion": "You confessed to taking the ledger. Why should I believe anything else you say?",
+          "responses": [
+            {
+              "responseSequence": ["Because I'm telling the truth about why.", "The rations were being stolen from Block D. I'm not a criminal — I did what I had to do."],
+              "isLie": false,
+              "stressImpact": 0.06,
+              "responseType": "Emotional",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        },
+        {
+          "tagId": "clue_ration_fraud",
+          "tagQuestion": "You say there's ration fraud. Can you prove it?",
+          "responses": [
+            {
+              "responseSequence": ["The proof was in the ledger! That's the whole point.", "Why do you think I took it? Someone had to do something before more people starved."],
+              "isLie": false,
+              "stressImpact": 0.08,
+              "responseType": "Emotional",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": []
         }
       ],
       "lawyeredUpResponses": [
@@ -160,21 +240,93 @@
       ],
       "tagInteractions": [
         {
-          "tagId": "missing_ledger",
-          "tagQuestion": "The ledger went missing on your watch. Explain.",
+          "tagId": "clue_access_logs",
+          "tagQuestion": "The access log shows someone entered after hours. Know anything about that?",
           "responses": [
             {
               "responseSequence": ["I run a tight ship. Someone must have taken it after hours.", "Check the access logs — I signed out at 17:00 sharp."],
               "isLie": false,
+              "stressImpact": 0.04,
+              "responseType": "Normal",
               "clickableClues": [
                 {
-                  "clueId": "clue_access_logs",
-                  "clickableText": "access logs",
-                  "noteText": "<person>Gregor Holtz</person> suggests checking the <item>access logs</item> for after-hours entry",
+                  "clueId": "clue_gregor_signout",
+                  "clickableText": "signed out at 17:00",
+                  "noteText": "<person>Gregor Holtz</person> signed out at 17:00 sharp — his alibi checks out",
                   "highlightColor": { "r": 1.0, "g": 0.92, "b": 0.0, "a": 1.0 },
                   "oneTimeOnly": true
                 }
               ]
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        },
+        {
+          "tagId": "clue_gregor_signout",
+          "tagQuestion": "You signed out at 17:00. Can anyone confirm that?",
+          "responses": [
+            {
+              "responseSequence": ["Of course. The security guard saw me leave. I went straight home.", "I've worked there fifteen years. Never stayed past closing."],
+              "isLie": false,
+              "stressImpact": 0.04,
+              "responseType": "Normal",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        },
+        {
+          "tagId": "clue_ration_discrepancy",
+          "tagQuestion": "Block D is getting half rations. Did you know about that?",
+          "responses": [
+            {
+              "responseSequence": ["I file what they give me. I don't set the numbers.", "If something's off in the rations, that's above my pay grade."],
+              "isLie": false,
+              "stressImpact": 0.04,
+              "responseType": "Normal",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        },
+        {
+          "tagId": "clue_elena_after_hours",
+          "tagQuestion": "Elena was at the Records Office after hours. Did you know about that?",
+          "responses": [
+            {
+              "responseSequence": ["She was? I had no idea. The office should have been locked.", "That's concerning. I always secure the building myself when I leave."],
+              "isLie": false,
+              "stressImpact": 0.04,
+              "responseType": "Normal",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        },
+        {
+          "tagId": "clue_elena_confession",
+          "tagQuestion": "Elena confessed to taking the ledger. What do you make of that?",
+          "responses": [
+            {
+              "responseSequence": ["Elena? She's one of my best clerks. I can't believe she'd do something like that.", "This is going to come down on my head, isn't it? Missing ledger under my watch..."],
+              "isLie": false,
+              "stressImpact": 0.06,
+              "responseType": "Normal",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        },
+        {
+          "tagId": "clue_ration_fraud",
+          "tagQuestion": "Elena says someone in the Council is stealing rations. Heard anything about that?",
+          "responses": [
+            {
+              "responseSequence": ["That's a dangerous accusation. If it's true, it goes way above my level.", "I process paperwork. I don't question what comes from the Council. It's not worth the risk."],
+              "isLie": false,
+              "stressImpact": 0.04,
+              "responseType": "Normal",
+              "clickableClues": []
             }
           ],
           "unlocksTruthForTagIds": []
@@ -205,14 +357,45 @@
       "title": "Office Access Log",
       "description": "The sign-in/sign-out sheet for the Municipal Records Office. Shows after-hours entry on the night of the 14th.",
       "type": "Document",
-      "cardImagePath": "Evidence/core_01/ev_access_log_card"
+      "cardImagePath": "Evidence/core_01/ev_access_log_card",
+      "hotspots": [
+        {
+          "clueId": "clue_access_logs",
+          "noteText": "The <item>access log</item> shows someone entered the <location>Records Office</location> at 23:14 on the night of the 14th — well after closing time",
+          "pageIndex": 0,
+          "positionX": 0.5,
+          "positionY": 0.3,
+          "width": 0.6,
+          "height": 0.12
+        },
+        {
+          "clueId": "clue_gregor_signout",
+          "noteText": "<person>Gregor Holtz</person> signed out at 17:00 sharp — his alibi checks out",
+          "pageIndex": 0,
+          "positionX": 0.5,
+          "positionY": 0.55,
+          "width": 0.6,
+          "height": 0.12
+        }
+      ]
     },
     {
       "id": "ev_elena_note",
       "title": "Handwritten Note",
       "description": "A torn note found in Elena's desk: 'The numbers don't add up. Block D is getting half rations. Someone has to do something.'",
       "type": "Document",
-      "cardImagePath": "Evidence/core_01/ev_elena_note_card"
+      "cardImagePath": "Evidence/core_01/ev_elena_note_card",
+      "hotspots": [
+        {
+          "clueId": "clue_ration_discrepancy",
+          "noteText": "A handwritten note mentions that <location>Block D</location> is receiving only half of its allocated rations — someone has been tampering with the numbers",
+          "pageIndex": 0,
+          "positionX": 0.5,
+          "positionY": 0.4,
+          "width": 0.7,
+          "height": 0.15
+        }
+      ]
     }
   ],
 
@@ -248,7 +431,7 @@
         "displayLabel": "Crime",
         "type": "Violation",
         "required": true,
-        "optionSource": "GlobalOnly"
+        "optionSource": "FromDiscoveredTags"
       }
     ],
     "justification": {

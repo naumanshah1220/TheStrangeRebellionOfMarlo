@@ -33,10 +33,11 @@ public class InterrogationDropZone : MonoBehaviour, IPointerEnterHandler, IPoint
     private Color originalFrameColor;
     private string currentTagContent = "";
     private string currentTagType = "";
+    private string currentTagId = "";
     private GameObject droppedTagObject; // Keep reference to the dropped tag
-    
+
     // Events
-    public System.Action<string, string, string> OnTagDroppedEvent; // content, type, questionText
+    public System.Action<string, string, string, string> OnTagDroppedEvent; // content, type, questionText, tagId
     
     [Header("Manager Reference")]
     public InterrogationManager interrogationManager;
@@ -54,20 +55,20 @@ public class InterrogationDropZone : MonoBehaviour, IPointerEnterHandler, IPoint
     /// <summary>
     /// Update prompt text based on tag being dragged
     /// </summary>
-    public void UpdatePromptForTag(string tagContent, string tagType)
+    public void UpdatePromptForTag(string tagContent, string tagType, string tagId = null)
     {
         if (interrogationManager == null) return;
-        
+
         // Get current suspect
         string currentSuspectId = interrogationManager.CurrentSuspectId;
         if (string.IsNullOrEmpty(currentSuspectId)) return;
-        
+
         // Find the citizen data
         var conversation = interrogationManager.GetCurrentConversation();
         if (conversation?.citizen == null) return;
-        
-        // Get the appropriate question for this tag
-        string questionText = conversation.citizen.GetQuestionForTag(tagContent, tagType);
+
+        // Get the appropriate question for this tag — use tagId for lookup, tagContent for display
+        string questionText = conversation.citizen.GetQuestionForTag(tagId ?? tagContent, tagType, tagContent);
         
         // Update prompt text
         if (promptText != null)
@@ -125,6 +126,7 @@ public class InterrogationDropZone : MonoBehaviour, IPointerEnterHandler, IPoint
         // Store tag information
         currentTagContent = tag.GetTagContent();
         currentTagType = tag.GetTagType();
+        currentTagId = tag.GetTagID() ?? currentTagContent;
         hasDroppedTag = true;
         
         // Clean up any existing dropped tag first
@@ -147,7 +149,7 @@ public class InterrogationDropZone : MonoBehaviour, IPointerEnterHandler, IPoint
                 var conversation = interrogationManager.GetCurrentConversation();
                 if (conversation?.citizen != null)
                 {
-                    questionText = conversation.citizen.GetQuestionForTag(currentTagContent, currentTagType);
+                    questionText = conversation.citizen.GetQuestionForTag(currentTagId, currentTagType, currentTagContent);
                     Debug.Log($"[InterrogationDropZone] Using fallback question: '{questionText}'");
                 }
             }
@@ -180,7 +182,7 @@ public class InterrogationDropZone : MonoBehaviour, IPointerEnterHandler, IPoint
         UpdatePromptText();
         
         // Trigger event
-        OnTagDroppedEvent?.Invoke(currentTagContent, currentTagType, questionText);
+        OnTagDroppedEvent?.Invoke(currentTagContent, currentTagType, questionText, currentTagId);
         
         Debug.Log($"[InterrogationDropZone] Tag dropped: {currentTagContent} ({currentTagType})");
     }
@@ -201,6 +203,7 @@ public class InterrogationDropZone : MonoBehaviour, IPointerEnterHandler, IPoint
         hasDroppedTag = false;
         currentTagContent = "";
         currentTagType = "";
+        currentTagId = "";
         
         SetFrameColor(originalFrameColor);
         UpdatePromptText();

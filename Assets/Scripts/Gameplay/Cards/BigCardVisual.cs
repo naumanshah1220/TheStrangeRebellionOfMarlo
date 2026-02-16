@@ -290,11 +290,15 @@ public class BigCardVisual : MonoBehaviour//, IEvidenceDraggable
     /// <summary>
     /// Dynamically populates the fallback BigCardVisual with evidence data.
     /// Sets the main image on page 0 and title/description text if found.
+    /// Also creates clickable Clue hotspots from JSON-defined hotspot data.
     /// Called by Card.Initialize() when using the fallback prefab (no custom BigCardVisual).
     /// </summary>
     public void PopulateFromEvidence(Evidence evidence)
     {
         if (evidence == null) return;
+
+        // Remove any existing placeholder Clue components from the prefab
+        ClearExistingClues();
 
         // Find the first page
         GameObject page0 = (pageObjects != null && pageObjects.Count > 0) ? pageObjects[0] : null;
@@ -326,7 +330,84 @@ public class BigCardVisual : MonoBehaviour//, IEvidenceDraggable
             textComponents[0].text = $"<b>{evidence.title}</b>\n\n{evidence.description}";
         }
 
-        Debug.Log($"[BigCardVisual] Populated fallback from evidence '{evidence.id}': {evidence.title}");
+        // Create clickable Clue hotspots from JSON data
+        if (evidence.hotspots != null && evidence.hotspots.Count > 0)
+        {
+            CreateHotspotsFromData(evidence);
+        }
+
+        Debug.Log($"[BigCardVisual] Populated fallback from evidence '{evidence.id}': {evidence.title} ({evidence.hotspots?.Count ?? 0} hotspot(s))");
+    }
+
+    /// <summary>
+    /// Removes any Clue components baked into the prefab (e.g., placeholders from editor authoring).
+    /// Called before populating from JSON evidence data to avoid stale/irrelevant clues.
+    /// </summary>
+    private void ClearExistingClues()
+    {
+        if (cluesOnCard == null || cluesOnCard.Length == 0) return;
+
+        int cleared = 0;
+        foreach (var clue in cluesOnCard)
+        {
+            if (clue != null)
+            {
+                Destroy(clue.gameObject);
+                cleared++;
+            }
+        }
+        cluesOnCard = new Clue[0];
+        if (cleared > 0)
+            Debug.Log($"[BigCardVisual] Cleared {cleared} existing placeholder clue(s) from prefab.");
+    }
+
+    /// <summary>
+    /// Creates clickable Clue buttons on the evidence card from JSON-defined hotspot data.
+    /// Each hotspot is positioned using normalized coordinates within the page's RectTransform.
+    /// </summary>
+    private void CreateHotspotsFromData(Evidence evidence)
+    {
+        foreach (var hotspot in evidence.hotspots)
+        {
+            int pageIdx = hotspot.pageIndex;
+            if (pageIdx < 0 || pageIdx >= pageObjects.Count)
+            {
+                Debug.LogWarning($"[BigCardVisual] Hotspot '{hotspot.clueId}' targets page {pageIdx} but only {pageObjects.Count} page(s) exist.");
+                continue;
+            }
+
+            var page = pageObjects[pageIdx];
+            var pageRect = page.GetComponent<RectTransform>();
+            if (pageRect == null) continue;
+
+            // Create hotspot button as child of the page
+            var hotspotGO = new GameObject($"Hotspot_{hotspot.clueId}", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+            hotspotGO.transform.SetParent(page.transform, false);
+
+            // Position using anchors (normalized coordinates)
+            var rect = hotspotGO.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(hotspot.positionX - hotspot.width / 2f, hotspot.positionY - hotspot.height / 2f);
+            rect.anchorMax = new Vector2(hotspot.positionX + hotspot.width / 2f, hotspot.positionY + hotspot.height / 2f);
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+
+            // Semi-transparent highlight (visible but subtle)
+            var image = hotspotGO.GetComponent<Image>();
+            image.color = new Color(1f, 0.92f, 0f, 0.15f); // faint yellow tint
+            image.raycastTarget = true;
+
+            // Add the Clue component
+            var clue = hotspotGO.AddComponent<Clue>();
+            clue.clueID = hotspot.clueId;
+            clue.noteText = hotspot.noteText;
+            clue.pageNumber = pageIdx;
+            clue.hideAfterFound = false; // keep visible so player knows they found it
+
+            Debug.Log($"[BigCardVisual] Created hotspot '{hotspot.clueId}' on page {pageIdx} at ({hotspot.positionX}, {hotspot.positionY})");
+        }
+
+        // Refresh the cluesOnCard array since we added new Clue components
+        cluesOnCard = GetComponentsInChildren<Clue>(true);
     }
 
     // Legacy API removed: GetDisplayImage()

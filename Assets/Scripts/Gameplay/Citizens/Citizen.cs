@@ -438,12 +438,13 @@ public class Citizen : ScriptableObject
     }
     
     /// <summary>
-    /// Get the question text for a specific tag (for dynamic prompt updates)
+    /// Get the question text for a specific tag (for dynamic prompt updates).
+    /// Uses tagId for interaction lookup but displayName for generic question templates.
     /// </summary>
-    public string GetQuestionForTag(string tagId, string tagType)
+    public string GetQuestionForTag(string tagId, string tagType, string displayName = null)
     {
         TagInteraction interaction = GetTagInteraction(tagId);
-        
+
         if (interaction != null)
         {
             // Use specific question
@@ -451,26 +452,26 @@ public class Citizen : ScriptableObject
         }
         else
         {
-            // Use generic question for this tag type
-            return GetGenericQuestion(tagId, tagType);
+            // Use generic question — show the human-readable display name, not the raw ID
+            return GetGenericQuestion(displayName ?? tagId, tagType);
         }
     }
-    
+
     /// <summary>
     /// Get a generic question for a tag type
     /// </summary>
-    public string GetGenericQuestion(string tagId, string tagType)
+    public string GetGenericQuestion(string displayName, string tagType)
     {
         foreach (var genericQuestion in genericQuestions)
         {
             if (genericQuestion.tagType.Equals(tagType, System.StringComparison.OrdinalIgnoreCase))
             {
-                return genericQuestion.GetRandomQuestion(tagId);
+                return genericQuestion.GetRandomQuestion(displayName);
             }
         }
-        
+
         // Fallback if tag type not found
-        return $"Tell me about '{tagId}'";
+        return $"Tell me about '{displayName}'";
     }
     
     /// <summary>

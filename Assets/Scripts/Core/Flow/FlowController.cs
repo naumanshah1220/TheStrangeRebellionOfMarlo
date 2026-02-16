@@ -27,6 +27,7 @@ public class FlowController : SingletonMonoBehaviour<FlowController>
     private PlayerProgressManager playerProgress;
 
     private NightSummaryData currentNightData;
+    private DaysBriefingDataJson daysJsonData;
 
     [Header("Debug")]
     [Tooltip("When true, skip flow panels and let debug buttons drive the game (old behavior).")]
@@ -54,6 +55,9 @@ public class FlowController : SingletonMonoBehaviour<FlowController>
             return;
         }
 
+        // Load JSON content for lore and days
+        LoadJsonContent();
+
         CurrentDay = FlowBootstrap.ContinueFromDay;
 
         if (FlowBootstrap.ShouldShowSlideshow)
@@ -64,6 +68,27 @@ public class FlowController : SingletonMonoBehaviour<FlowController>
         {
             BeginDayBriefing();
         }
+    }
+
+    private void LoadJsonContent()
+    {
+        var content = ContentLoader.LoadAllContent();
+        if (content == null) return;
+
+        // Build SlideshowData from JSON if available (fallback to inspector-assigned)
+        if (content.loreData != null && content.loreData.slides != null && content.loreData.slides.Count > 0)
+        {
+            var jsonSlideshow = SlideshowData.CreateFromJson(content.loreData);
+            if (jsonSlideshow != null)
+                slideshowData = jsonSlideshow;
+        }
+
+        // Store days data for building DayBriefingData each day
+        daysJsonData = content.daysData;
+
+        // Feed newspaper headlines from JSON
+        if (newspaperManager != null && content.daysData != null)
+            newspaperManager.LoadFromJson(content.daysData);
     }
 
     private void SetFlowState(FlowState newState)
@@ -95,22 +120,65 @@ public class FlowController : SingletonMonoBehaviour<FlowController>
     {
         SetFlowState(FlowState.DayBriefing);
 
-        // Get headline for today (based on yesterday's cases)
-        string headline = "";
-        if (newspaperManager != null && daysManager != null && CurrentDay > 1)
-        {
-            headline = newspaperManager.GetHeadlineForDay(CurrentDay, daysManager.todaysClosedCases);
-        }
+        var briefingData = BuildDayBriefingData();
 
         if (dayBriefingPanel != null)
         {
-            dayBriefingPanel.Show(CurrentDay, headline, () => BeginWorkday());
+            dayBriefingPanel.Show(briefingData, () => BeginWorkday());
         }
         else
         {
             // No panel — go straight to workday
             BeginWorkday();
         }
+    }
+
+    private DayBriefingData BuildDayBriefingData()
+    {
+        var data = new DayBriefingData
+        {
+            dayNumber = CurrentDay,
+            headline = "",
+            subheadline = "",
+            letterFrom = "",
+            letterBody = "",
+            unlockNotices = new List<string>()
+        };
+
+        // Get headline from NewspaperManager (handles case outcome overrides)
+        if (newspaperManager != null && daysManager != null && CurrentDay > 1)
+        {
+            data.headline = newspaperManager.GetHeadlineForDay(CurrentDay, daysManager.todaysClosedCases);
+        }
+
+        // Fill from JSON days data if available
+        if (daysJsonData != null && daysJsonData.days != null)
+        {
+            var dayJson = daysJsonData.days.Find(d => d.day == CurrentDay);
+            if (dayJson != null)
+            {
+                // Subheadline from JSON
+                if (!string.IsNullOrEmpty(dayJson.subheadline))
+                    data.subheadline = dayJson.subheadline;
+
+                // If headline wasn't set by NewspaperManager (day 1 or no override), use JSON default
+                if (string.IsNullOrEmpty(data.headline) && !string.IsNullOrEmpty(dayJson.headline))
+                    data.headline = dayJson.headline;
+
+                // Family letter
+                if (dayJson.familyLetter != null)
+                {
+                    data.letterFrom = dayJson.familyLetter.from ?? "";
+                    data.letterBody = dayJson.familyLetter.body ?? "";
+                }
+
+                // Unlock notices
+                if (dayJson.unlockNotices != null)
+                    data.unlockNotices = new List<string>(dayJson.unlockNotices);
+            }
+        }
+
+        return data;
     }
 
     public void BeginWorkday()

@@ -19,6 +19,8 @@ public static class ContentLoader
     {
         public ContentManifest manifest;
         public List<Case> cases = new List<Case>();
+        public LoreJson loreData;
+        public DaysBriefingDataJson daysData;
     }
 
     // Cache so multiple callers (CaseManager.Awake, DaysManager.Start) don't re-read files
@@ -79,13 +81,17 @@ public static class ContentLoader
 
         var result = new ContentLoadResult { manifest = manifest };
 
+        string contentDir = Path.Combine(Application.streamingAssetsPath, ContentRoot);
+
+        // Load lore and days data
+        result.loreData = LoadLore(contentDir, manifest.lore, settings);
+        result.daysData = LoadDays(contentDir, manifest.days, settings);
+
         if (manifest.cases == null)
         {
             _cachedResult = result;
             return result;
         }
-
-        string contentDir = Path.Combine(Application.streamingAssetsPath, ContentRoot);
 
         foreach (string casePath in manifest.cases)
         {
@@ -113,6 +119,58 @@ public static class ContentLoader
 
         _cachedResult = result;
         return result;
+    }
+
+    // ── Lore / Days loading ─────────────────────────────────────
+
+    private static LoreJson LoadLore(string contentDir, string lorePath, JsonSerializerSettings settings)
+    {
+        if (string.IsNullOrEmpty(lorePath)) return null;
+
+        string fullPath = Path.Combine(contentDir, lorePath);
+        if (!File.Exists(fullPath))
+        {
+            Debug.LogWarning($"[ContentLoader] Lore file not found: {lorePath}");
+            return null;
+        }
+
+        try
+        {
+            string json = File.ReadAllText(fullPath);
+            var lore = JsonConvert.DeserializeObject<LoreJson>(json, settings);
+            Debug.Log($"[ContentLoader] Loaded lore with {lore?.slides?.Count ?? 0} slide(s).");
+            return lore;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[ContentLoader] Failed to parse lore: {e.Message}");
+            return null;
+        }
+    }
+
+    private static DaysBriefingDataJson LoadDays(string contentDir, string daysPath, JsonSerializerSettings settings)
+    {
+        if (string.IsNullOrEmpty(daysPath)) return null;
+
+        string fullPath = Path.Combine(contentDir, daysPath);
+        if (!File.Exists(fullPath))
+        {
+            Debug.LogWarning($"[ContentLoader] Days file not found: {daysPath}");
+            return null;
+        }
+
+        try
+        {
+            string json = File.ReadAllText(fullPath);
+            var days = JsonConvert.DeserializeObject<DaysBriefingDataJson>(json, settings);
+            Debug.Log($"[ContentLoader] Loaded days data with {days?.days?.Count ?? 0} day(s).");
+            return days;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[ContentLoader] Failed to parse days: {e.Message}");
+            return null;
+        }
     }
 
     // ── Case conversion ──────────────────────────────────────────
@@ -171,6 +229,22 @@ public static class ContentLoader
         c.solutions = ConvertSolutions(json.solutions);
         c.minDiscoveredCluesToAllowCommit = json.minDiscoveredCluesToAllowCommit;
         c.allowCommitWithLowConfidence = json.allowCommitWithLowConfidence;
+
+        // Clue-to-verdict mappings
+        c.clueVerdictMappings = new List<ClueVerdictMapping>();
+        if (json.clueVerdictMappings != null)
+        {
+            foreach (var m in json.clueVerdictMappings)
+            {
+                c.clueVerdictMappings.Add(new ClueVerdictMapping
+                {
+                    clueId = m.clueId,
+                    slotId = m.slotId,
+                    optionId = m.optionId,
+                    label = m.label
+                });
+            }
+        }
 
         // Visuals
         c.cardImage = ResourceResolver.LoadSprite(json.cardImagePath);
@@ -298,6 +372,9 @@ public static class ContentLoader
                 if (appConfig != null)
                     SetPrivateField(ev, "associatedApp", appConfig);
             }
+
+            // Hotspots
+            ev.hotspots = ConvertHotspots(ej.hotspots);
 
             result.Add(ev);
         }
@@ -552,6 +629,29 @@ public static class ContentLoader
             }
 
             result[i] = solution;
+        }
+        return result;
+    }
+
+    // ── Hotspot conversion ─────────────────────────────────────
+
+    private static List<EvidenceHotspot> ConvertHotspots(List<EvidenceHotspotJson> jsonList)
+    {
+        var result = new List<EvidenceHotspot>();
+        if (jsonList == null) return result;
+
+        foreach (var hj in jsonList)
+        {
+            result.Add(new EvidenceHotspot
+            {
+                clueId = hj.clueId,
+                noteText = hj.noteText,
+                pageIndex = hj.pageIndex,
+                positionX = hj.positionX,
+                positionY = hj.positionY,
+                width = hj.width,
+                height = hj.height
+            });
         }
         return result;
     }

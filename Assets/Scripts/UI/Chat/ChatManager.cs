@@ -141,12 +141,12 @@ public class ChatManager : MonoBehaviour
     /// <summary>
     /// Handle tag dropped on the interrogation zone
     /// </summary>
-    private void HandleTagDropped(string tagContent, string tagType, string questionText)
+    private void HandleTagDropped(string tagContent, string tagType, string questionText, string tagId)
     {
         if (isProcessingMessage) return;
-        
+
         // Use the question text directly passed from the drop zone
-        StartCoroutine(ProcessChatSequence(questionText, tagContent));
+        StartCoroutine(ProcessChatSequence(questionText, tagContent, tagId));
     }
     
     /// <summary>
@@ -186,28 +186,28 @@ public class ChatManager : MonoBehaviour
     /// <summary>
     /// Process the complete chat sequence (drop zone -> player message -> thinking -> response)
     /// </summary>
-    private IEnumerator ProcessChatSequence(string questionText, string tagContent)
+    private IEnumerator ProcessChatSequence(string questionText, string tagContent, string tagId = null)
     {
         isProcessingMessage = true;
-        
+
         // 1. Hide the drop zone with animation
         yield return StartCoroutine(HideDropZone());
-        
+
         // 2. Show player message with animation
         yield return StartCoroutine(ShowPlayerMessage(questionText));
-        
+
         // 3. Show thinking message
         yield return StartCoroutine(ShowThinkingMessage());
-        
+
         // 4. Trigger the response processing directly (instead of using event that causes duplicate processing)
         // Don't use OnPlayerMessageSent event as it causes duplicate processing in InterrogationManager
-        
-        // Process the response directly through InterrogationManager using internal method
+
+        // Process the response directly through InterrogationManager using tag ID for lookup
         if (InterrogationManager.Instance != null)
         {
-            InterrogationManager.Instance.ProcessTagResponseDirectly(tagContent);
+            InterrogationManager.Instance.ProcessTagResponseDirectly(tagId ?? tagContent);
         }
-        
+
         // Wait for response (this will be controlled externally)
         // The response will call ShowSuspectResponse when ready
     }

@@ -31,6 +31,45 @@ public class NewspaperManager : SingletonMonoBehaviour<NewspaperManager>
             Debug.LogError("CaseManager not found in NewspaperManager!");
     }
 
+    /// <summary>
+    /// Loads day headlines from JSON data. Replaces inspector-configured data.
+    /// Inspector data is kept as fallback if no JSON is provided.
+    /// </summary>
+    public void LoadFromJson(DaysBriefingDataJson data)
+    {
+        if (data == null || data.days == null) return;
+
+        var jsonHeadlines = new List<DayHeadline>();
+        foreach (var dayJson in data.days)
+        {
+            var dh = new DayHeadline
+            {
+                day = dayJson.day,
+                defaultHeadline = dayJson.headline ?? "",
+                caseOutcomes = new List<CaseOutcomeHeadline>()
+            };
+
+            if (dayJson.caseOutcomeHeadlines != null)
+            {
+                foreach (var co in dayJson.caseOutcomeHeadlines)
+                {
+                    dh.caseOutcomes.Add(new CaseOutcomeHeadline
+                    {
+                        caseId = co.caseId,
+                        headlineIfSolved = co.headlineIfSolved,
+                        headlineIfUnsolved = co.headlineIfUnsolved,
+                        priority = co.priority
+                    });
+                }
+            }
+
+            jsonHeadlines.Add(dh);
+        }
+
+        dayHeadlines = jsonHeadlines;
+        Debug.Log($"[NewspaperManager] Loaded {jsonHeadlines.Count} day headline(s) from JSON.");
+    }
+
     public string GetHeadlineForDay(int day, List<Case> yesterdaysCases)
     {
         var dayHeadline = dayHeadlines.Find(d => d.day == day);

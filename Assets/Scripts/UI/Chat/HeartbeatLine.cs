@@ -75,7 +75,8 @@ public class HeartbeatLine : MaskableGraphic
             writeIndex = (writeIndex + 1) % sampleCount;
         }
 
-        SetVerticesDirty();
+        if (wholeSamples > 0)
+            SetVerticesDirty();
     }
 
     private float EvaluateECG(float t)

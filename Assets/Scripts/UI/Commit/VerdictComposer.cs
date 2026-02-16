@@ -36,6 +36,9 @@ namespace Detective.UI.Commit
         private bool isBuilt = false;
         private bool isRestoringState = false;
 
+        // Tracks option lists for FromDiscoveredTags slots so new clues can inject options
+        private Dictionary<string, List<VerdictOption>> discoveredTagSlotOptions = new Dictionary<string, List<VerdictOption>>();
+
         public IEnumerator BuildFromCase(Case caseData, CaseVerdict draftVerdict)
         {
             if (isBuilt)
@@ -135,6 +138,9 @@ namespace Detective.UI.Commit
         {
             suspectPortraitSlot.GoToPanel(0);
         }
+
+            // Subscribe to clue discovery so FromDiscoveredTags slots update dynamically
+            GameEvents.OnClueDiscovered += OnClueDiscovered;
 
             isBuilt = true;
             OnVerdictStateChanged?.Invoke(); // Let controller know we have an initial state
@@ -270,25 +276,131 @@ namespace Detective.UI.Commit
             GameObject slotGO = Instantiate(genericSlotPrefab, slotsContainer);
             var slotUI = slotGO.GetComponent<IVerdictSlot>();
             var options = new List<VerdictOption>();
-            if (schema.globalPools != null)
+
+            if (def.optionSource == OptionSource.FromDiscoveredTags)
             {
-                foreach(var pool in schema.globalPools)
-                {
-                    // Important: The original logic was flawed. We need to filter the pool's options.
-                    if (pool != null && pool.options != null)
-                    {
-                        options.AddRange(pool.options.Where(opt => opt.type == def.type));
-                    }
-                }
+                // Build options only from clues the player has already discovered
+                options = BuildOptionsFromDiscoveredClues(def);
+                // Track this list so OnClueDiscovered can add to it later
+                discoveredTagSlotOptions[def.slotId] = options;
+                if (showDebugLogs) Debug.Log($"[VerdictComposer] FromDiscoveredTags slot '{def.displayLabel}': {options.Count} option(s) from already-discovered clues.");
             }
             else
             {
-                 if (showDebugLogs) Debug.LogWarning($"[VerdictComposer] The Verdict Schema '{schema.name}' has no Global Pools assigned. Generic slots will have no options.");
+                if (schema.globalPools != null)
+                {
+                    foreach(var pool in schema.globalPools)
+                    {
+                        if (pool != null && pool.options != null)
+                        {
+                            options.AddRange(pool.options.Where(opt => opt.type == def.type));
+                        }
+                    }
+                }
+
+                // Fallback: if no options found from globalPools, extract from case solutions
+                if (options.Count == 0 && currentCase.solutions != null)
+                {
+                    var seen = new HashSet<string>();
+                    foreach (var solution in currentCase.solutions)
+                    {
+                        if (solution.answers == null) continue;
+                        var slotAnswer = solution.answers.Find(a => a.slotId == def.slotId);
+                        if (slotAnswer == null || slotAnswer.acceptedOptionIds == null) continue;
+
+                        foreach (string optionId in slotAnswer.acceptedOptionIds)
+                        {
+                            if (seen.Add(optionId))
+                            {
+                                options.Add(new VerdictOption
+                                {
+                                    id = optionId,
+                                    label = FormatOptionLabel(optionId),
+                                    type = def.type
+                                });
+                            }
+                        }
+                    }
+                    if (showDebugLogs && options.Count > 0)
+                        Debug.Log($"[VerdictComposer] Extracted {options.Count} option(s) from case solutions for slot '{def.displayLabel}'.");
+                }
+
+                if (options.Count == 0 && showDebugLogs)
+                    Debug.LogWarning($"[VerdictComposer] No options found for slot '{def.displayLabel}' ({def.type}). Check globalPools or case solutions.");
             }
-            
+
             if (showDebugLogs) Debug.Log($"[VerdictComposer] Found {options.Count} options for slot type '{def.type}'. Populating slot '{def.displayLabel}'.");
             slotUI.Populate(def, options);
             return slotUI;
+        }
+
+        /// <summary>
+        /// Builds verdict options from clueVerdictMappings for clues the player has already discovered.
+        /// </summary>
+        private List<VerdictOption> BuildOptionsFromDiscoveredClues(VerdictSlotDefinition def)
+        {
+            var options = new List<VerdictOption>();
+            if (currentCase.clueVerdictMappings == null) return options;
+
+            var cluesManager = CluesManager.Instance;
+            var seen = new HashSet<string>();
+
+            foreach (var mapping in currentCase.clueVerdictMappings)
+            {
+                if (mapping.slotId != def.slotId) continue;
+                if (seen.Contains(mapping.optionId)) continue;
+                if (cluesManager != null && cluesManager.IsClueFound(mapping.clueId))
+                {
+                    seen.Add(mapping.optionId);
+                    options.Add(new VerdictOption
+                    {
+                        id = mapping.optionId,
+                        label = mapping.label,
+                        type = def.type
+                    });
+                }
+            }
+            return options;
+        }
+
+        /// <summary>
+        /// Called when a clue is discovered. Adds new verdict options to FromDiscoveredTags slots.
+        /// </summary>
+        private void OnClueDiscovered(string clueId)
+        {
+            if (currentCase?.clueVerdictMappings == null) return;
+
+            foreach (var mapping in currentCase.clueVerdictMappings)
+            {
+                if (mapping.clueId != clueId) continue;
+                if (!discoveredTagSlotOptions.TryGetValue(mapping.slotId, out var optionsList)) continue;
+
+                // Don't add duplicate options
+                if (optionsList.Any(o => o.id == mapping.optionId)) continue;
+
+                // Find the slot definition to get the type
+                var slotDef = schema.slots.Find(s => s.slotId == mapping.slotId);
+                var slotType = slotDef != null ? slotDef.type : VerdictSlotType.Violation;
+
+                optionsList.Add(new VerdictOption
+                {
+                    id = mapping.optionId,
+                    label = mapping.label,
+                    type = slotType
+                });
+
+                if (showDebugLogs) Debug.Log($"[VerdictComposer] Clue '{clueId}' revealed verdict option '{mapping.label}' for slot '{mapping.slotId}'.");
+            }
+        }
+
+        /// <summary>
+        /// Converts an option ID like "obstruction_of_records" into a readable label "Obstruction Of Records".
+        /// </summary>
+        private static string FormatOptionLabel(string optionId)
+        {
+            if (string.IsNullOrEmpty(optionId)) return optionId;
+            return System.Globalization.CultureInfo.InvariantCulture.TextInfo
+                .ToTitleCase(optionId.Replace('_', ' '));
         }
 
         public void RefreshSentence()
@@ -314,6 +426,10 @@ namespace Detective.UI.Commit
         {
             isBuilt = false;
             if (justificationDropZone != null) justificationDropZone.Clear();
+
+            // Unsubscribe from clue discovery events
+            GameEvents.OnClueDiscovered -= OnClueDiscovered;
+            discoveredTagSlotOptions.Clear();
 
             // --- IMPORTANT: Unsubscribe from all events before destroying objects ---
 
@@ -407,6 +523,11 @@ namespace Detective.UI.Commit
         private void HandleSlotChange()
         {
             OnVerdictStateChanged?.Invoke();
+        }
+
+        private void OnDestroy()
+        {
+            GameEvents.OnClueDiscovered -= OnClueDiscovered;
         }
     }
 }

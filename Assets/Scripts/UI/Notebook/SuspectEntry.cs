@@ -161,7 +161,9 @@ public class SuspectEntry : MonoBehaviour
         suspectData.lastName = citizen.lastName;
         
         // Mark all fields as complete for pre-assigned suspects
-        suspectData.hasPortrait = citizen.picture != null;
+        // Portrait: if no sprite was loaded, still mark as "has" for pre-assigned suspects
+        // (they'll show the unknown/placeholder portrait but won't block interrogation)
+        suspectData.hasPortrait = true;
         suspectData.hasCitizenId = !string.IsNullOrEmpty(citizen.citizenID);
         suspectData.hasFirstName = !string.IsNullOrEmpty(citizen.firstName);
         suspectData.hasLastName = !string.IsNullOrEmpty(citizen.lastName);

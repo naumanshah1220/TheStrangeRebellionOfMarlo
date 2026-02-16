@@ -14,6 +14,8 @@ public class ContentManifest
     public string version;
     public List<DayScheduleEntry> daySchedule;
     public List<string> cases;
+    public string lore;
+    public string days;
 }
 
 [System.Serializable]
@@ -72,9 +74,21 @@ public class CaseJson
     public int minDiscoveredCluesToAllowCommit = 3;
     public bool allowCommitWithLowConfidence = true;
 
+    // Clue → Verdict option mappings (which clues reveal which verdict options)
+    public List<ClueVerdictMappingJson> clueVerdictMappings;
+
     // Visuals
     public string cardImagePath;
     public string fullCardPrefabPath;
+}
+
+[System.Serializable]
+public class ClueVerdictMappingJson
+{
+    public string clueId;
+    public string slotId;
+    public string optionId;
+    public string label;
 }
 
 // ── Citizen ───────────────────────────────────────────────────────
@@ -152,6 +166,23 @@ public class EvidenceJson
 
     // Disc evidence
     public string associatedAppId;
+
+    // Hotspots (clickable clue regions on the evidence card)
+    public List<EvidenceHotspotJson> hotspots;
+}
+
+// ── Evidence Hotspots ────────────────────────────────────────────
+
+[System.Serializable]
+public class EvidenceHotspotJson
+{
+    public string clueId;
+    public string noteText;
+    public int pageIndex;
+    public float positionX = 0.5f;  // normalized 0-1
+    public float positionY = 0.5f;  // normalized 0-1
+    public float width = 0.3f;      // normalized 0-1
+    public float height = 0.1f;     // normalized 0-1
 }
 
 // ── Dialogue / Interrogation ─────────────────────────────────────
@@ -286,4 +317,55 @@ public class SlotAnswerJson
 {
     public string slotId;
     public string[] acceptedOptionIds;
+}
+
+// ── Lore Slideshow ──────────────────────────────────────────────
+
+[System.Serializable]
+public class LoreJson
+{
+    public List<LoreSlideJson> slides = new List<LoreSlideJson>();
+}
+
+[System.Serializable]
+public class LoreSlideJson
+{
+    public string title;
+    public string bodyText;
+    public string backgroundImagePath;
+}
+
+// ── Day Briefing ────────────────────────────────────────────────
+
+[System.Serializable]
+public class DaysBriefingDataJson
+{
+    public List<DayBriefingJson> days = new List<DayBriefingJson>();
+}
+
+[System.Serializable]
+public class DayBriefingJson
+{
+    public int day;
+    public string headline;
+    public string subheadline;
+    public FamilyLetterJson familyLetter;
+    public List<string> unlockNotices = new List<string>();
+    public List<CaseOutcomeHeadlineJson> caseOutcomeHeadlines = new List<CaseOutcomeHeadlineJson>();
+}
+
+[System.Serializable]
+public class FamilyLetterJson
+{
+    public string from;
+    public string body;
+}
+
+[System.Serializable]
+public class CaseOutcomeHeadlineJson
+{
+    public string caseId;
+    public string headlineIfSolved;
+    public string headlineIfUnsolved;
+    public int priority = 1;
 }

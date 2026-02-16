@@ -43,6 +43,7 @@ public class Case : ScriptableObject, ICardData
     public CaseSolution[] solutions; // allow variants
     public int minDiscoveredCluesToAllowCommit = 3;
     public bool allowCommitWithLowConfidence = true; // but penalize
+    public List<ClueVerdictMapping> clueVerdictMappings = new List<ClueVerdictMapping>();
 
     [Header("Visuals")]
     public Sprite cardImage;

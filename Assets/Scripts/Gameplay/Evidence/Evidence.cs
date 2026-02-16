@@ -16,6 +16,9 @@ public class Evidence : ScriptableObject, ICardData
     [Header("Spectrograph")]
     [SerializeField] public ForeignSubstanceType foreignSubstance = ForeignSubstanceType.None;
     
+    [Header("Hotspots (JSON-driven clue regions)")]
+    public List<EvidenceHotspot> hotspots = new List<EvidenceHotspot>();
+
     [Header("Disk Evidence Settings")]
     [SerializeField] private AppConfig associatedApp;
     public bool HasAssociatedApp => type == EvidenceType.Disc && associatedApp != null;

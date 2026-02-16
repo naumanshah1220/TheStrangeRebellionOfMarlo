@@ -1,5 +1,7 @@
 {
   "version": "1.0",
+  "lore": "lore.json",
+  "days": "days.json",
   "daySchedule": [
     { "day": 1, "maxCasesForDay": 8, "maxCoreCases": 5, "minSecondaryCases": 1 },
     { "day": 2, "maxCasesForDay": 8, "maxCoreCases": 5, "minSecondaryCases": 2 },

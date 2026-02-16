@@ -428,8 +428,9 @@ public class DraggableTag : MonoBehaviour, IBeginDragHandler, IDragHandler, IEnd
         if (conversation?.citizen == null) 
             return $"Tell me about '{tagContent}'";
         
-        // Get the appropriate question for this tag (this will cache the random question)
-        return conversation.citizen.GetQuestionForTag(tagContent, tagType);
+        // Get the appropriate question for this tag — prefer tagId for interaction lookup, tagContent for display
+        string lookupId = !string.IsNullOrEmpty(tagId) ? tagId : tagContent;
+        return conversation.citizen.GetQuestionForTag(lookupId, tagType, tagContent);
     }
     
     private void AnimateToDropZone(GameObject dropZoneObject)

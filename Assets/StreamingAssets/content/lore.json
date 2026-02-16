@@ -1,0 +1,29 @@
+{
+  "slides": [
+    {
+      "title": "The Pattern",
+      "bodyText": "In the year of the Great Correction, the Council declared that all human failing could be traced to seven root behaviors. They called these behaviors The Pattern \u2014 a doctrine of order imposed upon every citizen.\n\nPride. Greed. Lust. Envy. Gluttony. Wrath. Sloth.\n\nNo longer sins of the soul \u2014 now crimes of the state.",
+      "backgroundImagePath": ""
+    },
+    {
+      "title": "The Council",
+      "bodyText": "The Council rules from the Capital Spire, unseen but omnipresent. Their edicts flow through every bureau, every checkpoint, every surveillance node.\n\nCompliance is measured. Loyalty is tracked. Deviation is catalogued.\n\nThe Council does not punish \u2014 it corrects. And correction begins with documentation.",
+      "backgroundImagePath": ""
+    },
+    {
+      "title": "The Bureau of Pattern Analysis",
+      "bodyText": "Within the sprawling bureaucracy, one office holds particular weight: the Bureau of Pattern Analysis.\n\nIts analysts examine evidence, interrogate suspects, and determine which citizens have deviated from The Pattern. Their indictments carry the force of law.\n\nThe Bureau does not judge. It classifies.",
+      "backgroundImagePath": ""
+    },
+    {
+      "title": "Analyst Marlo",
+      "bodyText": "You are Marlo. Pattern Analyst, Third Class.\n\nYou have a desk. A set of tools. A stack of cases that arrives each morning.\n\nYou have a family that depends on your salary. A landlord who depends on your rent. And a regime that depends on your compliance.\n\nYour job is simple: process the cases. Find the pattern violations. File the indictments.",
+      "backgroundImagePath": ""
+    },
+    {
+      "title": "Day One",
+      "bodyText": "The morning bell rings at 06:00. Your terminal flickers to life.\n\nA stack of case files sits on your desk. Each one contains evidence, witness statements, and suspect profiles. Your tools are ready \u2014 the database, the fingerprint duster, the spectrograph.\n\nExamine. Interrogate. Indict.\n\nThe Council is watching. Your family is counting on you.\n\nBegin.",
+      "backgroundImagePath": ""
+    }
+  ]
+}
