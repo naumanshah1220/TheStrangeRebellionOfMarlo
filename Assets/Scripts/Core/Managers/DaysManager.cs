@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,9 +15,17 @@ public class DayCaseSettings
     public int minSecondaryCases = 1;   // Minimum secondary cases to maintain
 }
 
+public enum OvertimeState
+{
+    None,
+    Warning,       // 18:00-19:00
+    Final,         // 19:00-20:00
+    Terminated     // 20:00+
+}
+
 public class DaysManager : SingletonMonoBehaviour<DaysManager>
 {
-    
+
     [Header("Day Settings")]
     [Range(1, 20)] public int currentDay = 1;
     public int totalDays = 20;
@@ -34,6 +43,10 @@ public class DaysManager : SingletonMonoBehaviour<DaysManager>
     private float currentGameHour;
     private float timeElapsed = 0f;
     private bool isDayActive = false;
+
+    [Header("Overtime Settings")]
+    public float overtimeWarningHour = 19f;
+    public float overtimeFinalHour = 20f;
 
     [Header("UI References")]
     public GameObject newspaperPanel;
@@ -57,6 +70,19 @@ public class DaysManager : SingletonMonoBehaviour<DaysManager>
     public Queue<Case> unassignedCases = new Queue<Case>();   // Queued up for later
 
     private List<Case> unsolvedCasesFromPreviousDay = new List<Case>();
+
+    // --- Day Results ---
+    public DayResults currentDayResults;
+    public DayResults previousDayResults;
+
+    // --- Overtime ---
+    public OvertimeState CurrentOvertimeState { get; private set; } = OvertimeState.None;
+    private bool overtimeActive = false;
+
+    // Overtime events
+    public event Action OnOvertimeStarted;
+    public event Action<OvertimeState> OnOvertimeEscalated;
+    public event Action OnOvertimeTerminated;
 
     private void Start()
     {
@@ -147,13 +173,20 @@ public class DaysManager : SingletonMonoBehaviour<DaysManager>
         currentGameHour = startHour;
         isDayActive = true;
 
+        // Reset overtime
+        CurrentOvertimeState = OvertimeState.None;
+        overtimeActive = false;
+
+        // Initialize day results
+        currentDayResults = new DayResults { dayNumber = currentDay };
+
         // Get settings for the day
         var settings = GetSettingsForDay(currentDay);
         int maxSimultaneous = progressionManager.GetCurrentMaxSimultaneousCases();
 
         // Get available cases from CaseManager, excluding carried over cases
         var availableCases = caseManager.GetAvailableCasesForDay(currentDay, settings.maxCasesForDay, settings.minSecondaryCases);
-        
+
         // Split available cases into core and secondary
         var coreCases = availableCases.FindAll(c => c.caseType == CaseType.Core);
         var secondaryCases = availableCases.FindAll(c => c.caseType == CaseType.Secondary);
@@ -233,12 +266,20 @@ public class DaysManager : SingletonMonoBehaviour<DaysManager>
             }
         }
 
+        // If a case is still open on the mat from the previous day, don't re-deal it into the hand
+        var openCase = GameManager.Instance?.CurrentCase;
+        if (openCase != null)
+        {
+            todaysPendingCases.Remove(openCase);
+            Debug.Log($"[DaysManager] Excluded open case '{openCase.title}' from hand — still on mat");
+        }
+
         onDayStart?.Invoke();
 
         var carriedOverCount = unsolvedCasesFromPreviousDay.Count;
         var newCoreCount = todaysTotalCases.Count(c => c.caseType == CaseType.Core && !unsolvedCasesFromPreviousDay.Contains(c));
         var newSecondaryCount = todaysTotalCases.Count(c => c.caseType == CaseType.Secondary && !unsolvedCasesFromPreviousDay.Contains(c));
-        
+
         Debug.Log($"Day {currentDay} started with {todaysTotalCases.Count} total cases:\n" +
                   $"- {carriedOverCount} carried over from previous day\n" +
                   $"- {newCoreCount} new core cases\n" +
@@ -267,12 +308,77 @@ public class DaysManager : SingletonMonoBehaviour<DaysManager>
         timeElapsed += Time.deltaTime;
         currentGameHour = startHour + (timeElapsed / realSecondsPerGameHour);
 
-        // End day if all cases are solved or time is up
-        if (currentGameHour >= endHour || 
-            (todaysPendingCases.Count == 0 && unassignedCases.Count == 0))
+        // Check if all work is done
+        if (todaysPendingCases.Count == 0 && unassignedCases.Count == 0)
         {
             EndDay();
+            return;
         }
+
+        // Check for overtime transitions
+        bool hasRemainingCoreCases = HasPendingCoreCases();
+
+        if (currentGameHour >= endHour && hasRemainingCoreCases)
+        {
+            // Enter or escalate overtime
+            UpdateOvertime();
+        }
+        else if (currentGameHour >= endHour && !hasRemainingCoreCases)
+        {
+            // Past end hour but no core cases remaining — end normally
+            EndDay();
+        }
+    }
+
+    private void UpdateOvertime()
+    {
+        OvertimeState newState;
+
+        if (currentGameHour >= overtimeFinalHour)
+            newState = OvertimeState.Terminated;
+        else if (currentGameHour >= overtimeWarningHour)
+            newState = OvertimeState.Final;
+        else
+            newState = OvertimeState.Warning;
+
+        if (newState != CurrentOvertimeState)
+        {
+            var previousState = CurrentOvertimeState;
+            CurrentOvertimeState = newState;
+
+            if (previousState == OvertimeState.None)
+            {
+                overtimeActive = true;
+                Debug.Log("[DaysManager] OVERTIME STARTED — core cases remain after end of day");
+                OnOvertimeStarted?.Invoke();
+            }
+
+            Debug.Log($"[DaysManager] Overtime escalated: {previousState} → {newState}");
+            OnOvertimeEscalated?.Invoke(newState);
+
+            if (newState == OvertimeState.Terminated)
+            {
+                Debug.Log("[DaysManager] OVERTIME TERMINATED — forced end of day");
+                OnOvertimeTerminated?.Invoke();
+                EndDay();
+            }
+        }
+    }
+
+    private bool HasPendingCoreCases()
+    {
+        foreach (var c in todaysPendingCases)
+        {
+            if (c.caseType == CaseType.Core)
+                return true;
+        }
+        // Also check unassigned queue
+        foreach (var c in unassignedCases)
+        {
+            if (c.caseType == CaseType.Core)
+                return true;
+        }
+        return false;
     }
 
     public string GetTimeString()
@@ -281,12 +387,12 @@ public class DaysManager : SingletonMonoBehaviour<DaysManager>
         int minutes = Mathf.FloorToInt((currentGameHour - hours) * 60);
         return $"{hours:D2}:{minutes:D2}";
     }
-    
+
     public float GetCurrentGameHour()
     {
         return currentGameHour;
     }
-    
+
     public bool IsDayActive()
     {
         return isDayActive;
@@ -302,15 +408,37 @@ public class DaysManager : SingletonMonoBehaviour<DaysManager>
         if (!todaysClosedCases.Contains(closedCase))
         {
             todaysClosedCases.Add(closedCase);
-            TodaysEarnings += closedCase.reward;
+
+            // Rewards are now deferred — tracked in CaseResult, delivered next morning as bonus.
+            // TodaysEarnings only tracks base salary (set in FlowController).
             caseManager.MarkCaseSolved(closedCase.caseID);
 
             // Update progression
             progressionManager.ProcessCaseCompletion(closedCase.caseID);
 
+            // If we were in overtime and all core cases are now done, end the day
+            if (overtimeActive && !HasPendingCoreCases())
+            {
+                Debug.Log("[DaysManager] All core cases completed during overtime — ending day");
+                EndDay();
+                return;
+            }
+
             // Try to assign a new case immediately if we have room
             TryQueueNextCase();
         }
+    }
+
+    /// <summary>
+    /// Store a CaseResult from verdict evaluation. Called by GameManager.OnCaseSubmitted().
+    /// </summary>
+    public void RecordCaseResult(CaseResult result)
+    {
+        if (currentDayResults == null)
+            currentDayResults = new DayResults { dayNumber = currentDay };
+
+        currentDayResults.caseResults.Add(result);
+        Debug.Log($"[DaysManager] Recorded case result: {result.caseTitle} — confidence {result.confidenceScore:F0}%, reward ${result.reward:F0}");
     }
 
     public void TryQueueNextCase()
@@ -330,18 +458,36 @@ public class DaysManager : SingletonMonoBehaviour<DaysManager>
 
     public void EndDay()
     {
+        if (!isDayActive) return; // Guard against double-end
         isDayActive = false;
 
-        // Check if any core cases are still pending
-        bool hasUnsolvedCoreCases = false;
+        // Finalize overtime tracking
+        if (overtimeActive && currentDayResults != null)
+        {
+            currentDayResults.hadOvertime = true;
+            currentDayResults.overtimeHours = Mathf.Max(0f, currentGameHour - endHour);
+        }
+
+        // Count unfinished core cases
+        int unfinishedCore = 0;
         foreach (var c in todaysPendingCases)
         {
             if (c.caseType == CaseType.Core)
-            {
-                hasUnsolvedCoreCases = true;
-                break;
-            }
+                unfinishedCore++;
         }
+        foreach (var c in unassignedCases)
+        {
+            if (c.caseType == CaseType.Core)
+                unfinishedCore++;
+        }
+
+        if (currentDayResults != null)
+        {
+            currentDayResults.unfinishedCoreCount = unfinishedCore;
+            currentDayResults.FinalizeResults();
+        }
+
+        bool hasUnsolvedCoreCases = unfinishedCore > 0;
 
         if (hasUnsolvedCoreCases)
         {
@@ -352,6 +498,9 @@ public class DaysManager : SingletonMonoBehaviour<DaysManager>
         {
             onDayEnd?.Invoke();
         }
+
+        // Move current results to previous (for next-morning bonus letter)
+        previousDayResults = currentDayResults;
 
         // Day counter is now owned by FlowController.AdvanceToNextDay()
         GameEvents.RaiseDayEnded();

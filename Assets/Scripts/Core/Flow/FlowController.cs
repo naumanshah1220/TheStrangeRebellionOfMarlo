@@ -25,9 +25,11 @@ public class FlowController : SingletonMonoBehaviour<FlowController>
     private DaysManager daysManager;
     private NewspaperManager newspaperManager;
     private PlayerProgressManager playerProgress;
+    private OverseerManager overseerManager;
 
     private NightSummaryData currentNightData;
     private DaysBriefingDataJson daysJsonData;
+    private DayBriefingData currentBriefingData;
 
     [Header("Debug")]
     [Tooltip("When true, skip flow panels and let debug buttons drive the game (old behavior).")]
@@ -38,6 +40,7 @@ public class FlowController : SingletonMonoBehaviour<FlowController>
         daysManager = DaysManager.Instance;
         newspaperManager = NewspaperManager.Instance;
         playerProgress = PlayerProgressManager.Instance;
+        overseerManager = OverseerManager.Instance;
 
         // If we came from MainMenu, FlowBootstrap was initialized.
         // If playing Detective 6.0 directly in Editor without going through MainMenu,
@@ -120,11 +123,12 @@ public class FlowController : SingletonMonoBehaviour<FlowController>
     {
         SetFlowState(FlowState.DayBriefing);
 
-        var briefingData = BuildDayBriefingData();
+        // Build full briefing data (used by panel for day number, and by BeginWorkday for Overseer delivery)
+        currentBriefingData = BuildDayBriefingData();
 
         if (dayBriefingPanel != null)
         {
-            dayBriefingPanel.Show(briefingData, () => BeginWorkday());
+            dayBriefingPanel.Show(currentBriefingData, () => BeginWorkday());
         }
         else
         {
@@ -145,8 +149,16 @@ public class FlowController : SingletonMonoBehaviour<FlowController>
             unlockNotices = new List<string>()
         };
 
-        // Get headline from NewspaperManager (handles case outcome overrides)
-        if (newspaperManager != null && daysManager != null && CurrentDay > 1)
+        // Build multi-article newspaper from previous day results
+        DayResults prevResults = daysManager?.previousDayResults;
+        if (newspaperManager != null && CurrentDay > 1)
+        {
+            data.newspaperData = newspaperManager.BuildNewspaper(CurrentDay, prevResults);
+            data.headline = data.newspaperData.mainHeadline;
+        }
+
+        // Fallback: get headline from legacy method if newspaper didn't produce one
+        if (string.IsNullOrEmpty(data.headline) && newspaperManager != null && daysManager != null && CurrentDay > 1)
         {
             data.headline = newspaperManager.GetHeadlineForDay(CurrentDay, daysManager.todaysClosedCases);
         }
@@ -195,6 +207,19 @@ public class FlowController : SingletonMonoBehaviour<FlowController>
         else
         {
             Debug.LogError("[FlowController] DaysManager not found — cannot start workday!");
+        }
+
+        // Clear previous day's overseer cards, then deliver new morning items to the mat
+        if (overseerManager != null)
+        {
+            overseerManager.ClearOverseerHand();
+
+            BonusLetterData bonusData = null;
+            DayResults prevResults = daysManager?.previousDayResults;
+            if (prevResults != null && CurrentDay > 1)
+                bonusData = OverseerManager.BuildBonusLetter(prevResults);
+
+            overseerManager.DeliverMorningItems(currentBriefingData, bonusData);
         }
     }
 
@@ -279,7 +304,6 @@ public class FlowController : SingletonMonoBehaviour<FlowController>
         if (daysManager != null)
         {
             data.casesSolved = daysManager.todaysClosedCases.Count;
-            data.totalEarnings = daysManager.TodaysEarnings;
 
             // Check for unsolved core cases (penalty)
             data.hadUnsolvedCoreCases = false;
@@ -292,28 +316,38 @@ public class FlowController : SingletonMonoBehaviour<FlowController>
                 }
             }
 
-            // Build per-case earnings
+            // Case rewards are now deferred — show "under review" instead of reward amounts
             foreach (var closedCase in daysManager.todaysClosedCases)
             {
                 data.caseEarnings.Add(new CaseEarning
                 {
                     caseTitle = closedCase.title,
-                    reward = closedCase.reward
+                    reward = -1f // Sentinel: reward pending review
                 });
+            }
+
+            // Check for overtime
+            if (daysManager.currentDayResults != null)
+            {
+                data.hadOvertime = daysManager.currentDayResults.hadOvertime;
+                data.overtimeHours = daysManager.currentDayResults.overtimeHours;
             }
         }
 
         if (playerProgress != null)
         {
             data.baseSalary = playerProgress.baseIncome;
+            // Total earnings = base salary only (case bonuses arrive next morning)
+            data.totalEarnings = data.hadUnsolvedCoreCases ? 0f : playerProgress.baseIncome;
             data.currentSavings = playerProgress.familyStatus.savings;
             data.rent = playerProgress.baseDailyExpense;
-            data.foodCost = 15f; // Tunable — could come from data
+            data.foodCost = 15f;
             data.currentHunger = playerProgress.familyStatus.hunger;
         }
         else
         {
-            data.baseSalary = 50f;
+            data.baseSalary = 35f;
+            data.totalEarnings = 35f;
             data.rent = 30f;
             data.foodCost = 15f;
             data.currentHunger = 100f;
