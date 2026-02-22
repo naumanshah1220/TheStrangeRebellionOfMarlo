@@ -9,7 +9,7 @@ using DG.Tweening;
 public class CaseEarning
 {
     public string caseTitle;
-    public float reward;
+    public float reward;     // -1 sentinel means "pending review"
 }
 
 [System.Serializable]
@@ -25,6 +25,8 @@ public class NightSummaryData
     public float foodCost;
     public float currentHunger;
     public bool hadUnsolvedCoreCases;
+    public bool hadOvertime;
+    public float overtimeHours;
 }
 
 public class NightSummaryPanel : MonoBehaviour
@@ -36,6 +38,8 @@ public class NightSummaryPanel : MonoBehaviour
     [SerializeField] private TMP_Text baseSalaryText;
     [SerializeField] private TMP_Text totalEarningsText;
     [SerializeField] private TMP_Text penaltyText;
+    [SerializeField] private TMP_Text reviewNoticeText;
+    [SerializeField] private TMP_Text overtimeText;
 
     [Header("Earnings List")]
     [SerializeField] private Transform earningsContainer;
@@ -91,11 +95,29 @@ public class NightSummaryPanel : MonoBehaviour
         if (baseSalaryText) baseSalaryText.text = $"Base Salary: ${data.baseSalary:F0}";
         if (totalEarningsText) totalEarningsText.text = $"Total Earnings: ${data.totalEarnings:F0}";
 
+        // Penalty for unsolved core cases
         if (penaltyText)
         {
             penaltyText.gameObject.SetActive(data.hadUnsolvedCoreCases);
             if (data.hadUnsolvedCoreCases)
-                penaltyText.text = "PENALTY: Unsolved core cases — no pay today";
+                penaltyText.text = "PENALTY: Unsolved core cases \u2014 no pay today";
+        }
+
+        // Overtime notice
+        if (overtimeText)
+        {
+            overtimeText.gameObject.SetActive(data.hadOvertime);
+            if (data.hadOvertime)
+                overtimeText.text = $"OVERTIME: {data.overtimeHours:F1} hours \u2014 penalty applied to bonus";
+        }
+
+        // Deferred reward notice
+        if (reviewNoticeText)
+        {
+            bool hasCases = data.caseEarnings.Count > 0;
+            reviewNoticeText.gameObject.SetActive(hasCases);
+            if (hasCases)
+                reviewNoticeText.text = "Results under review \u2014 bonuses delivered tomorrow";
         }
 
         PopulateEarningsRows(data);
@@ -113,7 +135,15 @@ public class NightSummaryPanel : MonoBehaviour
         foreach (var earning in data.caseEarnings)
         {
             var row = Instantiate(earningRowPrefab, earningsContainer);
-            row.Setup(earning.caseTitle, earning.reward);
+            if (earning.reward < 0f)
+            {
+                // Pending review — show case name but no reward
+                row.Setup(earning.caseTitle, "Under Review");
+            }
+            else
+            {
+                row.Setup(earning.caseTitle, earning.reward);
+            }
         }
     }
 

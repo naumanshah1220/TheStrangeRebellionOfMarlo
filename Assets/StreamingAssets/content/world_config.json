@@ -1,0 +1,18 @@
+{
+  "_comment": "Configurable world-building constants. Change values here and run Tools/CaseGenerator/rename_currency.py to update all case files.",
+  "currency": {
+    "full": "Knotmark",
+    "short": "knots",
+    "symbol": "KM",
+    "plural": "knotmarks"
+  },
+  "state": {
+    "name": "Drazhovia",
+    "government": "The Council",
+    "doctrine": "The Pattern",
+    "tenets": "Seven Tenets",
+    "enforcers": "Enforcers",
+    "rehabilitation": "Recalibration",
+    "bureau": "Bureau of Pattern Compliance"
+  }
+}

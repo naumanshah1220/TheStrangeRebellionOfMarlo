@@ -11,4 +11,10 @@ public class CaseEarningRow : MonoBehaviour
         if (titleText) titleText.text = title;
         if (rewardText) rewardText.text = $"+${reward:F0}";
     }
+
+    public void Setup(string title, string rewardLabel)
+    {
+        if (titleText) titleText.text = title;
+        if (rewardText) rewardText.text = rewardLabel;
+    }
 }

@@ -280,7 +280,6 @@ public class VerdictSchemaJson
 {
     public string sentenceTemplate;
     public List<VerdictSlotDefinitionJson> slots = new List<VerdictSlotDefinitionJson>();
-    public JustificationDefinitionJson justification;
 }
 
 [System.Serializable]
@@ -290,25 +289,15 @@ public class VerdictSlotDefinitionJson
     public string displayLabel;
     public string type = "Suspect"; // VerdictSlotType enum as string
     public bool required = true;
-    public int minJustificationTags;
     public string[] tagTypesAccepted;
     public string optionSource = "CaseAndGlobal"; // OptionSource enum as string
     public string customPoolId;
 }
 
 [System.Serializable]
-public class JustificationDefinitionJson
-{
-    public bool required = true;
-    public int minRequired = 1;
-}
-
-[System.Serializable]
 public class CaseSolutionJson
 {
     public List<SlotAnswerJson> answers = new List<SlotAnswerJson>();
-    public string[] requiredJustificationTagIds;
-    public string[] bonusJustificationTagIds;
     public int minConfidenceToApprove = 100;
 }
 
@@ -352,6 +341,7 @@ public class DayBriefingJson
     public FamilyLetterJson familyLetter;
     public List<string> unlockNotices = new List<string>();
     public List<CaseOutcomeHeadlineJson> caseOutcomeHeadlines = new List<CaseOutcomeHeadlineJson>();
+    public List<NewspaperArticleJson> newspaperArticles = new List<NewspaperArticleJson>();
 }
 
 [System.Serializable]
@@ -367,5 +357,14 @@ public class CaseOutcomeHeadlineJson
     public string caseId;
     public string headlineIfSolved;
     public string headlineIfUnsolved;
+    public int priority = 1;
+}
+
+[System.Serializable]
+public class NewspaperArticleJson
+{
+    public string headline;
+    public string body;
+    public string category = "world_event";  // "case_outcome", "world_event", "regime_propaganda"
     public int priority = 1;
 }

@@ -1112,16 +1112,16 @@
       <HintPath>Library\ScriptAssemblies\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Unity.PlasticSCM.Editor">
+      <HintPath>Library\ScriptAssemblies\Unity.PlasticSCM.Editor.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Unity.RenderPipelines.Core.ShaderLibrary">
       <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Core.ShaderLibrary.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.TestTools.CodeCoverage.Editor">
       <HintPath>Library\ScriptAssemblies\Unity.TestTools.CodeCoverage.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.PlasticSCM.Editor">
-      <HintPath>Library\ScriptAssemblies\Unity.PlasticSCM.Editor.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.Multiplayer.Center.Editor">
@@ -1273,7 +1273,9 @@
     <ProjectReference Include="Utilities.csproj" />
     <ProjectReference Include="ProPixelizer.csproj" />
     <ProjectReference Include="UtilitiesEditor.csproj" />
+    <ProjectReference Include="MCPForUnity.Runtime.csproj" />
     <ProjectReference Include="SimpleScrollSnapEditor.csproj" />
+    <ProjectReference Include="MCPForUnity.Editor.csproj" />
     <ProjectReference Include="SimpleInspectorAttributesEditor.csproj" />
     <ProjectReference Include="SimpleScrollSnap.csproj" />
     <ProjectReference Include="SimpleInspectorAttributes.csproj" />

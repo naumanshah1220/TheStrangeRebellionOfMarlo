@@ -2,7 +2,6 @@ using UnityEngine;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
-using Detective.UI.Commit;
 
 namespace Detective.UI.Commit
 {
@@ -22,9 +21,6 @@ namespace Detective.UI.Commit
         public SuspectVerdictSlot suspectPortraitSlot;
         [Tooltip("The slot for the suspect name popup selector.")]
         public PopupVerdictSlot suspectNameSlot;
-        [Tooltip("The drop zone for justification clue tags.")]
-        public JustificationDropZone justificationDropZone;
-
         [Header("Slot Prefabs")]
         [Tooltip("Default prefab for all other slot types (e.g., Motive, Method).")]
         public GameObject genericSlotPrefab;
@@ -236,17 +232,11 @@ namespace Detective.UI.Commit
                 allSelections.Add(suspectSel);
             }
 
-            // Step 3: Get justification tags.
-            if (justificationDropZone != null)
-            {
-                verdict.justificationTagIds = justificationDropZone.GetAttachedClueIds();
-            }
-
-            // Step 4: NOW, save the complete current state to the verdict object.
+            // Step 3: Save the complete current state to the verdict object.
             verdict.selections = allSelections;
             verdict.computedConfidence = VerdictEvaluator.ComputeConfidence(currentCase, verdict);
 
-            // Step 5: Perform completeness checks on the now-saved state.
+            // Step 4: Perform completeness checks on the now-saved state.
             foreach (var def in schema.slots)
             {
                 if (def.required && !verdict.selections.Any(s => s.slotId == def.slotId))
@@ -254,12 +244,6 @@ namespace Detective.UI.Commit
                     error = $"The '{def.displayLabel}' field must be filled.";
                     return false; // Verdict is incomplete, but the partial draft is correct.
                 }
-            }
-
-            if (schema.justification.required && verdict.justificationTagIds.Count == 0)
-            {
-                error = "At least one piece of evidence must be provided as justification.";
-                return false;
             }
 
             return true;
@@ -425,7 +409,6 @@ namespace Detective.UI.Commit
         public void Clear()
         {
             isBuilt = false;
-            if (justificationDropZone != null) justificationDropZone.Clear();
 
             // Unsubscribe from clue discovery events
             GameEvents.OnClueDiscovered -= OnClueDiscovered;

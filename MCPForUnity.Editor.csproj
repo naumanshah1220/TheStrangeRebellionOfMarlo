@@ -174,8 +174,8 @@
     <Compile Include="Assets\MCPForUnity\Editor\Helpers\PortManager.cs" />
     <Compile Include="Assets\MCPForUnity\Editor\Tools\ManageEditor.cs" />
     <Compile Include="Assets\MCPForUnity\Editor\Dependencies\Models\DependencyStatus.cs" />
-    <Compile Include="Assets\MCPForUnity\Editor\Services\PackageUpdateService.cs" />
     <Compile Include="Assets\MCPForUnity\Editor\Tools\GameObjects\ComponentResolver.cs" />
+    <Compile Include="Assets\MCPForUnity\Editor\Services\PackageUpdateService.cs" />
     <Compile Include="Assets\MCPForUnity\Editor\Services\EditorConfigurationCache.cs" />
     <Compile Include="Assets\MCPForUnity\Editor\Helpers\HttpEndpointUtility.cs" />
     <Compile Include="Assets\MCPForUnity\Editor\Services\HttpBridgeReloadHandler.cs" />
@@ -246,8 +246,8 @@
     <Compile Include="Assets\MCPForUnity\Editor\Helpers\ConfigJsonBuilder.cs" />
     <Compile Include="Assets\MCPForUnity\Editor\Services\IPathResolverService.cs" />
     <Compile Include="Assets\MCPForUnity\Editor\Tools\RefreshUnity.cs" />
-    <Compile Include="Assets\MCPForUnity\Editor\Helpers\UnityJsonSerializer.cs" />
     <Compile Include="Assets\MCPForUnity\Editor\Models\Command.cs" />
+    <Compile Include="Assets\MCPForUnity\Editor\Helpers\UnityJsonSerializer.cs" />
     <Compile Include="Assets\MCPForUnity\Editor\Services\Transport\TransportState.cs" />
     <Compile Include="Assets\MCPForUnity\Editor\Services\TestRunnerNoThrottle.cs" />
     <Compile Include="Assets\MCPForUnity\Editor\Helpers\Pagination.cs" />

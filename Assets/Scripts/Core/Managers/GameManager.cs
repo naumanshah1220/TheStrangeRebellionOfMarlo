@@ -318,12 +318,20 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
     public void OnCaseSubmitted(Card submittedCard)
     {
         Debug.Log($"[GameManager] Case submitted: {submittedCard?.name}. Starting comprehensive cleanup...");
-        
+
         caseSubmitted = true;
-        
-        // Process case score/completion logic here if needed
-        // TODO: Add scoring system for submitted case
-        
+
+        // Evaluate verdict and store result
+        if (CurrentCase != null && CurrentCase.draftVerdict != null)
+        {
+            var caseResult = VerdictEvaluator.EvaluateVerdict(CurrentCase, CurrentCase.draftVerdict);
+            daysManager?.RecordCaseResult(caseResult);
+
+            Debug.Log($"[GameManager] Verdict evaluated: confidence={caseResult.confidenceScore:F0}%, " +
+                      $"correct={caseResult.isFullyCorrect}, reward=${caseResult.reward:F0}, " +
+                      $"slots={caseResult.slotsCorrect}/{caseResult.slotsTotal}");
+        }
+
         // Comprehensive cleanup of all case-related cards and visuals
         CleanupSubmittedCase(submittedCard);
     }

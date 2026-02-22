@@ -1,0 +1,444 @@
+{
+  "caseID": "core_01",
+  "title": "The Missing Ration Cards",
+  "description": "A market vendor in Block D reported four ration cards missing after closing. The last two customers — a factory worker and his co-worker — were both detained. One of them must know where the cards are.",
+  "caseType": "Core",
+  "firstAvailableDay": 1,
+  "coreSequenceNumber": 1,
+  "reward": 60.0,
+  "extraRewardForState": 0.0,
+  "suspicionReduction": 0.0,
+  "requiredPreviousCaseIds": [],
+  "unlocksNextCaseIds": ["core_02"],
+
+  "cardImagePath": "Cases/core_01/card",
+
+  "lawBroken": "Surplus (Deviation from the First Tenet §1)",
+  "involvesResistance": false,
+  "resistanceChoice": "",
+  "stateChoice": "Convict Dejan Markovic for exceeding his caloric allocation.",
+
+  "minDiscoveredCluesToAllowCommit": 3,
+  "allowCommitWithLowConfidence": true,
+
+  "clueVerdictMappings": [
+    { "clueId": "clue_excess_purchase", "slotId": "violation", "optionId": "surplus", "label": "Surplus" },
+    { "clueId": "clue_excess_purchase", "slotId": "violation", "optionId": "excess_consumption", "label": "Excess Consumption" },
+    { "clueId": "clue_missing_cards", "slotId": "violation", "optionId": "theft", "label": "Theft of Ration Cards" },
+    { "clueId": "clue_dejan_admission", "slotId": "violation", "optionId": "surplus", "label": "Surplus" }
+  ],
+
+  "suspects": [
+    {
+      "citizenID": "citizen_dejan",
+      "firstName": "Dejan",
+      "lastName": "Markovic",
+      "picturePath": "Portraits/citizen_dejan",
+      "dateOfBirth": "09/14/1981",
+      "gender": "Male",
+      "ethnicity": "Caucasian",
+      "maritalStatus": "Married",
+      "address": "17 Mill Lane, Block D",
+      "occupation": "Grain Mill Operator",
+      "nervousnessLevel": 0.45,
+      "initialStress": 0.30,
+      "isGuilty": true,
+      "criminalHistory": [],
+      "tagInteractions": [
+        {
+          "tagId": "clue_last_customers",
+          "tagQuestion": "You were one of the last two customers at the market. What did you buy?",
+          "responses": [
+            {
+              "responseSequence": ["My weekly rations. Same as always.", "Bread, oil, dried beans. Nothing out of the ordinary."],
+              "isLie": true,
+              "stressImpact": 0.06,
+              "responseType": "Normal",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": [],
+          "contradictedByEvidenceTagIds": ["clue_excess_purchase"],
+          "contradictionResponse": {
+            "responseSequence": ["The records are... look, sometimes the vendor writes things down wrong.", "I only bought what my family needs."],
+            "isLie": true,
+            "stressImpact": 0.10,
+            "responseType": "Defensive",
+            "clickableClues": []
+          },
+          "responseVariants": []
+        },
+        {
+          "tagId": "clue_missing_cards",
+          "tagQuestion": "Four ration cards went missing from the vendor's counter. Do you know anything about that?",
+          "responses": [
+            {
+              "responseSequence": ["Missing cards? No.", "I paid with my own card and left. Ask the vendor — he probably miscounted."],
+              "isLie": true,
+              "stressImpact": 0.08,
+              "responseType": "Evasive",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": [],
+          "contradictedByEvidenceTagIds": ["clue_excess_purchase"],
+          "contradictionResponse": {
+            "responseSequence": ["I...", "Look, the allocation for a family of three is not enough. My boy is eight. He's always hungry."],
+            "isLie": false,
+            "stressImpact": 0.12,
+            "responseType": "Emotional",
+            "clickableClues": [
+              {
+                "clueId": "clue_dejan_admission",
+                "clickableText": "the allocation for a family of three is not enough",
+                "noteText": "<person>Dejan Markovic</person> admits the standard ration allocation is not enough for his family and implies he took extra cards",
+                "highlightColor": { "r": 1.0, "g": 0.92, "b": 0.0, "a": 1.0 },
+                "oneTimeOnly": true
+              }
+            ]
+          },
+          "responseVariants": [
+            {
+              "variantId": "high_stress_breakdown",
+              "conditions": [{ "type": "StressAbove", "threshold": 0.7 }],
+              "responses": [
+                {
+                  "responseSequence": ["Fine! I took them. Four cards.", "My son goes to bed hungry three nights a week. You want me to just watch that?"],
+                  "isLie": false,
+                  "stressImpact": 0.05,
+                  "responseType": "Emotional"
+                }
+              ],
+              "weight": 1.0
+            }
+          ]
+        },
+        {
+          "tagId": "clue_excess_purchase",
+          "tagQuestion": "Your purchase records show 4,200 calories per day this week. Your family allocation is 2,800. How do you explain the difference?",
+          "responses": [
+            {
+              "responseSequence": ["That can't be right. There must be an error in the records.", "I buy what my card allows. Nothing more."],
+              "isLie": true,
+              "stressImpact": 0.12,
+              "responseType": "Defensive",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": [],
+          "contradictedByEvidenceTagIds": ["clue_missing_cards"],
+          "contradictionResponse": {
+            "responseSequence": ["Alright. I used extra cards.", "I took them from the counter when the vendor wasn't looking. I needed more food for my family."],
+            "isLie": false,
+            "stressImpact": 0.15,
+            "responseType": "Emotional",
+            "clickableClues": [
+              {
+                "clueId": "clue_dejan_method",
+                "clickableText": "took them from the counter",
+                "noteText": "<person>Dejan</person> confessed to taking ration cards from the <location>market vendor's counter</location> when the vendor was not looking",
+                "highlightColor": { "r": 1.0, "g": 0.92, "b": 0.0, "a": 1.0 },
+                "oneTimeOnly": true
+              }
+            ]
+          }
+        },
+        {
+          "tagId": "clue_nikola_within_limit",
+          "tagQuestion": "Your co-worker Stefan's purchases are within his allocation. Why are yours so much higher?",
+          "responses": [
+            {
+              "responseSequence": ["Stefan lives alone. I have a wife and a growing child.", "The system gives single men and families almost the same. Does that seem fair to you?"],
+              "isLie": false,
+              "stressImpact": 0.08,
+              "responseType": "Emotional",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        },
+        {
+          "tagId": "clue_dejan_admission",
+          "tagQuestion": "You've admitted the allocation isn't enough. Did you take the cards to make up the difference?",
+          "responses": [
+            {
+              "responseSequence": ["Yes. I took four cards over the past month.", "I used them at different vendors so nobody would notice. This week I got careless."],
+              "isLie": false,
+              "stressImpact": 0.06,
+              "responseType": "Emotional",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        },
+        {
+          "tagId": "clue_stefan_testimony",
+          "tagQuestion": "Stefan says you always seem to have more food at lunch than he does. True?",
+          "responses": [
+            {
+              "responseSequence": ["Stefan talks too much.", "My wife packs my lunch. That's all."],
+              "isLie": true,
+              "stressImpact": 0.06,
+              "responseType": "Defensive",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        }
+      ],
+      "lawyeredUpResponses": [
+        "I'm done talking.",
+        "I said what I said. That's enough.",
+        "My family needed food. That's my answer for everything."
+      ],
+      "rattledResponses": [
+        "Please... my son is only eight.",
+        "What happens to my family if you send me away?",
+        "I just wanted to feed my boy."
+      ],
+      "shutdownResponses": [
+        "...",
+        "Do what you have to do.",
+        "I have nothing more to say."
+      ]
+    },
+    {
+      "citizenID": "citizen_stefan",
+      "firstName": "Stefan",
+      "lastName": "Jovic",
+      "picturePath": "Portraits/citizen_stefan",
+      "dateOfBirth": "02/08/1984",
+      "gender": "Male",
+      "ethnicity": "Caucasian",
+      "maritalStatus": "Single",
+      "address": "9 Harvest Road, Block D",
+      "occupation": "Grain Mill Loader",
+      "nervousnessLevel": 0.25,
+      "initialStress": 0.15,
+      "isGuilty": false,
+      "criminalHistory": [],
+      "tagInteractions": [
+        {
+          "tagId": "clue_last_customers",
+          "tagQuestion": "You and Dejan were the last customers at the market. What happened?",
+          "responses": [
+            {
+              "responseSequence": ["We went after our shift like we always do.", "Dejan went to the counter first. I was behind him. We bought our rations and left."],
+              "isLie": false,
+              "stressImpact": 0.03,
+              "responseType": "Normal",
+              "clickableClues": [
+                {
+                  "clueId": "clue_stefan_testimony",
+                  "clickableText": "Dejan went to the counter first",
+                  "noteText": "<person>Stefan Jovic</person> confirms <person>Dejan</person> was at the vendor counter before him and had more time near the cards",
+                  "highlightColor": { "r": 1.0, "g": 0.92, "b": 0.0, "a": 1.0 },
+                  "oneTimeOnly": true
+                }
+              ]
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        },
+        {
+          "tagId": "clue_missing_cards",
+          "tagQuestion": "Four ration cards went missing. Did you see Dejan take anything from the counter?",
+          "responses": [
+            {
+              "responseSequence": ["I wasn't really watching. I was checking my own list.", "He was at the counter a bit longer than usual. But I didn't think anything of it."],
+              "isLie": false,
+              "stressImpact": 0.03,
+              "responseType": "Normal",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        },
+        {
+          "tagId": "clue_excess_purchase",
+          "tagQuestion": "Dejan's purchase records show he's been buying far more than his allocation. Did you know about this?",
+          "responses": [
+            {
+              "responseSequence": ["No. I mean, he always seems to have more food at lunch than I do.", "I figured his wife was a good cook. I didn't ask."],
+              "isLie": false,
+              "stressImpact": 0.03,
+              "responseType": "Normal",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        },
+        {
+          "tagId": "clue_nikola_within_limit",
+          "tagQuestion": "Your records show you buy within your allocation. Always?",
+          "responses": [
+            {
+              "responseSequence": ["Always. I live alone. My allocation is enough for one person.", "I don't have a family to worry about. Dejan does."],
+              "isLie": false,
+              "stressImpact": 0.02,
+              "responseType": "Normal",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        },
+        {
+          "tagId": "clue_dejan_admission",
+          "tagQuestion": "Dejan has admitted to taking the cards. Did you help him?",
+          "responses": [
+            {
+              "responseSequence": ["No. I had no idea.", "Dejan is my friend. We eat lunch together. That's it. I didn't know he was taking extra cards."],
+              "isLie": false,
+              "stressImpact": 0.04,
+              "responseType": "Normal",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        }
+      ],
+      "lawyeredUpResponses": [
+        "I've told you everything I know.",
+        "I didn't do anything wrong. Can I go?",
+        "Please check my records. They'll show I'm telling the truth."
+      ],
+      "rattledResponses": [
+        "I don't understand why I'm here. I paid for my rations.",
+        "Am I going to be charged? I haven't done anything.",
+        "Can someone tell my supervisor? I'll miss my shift."
+      ],
+      "shutdownResponses": [
+        "I've said everything I can.",
+        "Check the records.",
+        "..."
+      ]
+    }
+  ],
+  "culpritCitizenID": "citizen_dejan",
+
+  "evidences": [
+    {
+      "id": "ev_case_brief",
+      "title": "Bureau Case File #1041",
+      "description": "Official case assignment from the Bureau of Pattern Compliance. Contains the case summary, suspect information, and evidence inventory.",
+      "type": "Document",
+      "cardImagePath": "Evidence/core_01/ev_case_brief_card",
+      "hotspots": []
+    },
+    {
+      "id": "ev_vendor_statement",
+      "title": "Market Vendor Statement",
+      "description": "A written statement from the Block D market vendor reporting four missing ration cards discovered during his end-of-day count. He identified the last two customers before closing.",
+      "type": "Document",
+      "cardImagePath": "Evidence/core_01/ev_vendor_statement_card",
+      "hotspots": [
+        {
+          "clueId": "clue_last_customers",
+          "noteText": "The <location>Block D market</location> vendor identified <person>Dejan Markovic</person> and <person>Stefan Jovic</person> as the last two customers before closing",
+          "pageIndex": 0,
+          "positionX": 0.5,
+          "positionY": 0.30,
+          "width": 0.7,
+          "height": 0.12
+        },
+        {
+          "clueId": "clue_missing_cards",
+          "noteText": "Four <item>ration cards</item> were discovered missing during the vendor's end-of-day count at the <location>Block D market</location>",
+          "pageIndex": 0,
+          "positionX": 0.5,
+          "positionY": 0.60,
+          "width": 0.7,
+          "height": 0.12
+        }
+      ]
+    },
+    {
+      "id": "ev_ration_records",
+      "title": "Ration Allocation Records",
+      "description": "Official weekly purchase records for both suspects, pulled from the Central Rationing Office. Shows allocated calories per household versus actual purchases.",
+      "type": "Document",
+      "cardImagePath": "Evidence/core_01/ev_ration_records_card",
+      "hotspots": [
+        {
+          "clueId": "clue_excess_purchase",
+          "noteText": "<person>Dejan Markovic</person>'s purchases this week total 4,200 cal/day — well above his family allocation of 2,800 cal/day for a household of three",
+          "pageIndex": 0,
+          "positionX": 0.5,
+          "positionY": 0.35,
+          "width": 0.7,
+          "height": 0.15
+        },
+        {
+          "clueId": "clue_nikola_within_limit",
+          "noteText": "<person>Stefan Jovic</person>'s purchases total 1,900 cal/day — within his single-person allocation of 2,100 cal/day",
+          "pageIndex": 0,
+          "positionX": 0.5,
+          "positionY": 0.65,
+          "width": 0.7,
+          "height": 0.12
+        }
+      ]
+    }
+  ],
+
+  "steps": [
+    {
+      "stepId": "step_read_evidence",
+      "stepNumber": 1,
+      "description": "Read the vendor statement and ration records to identify key facts",
+      "requiredClueIds": [],
+      "unlockedClueIds": ["clue_last_customers", "clue_missing_cards"]
+    },
+    {
+      "stepId": "step_find_discrepancy",
+      "stepNumber": 2,
+      "description": "Discover the calorie discrepancy in the ration records",
+      "requiredClueIds": ["clue_last_customers"],
+      "unlockedClueIds": ["clue_excess_purchase", "clue_nikola_within_limit"]
+    },
+    {
+      "stepId": "step_interrogate",
+      "stepNumber": 3,
+      "description": "Interrogate both suspects using discovered clues",
+      "requiredClueIds": ["clue_excess_purchase"],
+      "unlockedClueIds": []
+    },
+    {
+      "stepId": "step_verdict",
+      "stepNumber": 4,
+      "description": "Submit verdict identifying the guilty suspect and violation",
+      "requiredClueIds": ["clue_dejan_admission"],
+      "unlockedClueIds": []
+    }
+  ],
+
+  "verdictSchema": {
+    "sentenceTemplate": "I accuse {suspect} of Deviation: {violation}.",
+    "slots": [
+      {
+        "slotId": "suspect",
+        "displayLabel": "Who",
+        "type": "Suspect",
+        "required": true,
+        "optionSource": "CaseOnly"
+      },
+      {
+        "slotId": "violation",
+        "displayLabel": "Deviation",
+        "type": "Violation",
+        "required": false,
+        "optionSource": "FromDiscoveredTags"
+      }
+    ]
+  },
+
+  "solutions": [
+    {
+      "answers": [
+        { "slotId": "suspect", "acceptedOptionIds": ["citizen_dejan"] },
+        { "slotId": "violation", "acceptedOptionIds": ["surplus", "excess_consumption", "theft"] }
+      ],
+      "minConfidenceToApprove": 70
+    }
+  ]
+}

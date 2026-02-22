@@ -18,8 +18,7 @@
     "slots": [
       { "slotId": "suspect", "displayLabel": "Who", "type": "Suspect", "required": true, "optionSource": "CaseOnly" },
       { "slotId": "violation", "displayLabel": "Crime", "type": "Violation", "required": true, "optionSource": "GlobalOnly" }
-    ],
-    "justification": { "required": true, "minRequired": 1 }
+    ]
   },
   "solutions": []
 }

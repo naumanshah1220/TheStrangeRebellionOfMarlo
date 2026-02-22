@@ -12,4 +12,5 @@ public struct DayBriefingData
     public string letterFrom;
     public string letterBody;
     public List<string> unlockNotices;
+    public NewspaperData newspaperData;
 }

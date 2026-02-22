@@ -1,0 +1,50 @@
+{
+  "_comment": "Art direction for evidence assets. AI prompts describe the visual. Art notes describe gameplay requirements.",
+  "references": {
+    "ev_case_brief": {
+      "title": "Bureau Case File (all cases)",
+      "aiPrompt": "A government case assignment folder, slightly worn. Thick beige card stock cover with a stamped header: 'BUREAU OF PATTERN COMPLIANCE — CASE FILE'. A case number is typed in the top right. A red wax seal or stamp in the corner. Inside: typed text on thin paper with sections for 'SUMMARY', 'SUSPECTS', and 'EVIDENCE INVENTORY'. Authoritarian bureaucratic aesthetic — functional, cold, official. Muted earth tones.",
+      "artNotes": "This is the first thing the player sees when opening a case. It should feel like an official dossier handed to you by your superior. Each case gets a unique case number stamped on the cover. The inside text is NOT interactive (no hotspots) — it's purely for the player to read and understand what they're investigating. Consider making this a 2-page document: cover page + contents."
+    },
+    "ev_vendor_statement": {
+      "title": "Market Vendor Statement (Core 01)",
+      "aiPrompt": "A handwritten statement on government-issue lined paper. The header is pre-printed: 'CITIZEN COMPLAINT FORM — SECTOR 3'. Below, a vendor has written in slightly shaky handwriting describing missing ration cards. An official red stamp reading 'RECEIVED' sits in the bottom corner. The paper is slightly yellowed and creased, as if folded and carried. Muted tones — beige paper, dark ink, red stamp.",
+      "artNotes": "Core 01 evidence. Two hotspot areas: (1) paragraph mentioning the last two customers by name [top third], (2) line stating four cards were missing at closing count [bottom third]. Single page."
+    },
+    "ev_ration_records": {
+      "title": "Ration Allocation Records (Core 01)",
+      "aiPrompt": "A printed government ledger on thin paper. Header: 'CENTRAL RATIONING OFFICE — WEEKLY PURCHASE RECORD'. A table with columns: Citizen Name, Family Size, Allocation (cal/day), Actual Purchases (cal/day). Two rows visible. One row has a noticeable discrepancy — the actual purchases column shows a much higher number than the allocation, circled in red pencil by the investigating officer. Clean, bureaucratic, typewriter font. Cold and clinical.",
+      "artNotes": "Core 01 evidence. Two hotspot areas: (1) Dejan's row showing 4200 vs 2800 cal/day — the key discrepancy [top half], (2) Stefan's row showing 1900 vs 2100 — within limits [bottom half]. The red circle around Dejan's numbers is the visual cue that something is wrong. Single page."
+    },
+    "core_02/ev_enforcer_report": {
+      "title": "Enforcer Patrol Report (Core 02)",
+      "aiPrompt": "An official incident report on carbon-copy paper with a faded header: 'ENFORCER PATROL REPORT — SECTOR 3'. Typed text with some handwritten additions in the margins. A small hand-drawn sketch map shows the market square with X marks indicating where the fight occurred. An 'INCIDENT — AGITATION' stamp in red sits at the top. The paper has slight coffee stains on one edge. Utilitarian government document aesthetic.",
+      "artNotes": "Core 02 evidence. Two hotspot areas: (1) incident description naming both fighters [top section], (2) injury details section [bottom section]. The sketch map of the market square adds character. Single page."
+    },
+    "ev_damage_assessment": {
+      "title": "Property Damage Assessment (Core 02)",
+      "aiPrompt": "A property damage assessment form on official paper. Header: 'BLOCK D COMMUNITY MARKET — DAMAGE REPORT'. Contains an itemized list with entries like 'Pumpkin (destroyed)', 'Vegetable stall (overturned)' with estimated damage values in the currency. A small polaroid-style photograph is paper-clipped to the bottom corner showing the smashed pumpkin remains on cobblestones. Official stamps and a filing date.",
+      "artNotes": "Core 02 evidence. Two hotspot areas: (1) pumpkin destruction entry [top half], (2) stall damage entry with cost estimate [bottom half]. The clipped photo of the smashed pumpkin adds a touch of dark humor to an otherwise dry bureaucratic document. Single page."
+    },
+    "core_03/ev_enforcer_report": {
+      "title": "Enforcer Stop Report (Core 03)",
+      "aiPrompt": "A patrol stop report — a standard form with pre-printed fields filled in by hand. Header: 'CURFEW ENFORCEMENT — STOP REPORT'. Fields include: Date, Time (23:15), Location (Korda Street), Number of Subjects (2). Brief handwritten notes describe two men walking in opposite directions. An 'AFTER HOURS VIOLATION' stamp in amber/orange. Clean, procedural.",
+      "artNotes": "Core 03 evidence. One hotspot area describing both detained civilians, their directions of travel, and the time. Single page."
+    },
+    "ev_checkpoint_photo": {
+      "title": "Checkpoint Camera Photo (Core 03)",
+      "aiPrompt": "A grainy black-and-white security camera still. Nighttime street scene — cobblestones, a dim streetlamp, two silhouetted figures walking in opposite directions. A timestamp overlay in the corner reads '23:10 — KORDA ST CHECKPOINT'. One figure appears younger (jacket, cap), the other older (work coveralls). Low resolution, slight motion blur, surveillance camera aesthetic. The architecture is industrial — concrete buildings, narrow street.",
+      "artNotes": "Core 03 evidence. FIRST PHOTO-TYPE evidence in the game. This teaches the player that evidence can be photos, not just documents. One hotspot area in the center identifying both figures. Should feel authentic as a surveillance still — grainy, cold, clinical. Single page."
+    },
+    "ev_permits_file": {
+      "title": "Permit and Registration File (Core 03)",
+      "aiPrompt": "Two government permits displayed side by side or on separate pages. LEFT/PAGE 1: 'REGISTERED RELATIONSHIP — VISITATION PERMIT' on formal paper, with a green 'APPROVED' stamp. Key visible text: 'Valid Hours: 08:00–20:00'. A small passport-style photo of a young man. RIGHT/PAGE 2: 'OVERTIME WORK PERMIT' on similar paper but with a prominent red 'EXPIRED' stamp across it. An older man's photo. Both documents have official watermarks and filing numbers.",
+      "artNotes": "Core 03 evidence. TWO-PAGE document. Page 0 has two hotspots: (1) the registered relationship confirmation, (2) the daytime-only hours restriction. Page 1 has one hotspot: the expired status of Ivan's overtime permit. The contrast between 'APPROVED' and 'EXPIRED' stamps is visually important."
+    },
+    "ev_factory_timesheet": {
+      "title": "Factory 12 Timesheet (Core 03)",
+      "aiPrompt": "An industrial timesheet — a grid on thick, slightly grease-stained paper. Header: 'FACTORY 12 — DAILY ATTENDANCE LOG'. Rows show worker names with clock-in and clock-out times. One row is relevant: 'CEROVIC, I. — IN: 14:00 — OUT: 22:40' with a foreman's signature next to it. A handwritten note in the margin reads 'Emergency boiler maintenance — approved'. The paper feels industrial — fingerprint smudges, a ring from a coffee mug.",
+      "artNotes": "Core 03 evidence. One hotspot area on Ivan's row showing his legitimate clock-out time with foreman confirmation. This evidence clears Ivan. The industrial, lived-in feel of the document contrasts with the clean government forms — this comes from a real workplace. Single page."
+    }
+  }
+}

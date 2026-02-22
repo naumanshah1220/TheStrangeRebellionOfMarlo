@@ -29,7 +29,7 @@ public class PlayerProgressManager : SingletonMonoBehaviour<PlayerProgressManage
     [Header("Family Settings")]
     public float hungerDecreasePerDay = 20f;
     public float starvingThreshold = 30f;
-    public float baseIncome = 50f;
+    public float baseIncome = 35f;
     public float baseDailyExpense = 30f;
 
     public event Action<float> OnMoneyEarned;
@@ -147,10 +147,23 @@ public class PlayerProgressManager : SingletonMonoBehaviour<PlayerProgressManage
     {
         // Add money to savings
         familyStatus.savings += amount;
-        
+
         // Notify listeners
         OnMoneyEarned?.Invoke(amount);
-        
+
         Debug.Log($"Added reward: {amount}. New savings: {familyStatus.savings}");
+    }
+
+    /// <summary>
+    /// Apply a bonus from the overseer's morning letter. Credits savings and fires OnMoneyEarned.
+    /// </summary>
+    public void ApplyBonus(float amount)
+    {
+        if (amount <= 0f) return;
+
+        familyStatus.savings += amount;
+        OnMoneyEarned?.Invoke(amount);
+
+        Debug.Log($"[PlayerProgressManager] Bonus applied: +${amount:F0}. New savings: ${familyStatus.savings:F0}");
     }
 } 

@@ -1,0 +1,525 @@
+{
+  "caseID": "core_02",
+  "title": "The Pumpkin Brawl",
+  "description": "Two men from the Block D community garden got into a fight over their prize pumpkins. One pumpkin was destroyed, a market stall was damaged, and both men are blaming each other. Determine who started the altercation.",
+  "caseType": "Core",
+  "firstAvailableDay": 2,
+  "coreSequenceNumber": 2,
+  "reward": 65.0,
+  "extraRewardForState": 0.0,
+  "suspicionReduction": 0.0,
+  "requiredPreviousCaseIds": ["core_01"],
+  "unlocksNextCaseIds": ["core_03"],
+
+  "cardImagePath": "Cases/core_02/card",
+
+  "lawBroken": "Agitation (Deviation from the Fifth Tenet §5)",
+  "involvesResistance": false,
+  "resistanceChoice": "",
+  "stateChoice": "Convict the aggressor who started the fight and destroyed the pumpkin.",
+
+  "minDiscoveredCluesToAllowCommit": 3,
+  "allowCommitWithLowConfidence": true,
+
+  "clueVerdictMappings": [
+    { "clueId": "clue_pumpkin_destroyed", "slotId": "violation", "optionId": "agitation", "label": "Agitation" },
+    { "clueId": "clue_pumpkin_destroyed", "slotId": "violation", "optionId": "destruction_of_property", "label": "Destruction of Property" },
+    { "clueId": "clue_borislav_started", "slotId": "violation", "optionId": "agitation", "label": "Agitation" },
+    { "clueId": "clue_stall_damage", "slotId": "violation", "optionId": "destruction_of_property", "label": "Destruction of Property" }
+  ],
+
+  "suspects": [
+    {
+      "citizenID": "citizen_borislav",
+      "firstName": "Borislav",
+      "lastName": "Kovac",
+      "picturePath": "Portraits/citizen_borislav",
+      "dateOfBirth": "11/03/1975",
+      "gender": "Male",
+      "ethnicity": "Caucasian",
+      "maritalStatus": "Married",
+      "address": "22 Garden Row, Block D",
+      "occupation": "Bricklayer",
+      "nervousnessLevel": 0.50,
+      "initialStress": 0.35,
+      "isGuilty": true,
+      "criminalHistory": [],
+      "tagInteractions": [
+        {
+          "tagId": "clue_enforcer_report",
+          "tagQuestion": "The enforcer report says you and Goran were fighting in the market square. What happened?",
+          "responses": [
+            {
+              "responseSequence": ["Goran started it. He's been talking trash about my pumpkin for weeks.", "He said mine was rotten inside. In front of everyone. I pushed him. That's it."],
+              "isLie": true,
+              "stressImpact": 0.06,
+              "responseType": "Defensive",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": [],
+          "contradictedByEvidenceTagIds": ["clue_borislav_started"],
+          "contradictionResponse": {
+            "responseSequence": ["Okay, maybe I threw the first punch.", "But he had it coming. You should have heard what he said about my pumpkin."],
+            "isLie": false,
+            "stressImpact": 0.10,
+            "responseType": "Defensive",
+            "clickableClues": []
+          },
+          "responseVariants": []
+        },
+        {
+          "tagId": "clue_pumpkin_destroyed",
+          "tagQuestion": "Goran's pumpkin was smashed during the fight. Did you destroy it?",
+          "responses": [
+            {
+              "responseSequence": ["It fell off the table during the scuffle. I didn't smash it on purpose.", "Things got knocked around. It was chaos."],
+              "isLie": true,
+              "stressImpact": 0.08,
+              "responseType": "Evasive",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": [],
+          "contradictedByEvidenceTagIds": ["clue_borislav_started"],
+          "contradictionResponse": {
+            "responseSequence": ["Fine. I grabbed it and threw it on the ground.", "His pumpkin was bigger than mine. I was angry. It was stupid."],
+            "isLie": false,
+            "stressImpact": 0.12,
+            "responseType": "Emotional",
+            "clickableClues": [
+              {
+                "clueId": "clue_borislav_motive",
+                "clickableText": "His pumpkin was bigger than mine",
+                "noteText": "<person>Borislav</person> admits he destroyed <person>Goran</person>'s pumpkin out of jealousy because it was larger than his own",
+                "highlightColor": { "r": 1.0, "g": 0.92, "b": 0.0, "a": 1.0 },
+                "oneTimeOnly": true
+              }
+            ]
+          }
+        },
+        {
+          "tagId": "clue_stall_damage",
+          "tagQuestion": "A market stall was damaged in the fight. Who knocked it over?",
+          "responses": [
+            {
+              "responseSequence": ["That was Goran. He shoved me into it.", "I was just defending myself."],
+              "isLie": true,
+              "stressImpact": 0.06,
+              "responseType": "Defensive",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        },
+        {
+          "tagId": "clue_borislav_started",
+          "tagQuestion": "A witness says you threw the first punch. Is that true?",
+          "responses": [
+            {
+              "responseSequence": ["Who said that? Was it Mara? She's always taking Goran's side.", "I pushed him first, maybe. But he provoked me."],
+              "isLie": false,
+              "stressImpact": 0.10,
+              "responseType": "Defensive",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        },
+        {
+          "tagId": "clue_goran_injuries",
+          "tagQuestion": "Goran has bruises on his face and a cut lip. You gave him those?",
+          "responses": [
+            {
+              "responseSequence": ["He hit me too! Look at my knuckles.", "It was a fight. We both got hurt."],
+              "isLie": false,
+              "stressImpact": 0.06,
+              "responseType": "Defensive",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        },
+        {
+          "tagId": "clue_borislav_motive",
+          "tagQuestion": "You admit you were jealous of his pumpkin. That's why you started the fight?",
+          "responses": [
+            {
+              "responseSequence": ["Jealous is a strong word.", "I spent three months on that pumpkin. He spent three months making sure everyone knew his was bigger. It got to me."],
+              "isLie": false,
+              "stressImpact": 0.06,
+              "responseType": "Emotional",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        }
+      ],
+      "lawyeredUpResponses": [
+        "It was a fight over a pumpkin. Are we really doing this?",
+        "I'm not saying anything else about a vegetable.",
+        "Just charge me and let me go home."
+      ],
+      "rattledResponses": [
+        "It was stupid. The whole thing was stupid.",
+        "My wife is going to kill me.",
+        "Over a pumpkin. I'm here over a pumpkin."
+      ],
+      "shutdownResponses": [
+        "...",
+        "I'm done.",
+        "It's a pumpkin. That's all I have to say."
+      ]
+    },
+    {
+      "citizenID": "citizen_goran",
+      "firstName": "Goran",
+      "lastName": "Petrovic",
+      "picturePath": "Portraits/citizen_goran",
+      "dateOfBirth": "04/19/1977",
+      "gender": "Male",
+      "ethnicity": "Caucasian",
+      "maritalStatus": "Married",
+      "address": "24 Garden Row, Block D",
+      "occupation": "Pipe Fitter",
+      "nervousnessLevel": 0.35,
+      "initialStress": 0.20,
+      "isGuilty": false,
+      "criminalHistory": [],
+      "tagInteractions": [
+        {
+          "tagId": "clue_enforcer_report",
+          "tagQuestion": "The enforcer report says you were involved in a public fight. What happened?",
+          "responses": [
+            {
+              "responseSequence": ["Borislav punched me. Out of nowhere.", "We were showing our pumpkins from the community garden. People were looking, having a nice time. Then he just snapped."],
+              "isLie": false,
+              "stressImpact": 0.04,
+              "responseType": "Normal",
+              "clickableClues": [
+                {
+                  "clueId": "clue_goran_account",
+                  "clickableText": "he just snapped",
+                  "noteText": "<person>Goran</person> says <person>Borislav</person> attacked him unprovoked while they were showing pumpkins at the community garden display",
+                  "highlightColor": { "r": 1.0, "g": 0.92, "b": 0.0, "a": 1.0 },
+                  "oneTimeOnly": true
+                }
+              ]
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        },
+        {
+          "tagId": "clue_pumpkin_destroyed",
+          "tagQuestion": "Your pumpkin was destroyed during the fight. Did Borislav do that?",
+          "responses": [
+            {
+              "responseSequence": ["He grabbed it off the table and slammed it on the ground.", "Three months of work. Gone. Because he couldn't stand that mine was bigger."],
+              "isLie": false,
+              "stressImpact": 0.06,
+              "responseType": "Emotional",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        },
+        {
+          "tagId": "clue_stall_damage",
+          "tagQuestion": "A market stall was knocked over. Did you cause that?",
+          "responses": [
+            {
+              "responseSequence": ["I was trying to get away from him. I backed into it.", "I didn't mean to damage anything. He was swinging at me."],
+              "isLie": false,
+              "stressImpact": 0.04,
+              "responseType": "Normal",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        },
+        {
+          "tagId": "clue_borislav_started",
+          "tagQuestion": "Did you provoke Borislav in any way?",
+          "responses": [
+            {
+              "responseSequence": ["I was just standing there with my pumpkin. People were complimenting it.", "Maybe he felt embarrassed. But I never said a word to him about his."],
+              "isLie": false,
+              "stressImpact": 0.03,
+              "responseType": "Normal",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        },
+        {
+          "tagId": "clue_goran_injuries",
+          "tagQuestion": "Tell me about your injuries.",
+          "responses": [
+            {
+              "responseSequence": ["Bruises on my face, cut lip, sore ribs.", "I fought back. I'm not going to stand there and get beaten. But I didn't start it."],
+              "isLie": false,
+              "stressImpact": 0.04,
+              "responseType": "Normal",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        }
+      ],
+      "lawyeredUpResponses": [
+        "I defended myself. That's not a crime.",
+        "Ask the witness. She saw everything.",
+        "I've told you the truth. What more do you need?"
+      ],
+      "rattledResponses": [
+        "He destroyed my pumpkin. Three months of work.",
+        "I just want this to be over.",
+        "We're neighbors. We have to see each other every day."
+      ],
+      "shutdownResponses": [
+        "I've said everything.",
+        "Talk to the witness.",
+        "..."
+      ]
+    },
+    {
+      "citizenID": "citizen_mara",
+      "firstName": "Mara",
+      "lastName": "Tomic",
+      "picturePath": "Portraits/citizen_mara",
+      "dateOfBirth": "07/12/1969",
+      "gender": "Female",
+      "ethnicity": "Caucasian",
+      "maritalStatus": "Widowed",
+      "address": "18 Garden Row, Block D",
+      "occupation": "Retired Seamstress",
+      "nervousnessLevel": 0.20,
+      "initialStress": 0.10,
+      "isGuilty": false,
+      "criminalHistory": [],
+      "tagInteractions": [
+        {
+          "tagId": "clue_enforcer_report",
+          "tagQuestion": "You were at the market when the fight happened. What did you see?",
+          "responses": [
+            {
+              "responseSequence": ["Both boys had their pumpkins on display. People were admiring them.", "Goran's was bigger. You could see Borislav getting redder and redder. Then he just went at him."],
+              "isLie": false,
+              "stressImpact": 0.02,
+              "responseType": "Normal",
+              "clickableClues": [
+                {
+                  "clueId": "clue_borislav_started",
+                  "clickableText": "he just went at him",
+                  "noteText": "Witness <person>Mara Tomic</person> confirms <person>Borislav</person> attacked <person>Goran</person> first after becoming visibly angry that Goran's pumpkin was larger",
+                  "highlightColor": { "r": 1.0, "g": 0.92, "b": 0.0, "a": 1.0 },
+                  "oneTimeOnly": true
+                }
+              ]
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        },
+        {
+          "tagId": "clue_pumpkin_destroyed",
+          "tagQuestion": "Did you see what happened to the pumpkin?",
+          "responses": [
+            {
+              "responseSequence": ["Borislav grabbed Goran's pumpkin and threw it on the cobblestones.", "Smashed it to pieces. The seeds went everywhere. Goran looked like he was going to cry."],
+              "isLie": false,
+              "stressImpact": 0.02,
+              "responseType": "Normal",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        },
+        {
+          "tagId": "clue_stall_damage",
+          "tagQuestion": "A market stall was damaged. How did that happen?",
+          "responses": [
+            {
+              "responseSequence": ["Goran was backing away from Borislav and bumped into old Radko's vegetable stall.", "Knocked the whole thing over. Radko was furious. But it wasn't Goran's fault — he was trying to get away."],
+              "isLie": false,
+              "stressImpact": 0.02,
+              "responseType": "Normal",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        },
+        {
+          "tagId": "clue_goran_injuries",
+          "tagQuestion": "Who got hurt worse in the fight?",
+          "responses": [
+            {
+              "responseSequence": ["Goran. Borislav is bigger. He's a bricklayer — arms like logs.", "Goran got a few hits in, but Borislav did most of the damage."],
+              "isLie": false,
+              "stressImpact": 0.02,
+              "responseType": "Normal",
+              "clickableClues": [
+                {
+                  "clueId": "clue_goran_injuries",
+                  "clickableText": "Borislav did most of the damage",
+                  "noteText": "Witness <person>Mara</person> confirms <person>Borislav</person> caused more physical harm to <person>Goran</person> during the fight",
+                  "highlightColor": { "r": 0.3, "g": 0.8, "b": 1.0, "a": 1.0 },
+                  "oneTimeOnly": true
+                }
+              ]
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        },
+        {
+          "tagId": "clue_borislav_started",
+          "tagQuestion": "Are you certain Borislav started the fight?",
+          "responses": [
+            {
+              "responseSequence": ["I was standing three meters away. I saw the whole thing.", "Borislav threw the first punch. Then he grabbed the pumpkin. Then the enforcers came."],
+              "isLie": false,
+              "stressImpact": 0.02,
+              "responseType": "Normal",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        }
+      ],
+      "lawyeredUpResponses": [
+        "I'm just a witness. I told you what I saw.",
+        "Do you need me to write it down? I can write it down.",
+        "I'm not involved. I was just watching."
+      ],
+      "rattledResponses": [
+        "They're both good boys really. This was just silly.",
+        "Garden disputes happen every year. Usually not this bad.",
+        "Am I in trouble? I just came to watch the pumpkins."
+      ],
+      "shutdownResponses": [
+        "I've said what I saw.",
+        "I'm an old woman. I need to go home.",
+        "..."
+      ]
+    }
+  ],
+  "culpritCitizenID": "citizen_borislav",
+
+  "evidences": [
+    {
+      "id": "ev_case_brief",
+      "title": "Bureau Case File #1042",
+      "description": "Official case assignment from the Bureau of Pattern Compliance. Contains the case summary, suspect information, and evidence inventory.",
+      "type": "Document",
+      "cardImagePath": "Evidence/core_02/ev_case_brief_card",
+      "hotspots": []
+    },
+    {
+      "id": "ev_enforcer_report",
+      "title": "Enforcer Patrol Report",
+      "description": "The responding enforcer's report documenting the disturbance at the Block D community market. Includes descriptions of the scene, injuries observed, and property damage.",
+      "type": "Document",
+      "cardImagePath": "Evidence/core_02/ev_enforcer_report_card",
+      "hotspots": [
+        {
+          "clueId": "clue_enforcer_report",
+          "noteText": "Enforcers responded to a disturbance at the <location>Block D community market</location> involving <person>Borislav Kovac</person> and <person>Goran Petrovic</person> fighting near the garden display",
+          "pageIndex": 0,
+          "positionX": 0.5,
+          "positionY": 0.25,
+          "width": 0.7,
+          "height": 0.12
+        },
+        {
+          "clueId": "clue_goran_injuries",
+          "noteText": "<person>Goran Petrovic</person> sustained bruises to the face, a cut lip, and reported sore ribs. <person>Borislav Kovac</person> had bruised knuckles.",
+          "pageIndex": 0,
+          "positionX": 0.5,
+          "positionY": 0.55,
+          "width": 0.7,
+          "height": 0.12
+        }
+      ]
+    },
+    {
+      "id": "ev_damage_assessment",
+      "title": "Property Damage Assessment",
+      "description": "An assessment of damage to the market area including a smashed pumpkin and a knocked-over vegetable stall belonging to vendor Radko.",
+      "type": "Document",
+      "cardImagePath": "Evidence/core_02/ev_damage_assessment_card",
+      "hotspots": [
+        {
+          "clueId": "clue_pumpkin_destroyed",
+          "noteText": "One large pumpkin belonging to <person>Goran Petrovic</person> was found smashed on the cobblestones near the display table",
+          "pageIndex": 0,
+          "positionX": 0.5,
+          "positionY": 0.30,
+          "width": 0.7,
+          "height": 0.12
+        },
+        {
+          "clueId": "clue_stall_damage",
+          "noteText": "Vendor <person>Radko</person>'s vegetable stall was knocked over during the altercation. Estimated damage: 15 knots in lost produce",
+          "pageIndex": 0,
+          "positionX": 0.5,
+          "positionY": 0.60,
+          "width": 0.7,
+          "height": 0.12
+        }
+      ]
+    }
+  ],
+
+  "steps": [
+    {
+      "stepId": "step_read_reports",
+      "stepNumber": 1,
+      "description": "Read the enforcer report and damage assessment to understand what happened",
+      "requiredClueIds": [],
+      "unlockedClueIds": ["clue_enforcer_report", "clue_pumpkin_destroyed"]
+    },
+    {
+      "stepId": "step_interrogate_witness",
+      "stepNumber": 2,
+      "description": "Interrogate the witness to establish who started the fight",
+      "requiredClueIds": ["clue_enforcer_report"],
+      "unlockedClueIds": ["clue_borislav_started"]
+    },
+    {
+      "stepId": "step_interrogate_suspects",
+      "stepNumber": 3,
+      "description": "Confront both suspects with the evidence and witness testimony",
+      "requiredClueIds": ["clue_borislav_started"],
+      "unlockedClueIds": []
+    }
+  ],
+
+  "verdictSchema": {
+    "sentenceTemplate": "I accuse {suspect} of Deviation: {violation}.",
+    "slots": [
+      {
+        "slotId": "suspect",
+        "displayLabel": "Who",
+        "type": "Suspect",
+        "required": true,
+        "optionSource": "CaseOnly"
+      },
+      {
+        "slotId": "violation",
+        "displayLabel": "Deviation",
+        "type": "Violation",
+        "required": false,
+        "optionSource": "FromDiscoveredTags"
+      }
+    ]
+  },
+
+  "solutions": [
+    {
+      "answers": [
+        { "slotId": "suspect", "acceptedOptionIds": ["citizen_borislav"] },
+        { "slotId": "violation", "acceptedOptionIds": ["agitation", "destruction_of_property"] }
+      ],
+      "minConfidenceToApprove": 70
+    }
+  ]
+}

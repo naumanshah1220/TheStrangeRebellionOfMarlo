@@ -9,7 +9,8 @@
         "body": "Marlo,\n\nThe children are excited about your new position. Eli keeps telling his friends that his father catches criminals. I didn't correct him.\n\nWe believe in you. Come home safe.\n\n\u2014 Lena"
       },
       "unlockNotices": [],
-      "caseOutcomeHeadlines": []
+      "caseOutcomeHeadlines": [],
+      "newspaperArticles": []
     },
     {
       "day": 2,
@@ -25,6 +26,26 @@
           "caseId": "core_01",
           "headlineIfSolved": "PATTERN VIOLATION RESOLVED: LEDGER THIEF APPREHENDED",
           "headlineIfUnsolved": "MISSING LEDGER CASE GROWS COLD \u2014 BUREAU UNDER SCRUTINY",
+          "priority": 2
+        }
+      ],
+      "newspaperArticles": [
+        {
+          "headline": "COUNCIL APPROVES NEW SURVEILLANCE MEASURES",
+          "body": "Citizens urged to report pattern violations in their districts. The Council spokesperson stated that vigilance is every citizen's duty.",
+          "category": "regime_propaganda",
+          "priority": 5
+        },
+        {
+          "headline": "BLOCK C RATIONS INCREASED BY 2%",
+          "body": "The Council's generosity knows no bounds. Workers in Block C will receive slightly larger food allotments starting next week.",
+          "category": "world_event",
+          "priority": 3
+        },
+        {
+          "headline": "BUREAU EFFICIENCY REPORT: ANALYSTS COMMENDED",
+          "body": "The Pattern Bureau reported a 12% increase in case throughput this quarter. Senior Overseer Harlan praised the dedication of frontline analysts.",
+          "category": "regime_propaganda",
           "priority": 2
         }
       ]
@@ -46,6 +67,26 @@
           "headlineIfSolved": "SECOND PATTERN OFFENDER IDENTIFIED THROUGH BUREAU ANALYSIS",
           "headlineIfUnsolved": "UNSOLVED CASES MOUNT AS BUREAU RESOURCES STRAINED",
           "priority": 2
+        }
+      ],
+      "newspaperArticles": [
+        {
+          "headline": "DISTRICT 7 CURFEW EXTENDED AFTER UNREST",
+          "body": "Following disturbances in the market district, the Council has extended curfew hours. Patrols have been doubled. Citizens are advised to remain indoors after dark.",
+          "category": "world_event",
+          "priority": 5
+        },
+        {
+          "headline": "NEW PATTERN INTERPRETATION GUIDELINES ISSUED",
+          "body": "The Bureau of Pattern Compliance has released updated guidelines for the Third and Fifth Violations. All analysts are expected to review and comply.",
+          "category": "regime_propaganda",
+          "priority": 3
+        },
+        {
+          "headline": "FACTORY OUTPUT UP IN SECTOR 9",
+          "body": "Production quotas exceeded for the third consecutive month. Workers credited the Council's incentive program.",
+          "category": "world_event",
+          "priority": 1
         }
       ]
     }

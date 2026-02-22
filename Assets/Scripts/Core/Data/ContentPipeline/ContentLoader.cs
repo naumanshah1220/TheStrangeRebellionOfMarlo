@@ -578,21 +578,11 @@ public static class ContentLoader
                     displayLabel = sj.displayLabel,
                     type = ParseEnum(sj.type, VerdictSlotType.Suspect),
                     required = sj.required,
-                    minJustificationTags = sj.minJustificationTags,
                     tagTypesAccepted = sj.tagTypesAccepted,
                     optionSource = ParseEnum(sj.optionSource, OptionSource.CaseAndGlobal),
                     customPoolId = sj.customPoolId
                 });
             }
-        }
-
-        if (json.justification != null)
-        {
-            schema.justification = new JustificationDefinition
-            {
-                required = json.justification.required,
-                minRequired = json.justification.minRequired
-            };
         }
 
         // globalPools stays null for JSON cases — only SO-authored schemas have pre-built pools
@@ -610,8 +600,6 @@ public static class ContentLoader
             var sj = jsonList[i];
             var solution = new CaseSolution
             {
-                requiredJustificationTagIds = sj.requiredJustificationTagIds,
-                bonusJustificationTagIds = sj.bonusJustificationTagIds,
                 minConfidenceToApprove = sj.minConfidenceToApprove
             };
 

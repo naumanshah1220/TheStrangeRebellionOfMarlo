@@ -1,0 +1,595 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Marlo Case File",
+  "description": "Schema for case JSON files in The Strange Rebellion of Marlo",
+  "type": "object",
+  "required": [
+    "caseID", "title", "description", "caseType",
+    "firstAvailableDay", "reward",
+    "lawBroken",
+    "suspects", "culpritCitizenID",
+    "evidences", "steps",
+    "verdictSchema", "solutions",
+    "minDiscoveredCluesToAllowCommit"
+  ],
+  "properties": {
+    "caseID": {
+      "type": "string",
+      "pattern": "^(core|secondary)_\\d{2}$",
+      "description": "Unique case identifier (e.g. core_01, secondary_05)"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 100
+    },
+    "description": {
+      "type": "string",
+      "minLength": 20,
+      "maxLength": 500
+    },
+    "caseType": {
+      "type": "string",
+      "enum": ["Core", "Secondary"]
+    },
+    "firstAvailableDay": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 30
+    },
+    "coreSequenceNumber": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Ordering for core cases (0 for secondary)"
+    },
+    "reward": {
+      "type": "number",
+      "minimum": 0
+    },
+    "extraRewardForState": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Bonus reward for siding with the Council"
+    },
+    "suspicionReduction": {
+      "type": "number",
+      "minimum": 0
+    },
+    "requiredPreviousCaseIds": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "unlocksNextCaseIds": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "cardImagePath": {
+      "type": "string",
+      "description": "Resources/ path for the case card sprite"
+    },
+    "fullCardPrefabPath": {
+      "type": "string",
+      "description": "Resources/ path for the expanded card prefab"
+    },
+    "lawBroken": {
+      "type": "string",
+      "description": "Human-readable Tenet reference (e.g. 'Accumulation (Deviation from the Second Tenet §2)')"
+    },
+    "involvesResistance": {
+      "type": "boolean",
+      "default": false
+    },
+    "resistanceChoice": {
+      "type": "string",
+      "description": "Description of the Resistance-aligned choice"
+    },
+    "stateChoice": {
+      "type": "string",
+      "description": "Description of the Council-aligned choice"
+    },
+    "minDiscoveredCluesToAllowCommit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 20,
+      "description": "Minimum clues needed before player can submit verdict"
+    },
+    "allowCommitWithLowConfidence": {
+      "type": "boolean",
+      "default": true
+    },
+    "clueVerdictMappings": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/ClueVerdictMapping" },
+      "description": "Maps discovered clues to verdict option availability"
+    },
+    "suspects": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Citizen" },
+      "minItems": 1,
+      "maxItems": 5,
+      "description": "Case suspects (1-5)"
+    },
+    "culpritCitizenID": {
+      "type": "string",
+      "description": "citizenID of the guilty suspect"
+    },
+    "evidences": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Evidence" },
+      "minItems": 1,
+      "description": "Primary evidence cards"
+    },
+    "extraEvidences": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Evidence" },
+      "description": "Evidence unlocked through investigation"
+    },
+    "steps": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/CaseStep" },
+      "minItems": 1,
+      "description": "Investigation milestones"
+    },
+    "verdictSchema": { "$ref": "#/$defs/VerdictSchema" },
+    "solutions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/CaseSolution" },
+      "minItems": 1,
+      "description": "Accepted verdict solutions"
+    }
+  },
+  "$defs": {
+    "ClueVerdictMapping": {
+      "type": "object",
+      "required": ["clueId", "slotId", "optionId", "label"],
+      "properties": {
+        "clueId": { "type": "string" },
+        "slotId": { "type": "string" },
+        "optionId": { "type": "string" },
+        "label": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "Citizen": {
+      "type": "object",
+      "required": [
+        "citizenID", "firstName", "lastName",
+        "dateOfBirth", "address", "occupation",
+        "nervousnessLevel", "initialStress", "isGuilty",
+        "tagInteractions"
+      ],
+      "properties": {
+        "citizenID": {
+          "type": "string",
+          "pattern": "^citizen_[a-z_]+$"
+        },
+        "firstName": { "type": "string", "minLength": 1 },
+        "lastName": { "type": "string", "minLength": 1 },
+        "picturePath": { "type": "string" },
+        "dateOfBirth": {
+          "type": "string",
+          "pattern": "^\\d{2}/\\d{2}/\\d{4}$",
+          "description": "MM/DD/YYYY format"
+        },
+        "gender": {
+          "type": "string",
+          "enum": ["Male", "Female"],
+          "default": "Male"
+        },
+        "ethnicity": {
+          "type": "string",
+          "enum": ["Caucasian", "Hispanic", "Black", "Asian", "MiddleEastern", "Mixed"],
+          "default": "Caucasian"
+        },
+        "maritalStatus": {
+          "type": "string",
+          "enum": ["Single", "Married", "Divorced", "Widowed"],
+          "default": "Single"
+        },
+        "address": { "type": "string" },
+        "occupation": { "type": "string" },
+        "nervousnessLevel": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "initialStress": {
+          "type": "number",
+          "minimum": -1.0,
+          "maximum": 1.0,
+          "description": "-1 means auto-calculate from nervousnessLevel"
+        },
+        "isGuilty": { "type": "boolean" },
+        "criminalHistory": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/CriminalRecord" }
+        },
+        "fingerprintPaths": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "tagInteractions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/TagInteraction" },
+          "minItems": 1
+        },
+        "genericQuestions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/GenericQuestion" }
+        },
+        "genericResponses": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/TagResponse" }
+        },
+        "lawyeredUpResponses": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "rattledResponses": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "shutdownResponses": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "CriminalRecord": {
+      "type": "object",
+      "required": ["offense", "date", "description", "severity"],
+      "properties": {
+        "offense": { "type": "string" },
+        "date": { "type": "string" },
+        "description": { "type": "string" },
+        "severity": {
+          "type": "string",
+          "enum": ["Minor", "Moderate", "Major", "Severe"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "GenericQuestion": {
+      "type": "object",
+      "required": ["tagType", "questions"],
+      "properties": {
+        "tagType": { "type": "string" },
+        "questions": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "Evidence": {
+      "type": "object",
+      "required": ["id", "title", "description", "type"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^ev_[a-z0-9_]+$"
+        },
+        "title": { "type": "string", "minLength": 1 },
+        "description": { "type": "string", "minLength": 10 },
+        "type": {
+          "type": "string",
+          "enum": ["Document", "Photo", "Disc", "Item"]
+        },
+        "cardImagePath": { "type": "string" },
+        "fullCardPrefabPath": { "type": "string" },
+        "foreignSubstance": {
+          "type": "string",
+          "enum": [
+            "None", "Ink", "Paint", "Chemical",
+            "Blood", "Soil", "Gunpowder", "Adhesive",
+            "Food", "Cosmetic", "Industrial", "Pharmaceutical"
+          ],
+          "default": "None"
+        },
+        "associatedAppId": {
+          "type": "string",
+          "description": "For Disc-type evidence, the computer app ID"
+        },
+        "hotspots": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/EvidenceHotspot" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "EvidenceHotspot": {
+      "type": "object",
+      "required": ["clueId", "noteText", "pageIndex"],
+      "properties": {
+        "clueId": { "type": "string" },
+        "noteText": {
+          "type": "string",
+          "description": "Supports <person>, <location>, <item> markup tags"
+        },
+        "pageIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "positionX": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "default": 0.5
+        },
+        "positionY": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "default": 0.5
+        },
+        "width": {
+          "type": "number",
+          "minimum": 0.01,
+          "maximum": 1.0,
+          "default": 0.3
+        },
+        "height": {
+          "type": "number",
+          "minimum": 0.01,
+          "maximum": 1.0,
+          "default": 0.1
+        }
+      },
+      "additionalProperties": false
+    },
+    "TagInteraction": {
+      "type": "object",
+      "required": ["tagId", "tagQuestion", "responses"],
+      "properties": {
+        "tagId": { "type": "string" },
+        "tagQuestion": { "type": "string", "minLength": 5 },
+        "responses": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/TagResponse" },
+          "minItems": 1
+        },
+        "unlocksTruthForTagIds": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "unlockedInitialResponseIfPreviouslyDenied": {
+          "$ref": "#/$defs/TagResponse"
+        },
+        "unlockedInitialResponseIfNotDenied": {
+          "$ref": "#/$defs/TagResponse"
+        },
+        "unlockedFollowupResponses": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/TagResponse" }
+        },
+        "contradictedByEvidenceTagIds": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "contradictionResponse": {
+          "$ref": "#/$defs/TagResponse"
+        },
+        "responseVariants": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ResponseVariantGroup" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "TagResponse": {
+      "type": "object",
+      "required": ["responseSequence", "isLie"],
+      "properties": {
+        "responseSequence": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "isLie": { "type": "boolean" },
+        "responseDelayOverride": {
+          "type": "number",
+          "minimum": 0
+        },
+        "stressImpact": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "default": 0.05
+        },
+        "responseType": {
+          "type": "string",
+          "enum": ["Normal", "Evasive", "Defensive", "Emotional", "Hostile"],
+          "default": "Normal"
+        },
+        "clickableClues": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ClickableClue" }
+        },
+        "conditions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ResponseCondition" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "ClickableClue": {
+      "type": "object",
+      "required": ["clueId", "clickableText", "noteText"],
+      "properties": {
+        "clueId": { "type": "string" },
+        "clickableText": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Must be an exact substring of one responseSequence line"
+        },
+        "noteText": {
+          "type": "string",
+          "description": "Supports <person>, <location>, <item> markup tags"
+        },
+        "highlightColor": { "$ref": "#/$defs/Color" },
+        "oneTimeOnly": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "Color": {
+      "type": "object",
+      "required": ["r", "g", "b", "a"],
+      "properties": {
+        "r": { "type": "number", "minimum": 0, "maximum": 1 },
+        "g": { "type": "number", "minimum": 0, "maximum": 1 },
+        "b": { "type": "number", "minimum": 0, "maximum": 1 },
+        "a": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "ResponseCondition": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "TagAsked", "TagNotAsked",
+            "ClueDiscovered", "ClueNotDiscovered",
+            "StressAbove", "StressBelow",
+            "SuspectInterrogated", "SuspectNotInterrogated"
+          ]
+        },
+        "targetId": { "type": "string" },
+        "minCount": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        },
+        "threshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "ResponseVariantGroup": {
+      "type": "object",
+      "required": ["variantId", "responses", "conditions"],
+      "properties": {
+        "variantId": { "type": "string" },
+        "responses": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/TagResponse" },
+          "minItems": 1
+        },
+        "conditions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ResponseCondition" },
+          "minItems": 1
+        },
+        "weight": {
+          "type": "number",
+          "minimum": 0,
+          "default": 1.0
+        }
+      },
+      "additionalProperties": false
+    },
+    "CaseStep": {
+      "type": "object",
+      "required": ["stepId", "stepNumber", "description"],
+      "properties": {
+        "stepId": { "type": "string" },
+        "stepNumber": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "description": { "type": "string" },
+        "requiredClueIds": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "unlockedClueIds": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "VerdictSchema": {
+      "type": "object",
+      "required": ["sentenceTemplate", "slots"],
+      "properties": {
+        "sentenceTemplate": {
+          "type": "string",
+          "description": "Template with {slotId} placeholders"
+        },
+        "slots": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/VerdictSlot" },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "VerdictSlot": {
+      "type": "object",
+      "required": ["slotId", "displayLabel", "type", "required"],
+      "properties": {
+        "slotId": { "type": "string" },
+        "displayLabel": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": ["Suspect", "Violation", "Evidence", "Motive", "Custom"]
+        },
+        "required": { "type": "boolean" },
+        "tagTypesAccepted": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "optionSource": {
+          "type": "string",
+          "enum": ["CaseOnly", "GlobalOnly", "CaseAndGlobal", "FromDiscoveredTags"],
+          "default": "CaseAndGlobal"
+        },
+        "customPoolId": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "CaseSolution": {
+      "type": "object",
+      "required": ["answers", "minConfidenceToApprove"],
+      "properties": {
+        "answers": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/SlotAnswer" },
+          "minItems": 1
+        },
+        "minConfidenceToApprove": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        }
+      },
+      "additionalProperties": false
+    },
+    "SlotAnswer": {
+      "type": "object",
+      "required": ["slotId", "acceptedOptionIds"],
+      "properties": {
+        "slotId": { "type": "string" },
+        "acceptedOptionIds": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

@@ -10,7 +10,6 @@ public class VerdictSlotDefinition
     public string displayLabel;           // e.g. "Who", "How"
     public VerdictSlotType type;
     public bool required = true;          // must be filled
-    public int minJustificationTags = 0;  // tags player must attach to this slot
     public string[] tagTypesAccepted;     // e.g. ["person","item","location"] for drag behavior
     public OptionSource optionSource = OptionSource.CaseAndGlobal;
     public string customPoolId;           // for Custom
@@ -38,14 +37,6 @@ public class CaseSolution
     }
 
     public List<SlotAnswer> answers = new List<SlotAnswer>();
-    public string[] requiredJustificationTagIds; // player must have discovered and/or attach to commit
-    public string[] bonusJustificationTagIds; // optional "damning" clues for a score boost
-    public int minConfidenceToApprove = 100;     // if you compute confidence
+    public int minConfidenceToApprove = 100;
 }
 
-[System.Serializable]
-public class JustificationDefinition
-{
-    public bool required = true;
-    public int minRequired = 1;
-}

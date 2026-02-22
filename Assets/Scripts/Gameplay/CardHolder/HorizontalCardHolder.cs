@@ -548,6 +548,18 @@ public class HorizontalCardHolder : MonoBehaviour
         card.BeginDragEvent.AddListener(BeginDrag);
         card.EndDragEvent.AddListener(EndDrag);
 
+        // Clean up any stale LayoutElement constraints from a previous holder's squeeze
+        if (card.transform.parent != null)
+        {
+            var le = card.transform.parent.GetComponent<UnityEngine.UI.LayoutElement>();
+            if (le != null)
+            {
+                le.minWidth = -1f;
+                le.preferredWidth = -1f;
+                le.flexibleWidth = -1f;
+            }
+        }
+
         // Determine card location and scale based on visual mode
         if (ShowsSmallCards())
         {
@@ -560,9 +572,9 @@ public class HorizontalCardHolder : MonoBehaviour
         {
             card.cardLocation = (purpose == HolderPurpose.Mat && card.mode == CardMode.Case)
                 ? CardLocation.Slot : CardLocation.Mat;
-            card.transform.localScale = GetBigCardScale(card);
             if (card.transform.parent != null)
                 SizeSlotForBigCard(card, card.transform.parent.gameObject);
+            card.transform.localScale = GetBigCardScale(card);
         }
 
         if (card.cardVisual != null)
@@ -787,44 +799,48 @@ public class HorizontalCardHolder : MonoBehaviour
     }
 
     /// <summary>
-    /// Gets the appropriate scale for a card based on its bigCardVisual size
+    /// Gets the appropriate scale for a card based on its bigCardVisual size.
+    /// The Card uses stretch anchors (fills its slot), so when the slot is sized
+    /// to match the bigCardVisual, scale should be 1. Only scale when the slot
+    /// can't be resized (e.g. layout-controlled).
     /// </summary>
     private Vector3 GetBigCardScale(Card card)
     {
         if (card.bigCardVisual != null)
         {
-            // Get the big card visual's rect transform
             RectTransform bigCardRect = card.bigCardVisual.GetComponent<RectTransform>();
             if (bigCardRect != null)
             {
-                // Get the small card's rect transform for comparison
                 RectTransform cardRect = card.GetComponent<RectTransform>();
                 if (cardRect != null)
                 {
-                    // Calculate scale based on the size difference
+                    // Use sizeDelta for point-anchored, rect.size for stretch-anchored
                     Vector2 bigCardSize = bigCardRect.sizeDelta;
+                    if (bigCardSize.x <= 0 || bigCardSize.y <= 0)
+                        bigCardSize = bigCardRect.rect.size;
+
                     Vector2 smallCardSize = cardRect.sizeDelta;
-                    
-                    if (smallCardSize.x > 0 && smallCardSize.y > 0)
+                    if (smallCardSize.x <= 0 || smallCardSize.y <= 0)
+                        smallCardSize = cardRect.rect.size;
+
+                    if (smallCardSize.x > 0 && smallCardSize.y > 0 &&
+                        bigCardSize.x > 0 && bigCardSize.y > 0)
                     {
                         float scaleX = bigCardSize.x / smallCardSize.x;
                         float scaleY = bigCardSize.y / smallCardSize.y;
-                        
-                        // Use the smaller scale to maintain aspect ratio, or average them
                         float uniformScale = Mathf.Max(scaleX, scaleY);
-                        
                         return new Vector3(uniformScale, uniformScale, uniformScale);
                     }
                 }
             }
         }
-        
-        // Fallback to the original bigSlotSize if calculation fails
+
         return new Vector3(fallback_slotSizeModifier, fallback_slotSizeModifier, fallback_slotSizeModifier);
     }
 
     /// <summary>
-    /// Sizes the card slot based on the bigCardVisual size
+    /// Sizes the card slot based on the bigCardVisual size.
+    /// Handles both point-anchored and stretch-anchored big card visuals.
     /// </summary>
     private void SizeSlotForBigCard(Card card, GameObject slot)
     {
@@ -832,15 +848,22 @@ public class HorizontalCardHolder : MonoBehaviour
         {
             RectTransform bigCardRect = card.bigCardVisual.GetComponent<RectTransform>();
             RectTransform slotRect = slot.GetComponent<RectTransform>();
-            
+
             if (bigCardRect != null && slotRect != null)
             {
-                // Set slot size to match the big card visual size
-                slotRect.sizeDelta = bigCardRect.sizeDelta;
-                return;
+                // Use sizeDelta for point-anchored visuals, rect.size for stretch-anchored
+                Vector2 bigCardSize = bigCardRect.sizeDelta;
+                if (bigCardSize.x <= 0 || bigCardSize.y <= 0)
+                    bigCardSize = bigCardRect.rect.size;
+
+                if (bigCardSize.x > 0 && bigCardSize.y > 0)
+                {
+                    slotRect.sizeDelta = bigCardSize;
+                    return;
+                }
             }
         }
-        
+
         // Fallback to original behavior
         RectTransform cardRect = slot.GetComponent<RectTransform>();
         if (cardRect != null)
@@ -909,6 +932,7 @@ public class HorizontalCardHolder : MonoBehaviour
     /// <summary>
     /// Adapt HorizontalLayoutGroup so slots expand only when we have many cards.
     /// For small hands (<= threshold), keep slots at baseline width to avoid huge raycast areas.
+    /// When squeezing, dynamically caps min slot width to prevent overflow in narrow containers.
     /// </summary>
     private void ApplyAdaptiveLayout()
     {
@@ -926,6 +950,20 @@ public class HorizontalCardHolder : MonoBehaviour
         bool allowGroupExpand = shouldSqueeze && showSmall;
         hlg.childControlWidth = allowGroupExpand;
         hlg.childForceExpandWidth = allowGroupExpand;
+
+        // Calculate the effective minimum slot width that actually fits the container
+        float effectiveMinSlotWidth = Mathf.Max(1f, minSqueezedSlotWidth);
+        if (shouldSqueeze && showSmall && _cards.Count > 0)
+        {
+            if (rect == null)
+                rect = GetComponent<RectTransform>();
+            float containerWidth = rect.rect.width;
+            float padding = hlg.padding.left + hlg.padding.right;
+            float totalSpacing = hlg.spacing * Mathf.Max(0, _cards.Count - 1);
+            float availableWidth = containerWidth - padding - totalSpacing;
+            float maxFittingWidth = availableWidth / _cards.Count;
+            effectiveMinSlotWidth = Mathf.Max(1f, Mathf.Min(minSqueezedSlotWidth, maxFittingWidth));
+        }
 
         for (int i = 0; i < transform.childCount; i++)
         {
@@ -951,8 +989,7 @@ public class HorizontalCardHolder : MonoBehaviour
                 // Squeezing (small-visual hand) or big-visual mats/tools
                 if (shouldSqueeze && showSmall)
                 {
-                    // Enforce a minimum squeezed width so slots don't become too tiny
-                    le.minWidth = Mathf.Max(1f, minSqueezedSlotWidth);
+                    le.minWidth = effectiveMinSlotWidth;
                     le.preferredWidth = -1f; // let layout reduce until minWidth
                     le.flexibleWidth = 1f;
                 }
@@ -962,11 +999,6 @@ public class HorizontalCardHolder : MonoBehaviour
                     le.minWidth = -1f;
                     le.preferredWidth = -1f;
                     le.flexibleWidth = 1f;
-                }
-                // When returning from Mat, ensure we don't carry over a huge size in RT when group is expanding
-                if (!showSmall)
-                {
-                    // Big-visual holders rely on SizeSlotForBigCard; don't force here
                 }
             }
         }

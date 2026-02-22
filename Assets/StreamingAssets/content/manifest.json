@@ -8,9 +8,9 @@
     { "day": 3, "maxCasesForDay": 8, "maxCoreCases": 5, "minSecondaryCases": 2 }
   ],
   "cases": [
-    "cases/core_01_missing_ledger.json",
-    "cases/core_02_placeholder.json",
-    "cases/core_03_placeholder.json",
+    "cases/core_01_ration_cards.json",
+    "cases/core_02_pumpkin_brawl.json",
+    "cases/core_03_curfew_runner.json",
     "cases/core_04_placeholder.json",
     "cases/secondary_01_placeholder.json",
     "cases/secondary_02_placeholder.json",

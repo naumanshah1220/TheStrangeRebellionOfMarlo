@@ -1,0 +1,516 @@
+{
+  "caseID": "core_03",
+  "title": "The Curfew Runner",
+  "description": "Two men were stopped on the street past curfew by an enforcer patrol. One claims he was visiting his girlfriend. The other says he was walking home from a late shift. Review the permits and determine who violated curfew.",
+  "caseType": "Core",
+  "firstAvailableDay": 3,
+  "coreSequenceNumber": 3,
+  "reward": 65.0,
+  "extraRewardForState": 0.0,
+  "suspicionReduction": 0.0,
+  "requiredPreviousCaseIds": ["core_02"],
+  "unlocksNextCaseIds": ["core_04"],
+
+  "cardImagePath": "Cases/core_03/card",
+
+  "lawBroken": "Agitation (Deviation from the Fifth Tenet §5)",
+  "involvesResistance": false,
+  "resistanceChoice": "",
+  "stateChoice": "Convict the citizen who violated curfew without valid authorization.",
+
+  "minDiscoveredCluesToAllowCommit": 3,
+  "allowCommitWithLowConfidence": true,
+
+  "clueVerdictMappings": [
+    { "clueId": "clue_lazar_no_permit", "slotId": "violation", "optionId": "curfew_violation", "label": "Curfew Violation" },
+    { "clueId": "clue_lazar_no_permit", "slotId": "violation", "optionId": "agitation", "label": "Agitation" },
+    { "clueId": "clue_checkpoint_photo", "slotId": "violation", "optionId": "curfew_violation", "label": "Curfew Violation" },
+    { "clueId": "clue_lazar_admission", "slotId": "violation", "optionId": "agitation", "label": "Agitation" }
+  ],
+
+  "suspects": [
+    {
+      "citizenID": "citizen_lazar",
+      "firstName": "Lazar",
+      "lastName": "Radic",
+      "picturePath": "Portraits/citizen_lazar",
+      "dateOfBirth": "03/25/1998",
+      "gender": "Male",
+      "ethnicity": "Caucasian",
+      "maritalStatus": "Single",
+      "address": "14 Riverside Way, Block C",
+      "occupation": "Textile Factory Worker",
+      "nervousnessLevel": 0.45,
+      "initialStress": 0.30,
+      "isGuilty": true,
+      "criminalHistory": [],
+      "tagInteractions": [
+        {
+          "tagId": "clue_enforcer_stop",
+          "tagQuestion": "You were stopped on Korda Street at 23:15, well past the 22:00 curfew. Why were you out?",
+          "responses": [
+            {
+              "responseSequence": ["I was visiting my girlfriend, Ana. She lives on Korda Street.", "We're registered with the Council. I have a visitation permit."],
+              "isLie": false,
+              "stressImpact": 0.06,
+              "responseType": "Normal",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": [],
+          "contradictedByEvidenceTagIds": ["clue_lazar_no_permit"],
+          "contradictionResponse": {
+            "responseSequence": ["I... my permit is for daytime visits. I know.", "Ana's shift at the textile mill ends at 22:00. By the time she gets home and I get there, it's past curfew. The permit doesn't account for that."],
+            "isLie": false,
+            "stressImpact": 0.10,
+            "responseType": "Emotional",
+            "clickableClues": [
+              {
+                "clueId": "clue_lazar_admission",
+                "clickableText": "my permit is for daytime visits",
+                "noteText": "<person>Lazar Radic</person> admits his visitation permit is daytime-only and that he knowingly violated curfew because <person>Ana</person>'s work schedule makes daytime visits impossible",
+                "highlightColor": { "r": 1.0, "g": 0.92, "b": 0.0, "a": 1.0 },
+                "oneTimeOnly": true
+              }
+            ]
+          },
+          "responseVariants": []
+        },
+        {
+          "tagId": "clue_checkpoint_photo",
+          "tagQuestion": "This checkpoint photo shows you on Korda Street at 23:10. Five minutes before the enforcer stopped you.",
+          "responses": [
+            {
+              "responseSequence": ["Yes, that's me. I was walking to Ana's building.", "I wasn't hiding. I wasn't sneaking. I was just going to see my girlfriend."],
+              "isLie": false,
+              "stressImpact": 0.06,
+              "responseType": "Normal",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        },
+        {
+          "tagId": "clue_registration_doc",
+          "tagQuestion": "Your relationship with Ana is registered. Why not apply for an evening permit?",
+          "responses": [
+            {
+              "responseSequence": ["I tried. The clerk said evening permits are only for married couples.", "We've been together eleven months. But the system says we're not serious enough for evening visits."],
+              "isLie": false,
+              "stressImpact": 0.08,
+              "responseType": "Emotional",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        },
+        {
+          "tagId": "clue_lazar_no_permit",
+          "tagQuestion": "Your visitation permit clearly says 08:00 to 20:00. You were out at 23:15. That's a curfew violation.",
+          "responses": [
+            {
+              "responseSequence": ["I know what the permit says.", "Ana works until ten at night. When am I supposed to see her? The system doesn't care that shift workers exist."],
+              "isLie": false,
+              "stressImpact": 0.08,
+              "responseType": "Emotional",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        },
+        {
+          "tagId": "clue_lazar_admission",
+          "tagQuestion": "You knowingly broke curfew. You understand that's a violation?",
+          "responses": [
+            {
+              "responseSequence": ["I understand the rule. I just think the rule doesn't understand people.", "Charge me if you have to. I'd do it again."],
+              "isLie": false,
+              "stressImpact": 0.06,
+              "responseType": "Emotional",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        },
+        {
+          "tagId": "clue_ivan_overtime",
+          "tagQuestion": "The other man stopped with you — Ivan Cerovic — do you know him?",
+          "responses": [
+            {
+              "responseSequence": ["Never seen him before. We were just on the same street when the enforcer stopped us both."],
+              "isLie": false,
+              "stressImpact": 0.03,
+              "responseType": "Normal",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        }
+      ],
+      "lawyeredUpResponses": [
+        "I went to see my girlfriend. That's my crime. Charge me.",
+        "I've told you everything.",
+        "What more do you want me to say?"
+      ],
+      "rattledResponses": [
+        "What happens to Ana if I get sent away?",
+        "We're registered. We did everything right. Except the hours.",
+        "Please... it was just a visit."
+      ],
+      "shutdownResponses": [
+        "I broke curfew. I know.",
+        "...",
+        "Do what you have to do."
+      ]
+    },
+    {
+      "citizenID": "citizen_ivan",
+      "firstName": "Ivan",
+      "lastName": "Cerovic",
+      "picturePath": "Portraits/citizen_ivan",
+      "dateOfBirth": "08/11/1968",
+      "gender": "Male",
+      "ethnicity": "Caucasian",
+      "maritalStatus": "Married",
+      "address": "5 Factory Lane, Block D",
+      "occupation": "Boiler Technician",
+      "nervousnessLevel": 0.30,
+      "initialStress": 0.20,
+      "isGuilty": false,
+      "criminalHistory": [],
+      "tagInteractions": [
+        {
+          "tagId": "clue_enforcer_stop",
+          "tagQuestion": "You were also stopped past curfew. Why were you on the street at 23:15?",
+          "responses": [
+            {
+              "responseSequence": ["I was walking home from work. The boiler at Factory 12 had a pressure fault.", "I stayed late to fix it. My foreman can confirm."],
+              "isLie": false,
+              "stressImpact": 0.04,
+              "responseType": "Normal",
+              "clickableClues": [
+                {
+                  "clueId": "clue_ivan_overtime",
+                  "clickableText": "stayed late to fix it",
+                  "noteText": "<person>Ivan Cerovic</person> claims he was working overtime at <location>Factory 12</location> to fix a boiler pressure fault and was walking home when stopped",
+                  "highlightColor": { "r": 1.0, "g": 0.92, "b": 0.0, "a": 1.0 },
+                  "oneTimeOnly": true
+                }
+              ]
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        },
+        {
+          "tagId": "clue_ivan_overtime",
+          "tagQuestion": "You say you were working late. Do you have documentation?",
+          "responses": [
+            {
+              "responseSequence": ["I have an overtime permit. It's... well, it expired last month.", "But the work log at Factory 12 will show I was there until 22:40. The foreman signed me out."],
+              "isLie": false,
+              "stressImpact": 0.06,
+              "responseType": "Normal",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        },
+        {
+          "tagId": "clue_expired_permit",
+          "tagQuestion": "Your overtime permit expired last month. You know that means you were technically unauthorized to be out?",
+          "responses": [
+            {
+              "responseSequence": ["I applied for renewal three weeks ago. Still waiting.", "The boiler doesn't care about paperwork. If I don't fix it, the factory doesn't run in the morning."],
+              "isLie": false,
+              "stressImpact": 0.06,
+              "responseType": "Normal",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        },
+        {
+          "tagId": "clue_checkpoint_photo",
+          "tagQuestion": "This checkpoint photo shows two figures on Korda Street at 23:10. Can you confirm that's you?",
+          "responses": [
+            {
+              "responseSequence": ["That looks like me, yes. I was walking from the factory toward Block D.", "The young man — I don't know him. We were just on the same street."],
+              "isLie": false,
+              "stressImpact": 0.03,
+              "responseType": "Normal",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        },
+        {
+          "tagId": "clue_factory_timesheet",
+          "tagQuestion": "The factory timesheet confirms you clocked out at 22:40. That checks out.",
+          "responses": [
+            {
+              "responseSequence": ["Of course it does. I've worked at that factory for nineteen years.", "I fix the boiler. I go home. That's my life."],
+              "isLie": false,
+              "stressImpact": 0.02,
+              "responseType": "Normal",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        }
+      ],
+      "lawyeredUpResponses": [
+        "Check the factory log. I was working.",
+        "My permit expired. I know. I applied for renewal.",
+        "I'm a boiler technician. I fix things. That's all."
+      ],
+      "rattledResponses": [
+        "I've worked there nineteen years. Never had a problem.",
+        "If my permit had come through on time, we wouldn't be here.",
+        "Am I really being charged for doing my job?"
+      ],
+      "shutdownResponses": [
+        "Check the factory.",
+        "I've said everything.",
+        "..."
+      ]
+    },
+    {
+      "citizenID": "citizen_enforcer_kova",
+      "firstName": "Sergeant",
+      "lastName": "Kova",
+      "picturePath": "Portraits/citizen_kova",
+      "dateOfBirth": "01/30/1980",
+      "gender": "Male",
+      "ethnicity": "Caucasian",
+      "maritalStatus": "Married",
+      "address": "Enforcer Barracks, Sector 3",
+      "occupation": "Patrol Enforcer",
+      "nervousnessLevel": 0.15,
+      "initialStress": 0.05,
+      "isGuilty": false,
+      "criminalHistory": [],
+      "tagInteractions": [
+        {
+          "tagId": "clue_enforcer_stop",
+          "tagQuestion": "You stopped both men at 23:15 on Korda Street. Describe what you saw.",
+          "responses": [
+            {
+              "responseSequence": ["Standard patrol. Spotted two males walking in opposite directions on Korda Street.", "Both past curfew. Detained both for processing."],
+              "isLie": false,
+              "stressImpact": 0.01,
+              "responseType": "Normal",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        },
+        {
+          "tagId": "clue_checkpoint_photo",
+          "tagQuestion": "The checkpoint camera captured both men at 23:10. Did they appear to be together?",
+          "responses": [
+            {
+              "responseSequence": ["No. They were walking in opposite directions.", "The young one was heading east toward the apartment blocks. The older one was heading west toward Block D."],
+              "isLie": false,
+              "stressImpact": 0.01,
+              "responseType": "Normal",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        },
+        {
+          "tagId": "clue_ivan_overtime",
+          "tagQuestion": "The older man says he was coming from Factory 12. Did he look like he'd been working?",
+          "responses": [
+            {
+              "responseSequence": ["He was wearing work coveralls. Smelled like grease and steam.", "His story seemed legitimate. But expired permit is expired permit."],
+              "isLie": false,
+              "stressImpact": 0.01,
+              "responseType": "Normal",
+              "clickableClues": []
+            }
+          ],
+          "unlocksTruthForTagIds": []
+        }
+      ],
+      "lawyeredUpResponses": [
+        "I detained them as per protocol.",
+        "The report speaks for itself.",
+        "I follow procedure."
+      ],
+      "rattledResponses": [
+        "I'm just doing my job, analyst.",
+        "Is there a problem with my report?",
+        "I stopped them. I filed the report. That's it."
+      ],
+      "shutdownResponses": [
+        "My report is filed.",
+        "...",
+        "Refer to the report."
+      ]
+    }
+  ],
+  "culpritCitizenID": "citizen_lazar",
+
+  "evidences": [
+    {
+      "id": "ev_case_brief",
+      "title": "Bureau Case File #1043",
+      "description": "Official case assignment from the Bureau of Pattern Compliance. Contains the case summary, suspect information, and evidence inventory.",
+      "type": "Document",
+      "cardImagePath": "Evidence/core_03/ev_case_brief_card",
+      "hotspots": []
+    },
+    {
+      "id": "ev_enforcer_report",
+      "title": "Enforcer Stop Report",
+      "description": "Patrol Sergeant Kova's report documenting the detention of two civilians past curfew on Korda Street at 23:15. Both were walking in opposite directions.",
+      "type": "Document",
+      "cardImagePath": "Evidence/core_03/ev_enforcer_report_card",
+      "hotspots": [
+        {
+          "clueId": "clue_enforcer_stop",
+          "noteText": "Two civilians detained on <location>Korda Street</location> at 23:15 — past the 22:00 curfew. <person>Lazar Radic</person> (heading east) and <person>Ivan Cerovic</person> (heading west)",
+          "pageIndex": 0,
+          "positionX": 0.5,
+          "positionY": 0.30,
+          "width": 0.7,
+          "height": 0.12
+        }
+      ]
+    },
+    {
+      "id": "ev_checkpoint_photo",
+      "title": "Checkpoint Camera Photo",
+      "description": "A nighttime photograph from the Korda Street checkpoint camera showing two figures walking in opposite directions at 23:10, five minutes before the enforcer stop.",
+      "type": "Photo",
+      "cardImagePath": "Evidence/core_03/ev_checkpoint_photo_card",
+      "hotspots": [
+        {
+          "clueId": "clue_checkpoint_photo",
+          "noteText": "Checkpoint camera captured both <person>Lazar Radic</person> and <person>Ivan Cerovic</person> on <location>Korda Street</location> at 23:10 — clearly past curfew",
+          "pageIndex": 0,
+          "positionX": 0.5,
+          "positionY": 0.50,
+          "width": 0.6,
+          "height": 0.20
+        }
+      ]
+    },
+    {
+      "id": "ev_permits_file",
+      "title": "Permit and Registration File",
+      "description": "Combined file containing Lazar Radic's registered relationship visitation permit and Ivan Cerovic's overtime work permit. Both permits have been pulled from the Central Registry.",
+      "type": "Document",
+      "cardImagePath": "Evidence/core_03/ev_permits_file_card",
+      "hotspots": [
+        {
+          "clueId": "clue_registration_doc",
+          "noteText": "<person>Lazar Radic</person> has a registered relationship with <person>Ana Vukovic</person> — approved by the Council. Visitation permit issued for Block C, <location>Korda Street</location>",
+          "pageIndex": 0,
+          "positionX": 0.5,
+          "positionY": 0.25,
+          "width": 0.7,
+          "height": 0.12
+        },
+        {
+          "clueId": "clue_lazar_no_permit",
+          "noteText": "<person>Lazar Radic</person>'s visitation permit is restricted to daytime hours: 08:00 to 20:00. He was stopped at 23:15 — over three hours past his permitted window",
+          "pageIndex": 0,
+          "positionX": 0.5,
+          "positionY": 0.45,
+          "width": 0.7,
+          "height": 0.12
+        },
+        {
+          "clueId": "clue_expired_permit",
+          "noteText": "<person>Ivan Cerovic</person>'s overtime work permit expired on the 14th of last month. A renewal application is noted as pending",
+          "pageIndex": 1,
+          "positionX": 0.5,
+          "positionY": 0.30,
+          "width": 0.7,
+          "height": 0.12
+        }
+      ]
+    },
+    {
+      "id": "ev_factory_timesheet",
+      "title": "Factory 12 Timesheet",
+      "description": "The official timesheet from Factory 12 showing worker clock-in and clock-out times for the date of the curfew stop.",
+      "type": "Document",
+      "cardImagePath": "Evidence/core_03/ev_factory_timesheet_card",
+      "hotspots": [
+        {
+          "clueId": "clue_factory_timesheet",
+          "noteText": "<person>Ivan Cerovic</person> clocked out of <location>Factory 12</location> at 22:40, confirmed by foreman signature. He was performing emergency boiler maintenance",
+          "pageIndex": 0,
+          "positionX": 0.5,
+          "positionY": 0.45,
+          "width": 0.7,
+          "height": 0.12
+        }
+      ]
+    }
+  ],
+
+  "steps": [
+    {
+      "stepId": "step_review_stop",
+      "stepNumber": 1,
+      "description": "Review the enforcer report and checkpoint photo to understand the situation",
+      "requiredClueIds": [],
+      "unlockedClueIds": ["clue_enforcer_stop", "clue_checkpoint_photo"]
+    },
+    {
+      "stepId": "step_check_permits",
+      "stepNumber": 2,
+      "description": "Examine permits to determine who had valid authorization to be out",
+      "requiredClueIds": ["clue_enforcer_stop"],
+      "unlockedClueIds": ["clue_registration_doc", "clue_lazar_no_permit", "clue_expired_permit"]
+    },
+    {
+      "stepId": "step_verify_alibis",
+      "stepNumber": 3,
+      "description": "Cross-check Ivan's work alibi against the factory timesheet",
+      "requiredClueIds": ["clue_expired_permit"],
+      "unlockedClueIds": ["clue_factory_timesheet"]
+    },
+    {
+      "stepId": "step_interrogate",
+      "stepNumber": 4,
+      "description": "Interrogate suspects to confirm findings",
+      "requiredClueIds": ["clue_factory_timesheet"],
+      "unlockedClueIds": []
+    }
+  ],
+
+  "verdictSchema": {
+    "sentenceTemplate": "I accuse {suspect} of Deviation: {violation}.",
+    "slots": [
+      {
+        "slotId": "suspect",
+        "displayLabel": "Who",
+        "type": "Suspect",
+        "required": true,
+        "optionSource": "CaseOnly"
+      },
+      {
+        "slotId": "violation",
+        "displayLabel": "Deviation",
+        "type": "Violation",
+        "required": false,
+        "optionSource": "FromDiscoveredTags"
+      }
+    ]
+  },
+
+  "solutions": [
+    {
+      "answers": [
+        { "slotId": "suspect", "acceptedOptionIds": ["citizen_lazar"] },
+        { "slotId": "violation", "acceptedOptionIds": ["curfew_violation", "agitation"] }
+      ],
+      "minConfidenceToApprove": 70
+    }
+  ]
+}

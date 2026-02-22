@@ -70,6 +70,7 @@
     <Compile Include="Assets\Scripts\Gameplay\Cards\VisualCardsHandler.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Cases\Verdicts\VerdictSchema.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Tools\Computer\DesktopManager.cs" />
+    <Compile Include="Assets\Scripts\UI\Chat\StressIndicatorPanel.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Tools\Spectrograph\SpectrographBook.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Tools\FingerPrintDuster\Fingerprint.cs" />
     <Compile Include="Assets\ThirdPartyTools\TextMeshPro\Examples &amp; Extras\Scripts\TMP_TextSelector_B.cs" />
@@ -77,6 +78,7 @@
     <Compile Include="Assets\Scripts\Gameplay\CardHolder\HorizontalCardHolder.cs" />
     <Compile Include="Assets\Scripts\Core\Managers\ClueHighlighter.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Tools\Computer\ComputerSystem.cs" />
+    <Compile Include="Assets\Scripts\UI\Flow\BillsDeskPanel.cs" />
     <Compile Include="Assets\Scripts\UI\Notebook\ClickableClue.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Tools\FingerPrintDuster\BrushReveal.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Tools\Computer\ScriptableObjects\AppConfig.cs" />
@@ -85,12 +87,16 @@
     <Compile Include="Assets\Scripts\Gameplay\Tools\Computer\Apps\VideoPlayerApp.cs" />
     <Compile Include="Assets\Scripts\UI\Notebook\SuspectTag.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Tools\Computer\Apps\IFileContent.cs" />
+    <Compile Include="Assets\Scripts\Core\Data\ContentPipeline\UnityJsonConverters.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Reports\Report.cs" />
     <Compile Include="Assets\Scripts\UI\Commit\VerdictComposer.cs" />
+    <Compile Include="Assets\Scripts\UI\Flow\MainMenuController.cs" />
+    <Compile Include="Assets\Scripts\Core\Data\ClueVerdictMapping.cs" />
     <Compile Include="Assets\ThirdPartyTools\TextMeshPro\Examples &amp; Extras\Scripts\TMP_TextInfoDebugTool.cs" />
     <Compile Include="Assets\Scripts\UI\CaseSubmissionZone.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Tools\Computer\ScriptableObjects\DiscFile.cs" />
     <Compile Include="Assets\ThirdPartyTools\TextMeshPro\Examples &amp; Extras\Scripts\TMP_FrameRateCounter.cs" />
+    <Compile Include="Assets\Scripts\Core\Data\ContentPipeline\ContentLoader.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Cases\Case.cs" />
     <Compile Include="Assets\Scripts\UI\Notebook\ClueProcessor.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Tools\Computer\Apps\FolderApp.cs" />
@@ -99,6 +105,7 @@
     <Compile Include="Assets\Scripts\Core\Managers\PlayerProgressManager.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Cases\Verdicts\CaseVerdict.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Tools\Computer\Apps\AppIcon.cs" />
+    <Compile Include="Assets\Scripts\Core\Data\ContentPipeline\ResourceResolver.cs" />
     <Compile Include="Assets\Scripts\UI\Chat\ChatManager.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Tools\Computer\Apps\CitizenDatabaseApp.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Tools\Computer\Apps\CitizenDatabaseManager.cs" />
@@ -111,9 +118,11 @@
     <Compile Include="Assets\Scripts\Core\Data\Clues\DraggableBullet.cs" />
     <Compile Include="Assets\Scripts\Core\Managers\DragManager.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Tools\Computer\Apps\AppRegistry.cs" />
-    <Compile Include="Assets\Scripts\UI\SuspectView\DetailedSuspectView.cs" />
+    <Compile Include="Assets\Scripts\Core\Flow\FlowController.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Overseer\OverseerNotes.cs" />
+    <Compile Include="Assets\Scripts\Core\Data\BonusLetterData.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Cases\Verdicts\VerdictTypes.cs" />
+    <Compile Include="Assets\Scripts\Core\Data\DayBriefingData.cs" />
     <Compile Include="Assets\Scripts\Core\Managers\CaseManager.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Citizens\Citizen.cs" />
     <Compile Include="Assets\ThirdPartyTools\TextMeshPro\Examples &amp; Extras\Scripts\DropdownSample.cs" />
@@ -121,10 +130,12 @@
     <Compile Include="Assets\Scripts\Gameplay\CardHolder\CaseSlot.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Tools\Spectrograph\SpectrographSystem.cs" />
     <Compile Include="Assets\Scripts\Debug\ComputerDebugHelper.cs" />
+    <Compile Include="Assets\Scripts\UI\Flow\TopBarController.cs" />
     <Compile Include="Assets\Scripts\Core\Data\Clues\Clue.cs" />
     <Compile Include="Assets\Scripts\UI\Commit\SuspectVerdictSlot.cs" />
     <Compile Include="Assets\Scripts\UI\Commit\IVerdictSlot.cs" />
     <Compile Include="Assets\Scripts\Core\Managers\GameManager.cs" />
+    <Compile Include="Assets\Scripts\Core\Data\ContentPipeline\JsonModels.cs" />
     <Compile Include="Assets\Scripts\Core\Managers\UIManager.cs" />
     <Compile Include="Assets\Scripts\Core\Managers\CluesManager.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Cards\_SciptableObjects\CurveParameters.cs" />
@@ -132,27 +143,30 @@
     <Compile Include="Assets\Scripts\Debug\FileIconSettingsHelper.cs" />
     <Compile Include="Assets\ThirdPartyTools\TextMeshPro\Examples &amp; Extras\Scripts\TMP_TextEventCheck.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Tools\Computer\ScriptableObjects\FileIconManager.cs" />
+    <Compile Include="Assets\Scripts\Core\Flow\FlowState.cs" />
     <Compile Include="Assets\Scripts\UI\Notebook\DraggableTag.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Books\Book.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Tools\Computer\UI\BlockScrollRectDrag.cs" />
+    <Compile Include="Assets\Scripts\UI\Flow\DayBriefingPanel.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Tools\Computer\Apps\FingerprintDisplay.cs" />
     <Compile Include="Assets\Scripts\UI\CommitOverlayController.cs" />
     <Compile Include="Assets\Scripts\UI\SuspectDetailsUI.cs" />
     <Compile Include="Assets\ThirdPartyTools\TextMeshPro\Examples &amp; Extras\Scripts\TeleType.cs" />
     <Compile Include="Assets\Scripts\Core\Managers\ClueTextProcessor.cs" />
-    <Compile Include="Assets\Scripts\UI\SuspectView\CCTVMonitor.cs" />
     <Compile Include="Assets\Scripts\Core\Managers\SuspectManager.cs" />
     <Compile Include="Assets\Scripts\UI\Notebook\InterrogationDropZone.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Tools\Computer\UI\RetroComputerEffects.cs" />
-    <Compile Include="Assets\Scripts\UI\Commit\JustificationDropZone.cs" />
     <Compile Include="Assets\Scripts\UI\Notebook\SuspectsListManager.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Cards\Card.cs" />
+    <Compile Include="Assets\Scripts\Core\Data\BillInfo.cs" />
     <Compile Include="Assets\Scripts\Gameplay\CardHolder\FreeFormCardHolder.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Tools\FingerPrintDuster\ImageRevealBrush.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Tools\Spectrograph\ForeignSubstanceType.cs" />
     <Compile Include="Assets\ThirdPartyTools\TextMeshPro\Examples &amp; Extras\Scripts\TMPro_InstructionOverlay.cs" />
     <Compile Include="Assets\Scripts\UI\Chat\ThinkingDotsAnimation.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Citizens\CitizenDatabase.cs" />
+    <Compile Include="Assets\Scripts\UI\SuspectView\InterrogationScreen.cs" />
+    <Compile Include="Assets\Scripts\Core\Data\CaseResult.cs" />
     <Compile Include="Assets\Scripts\Core\Managers\EvidenceManager.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Cards\_Utility\ExtensionMethods.cs" />
     <Compile Include="Assets\Scripts\UI\Notebook\NotebookHeaderSetup.cs" />
@@ -161,20 +175,25 @@
     <Compile Include="Assets\ThirdPartyTools\TextMeshPro\Examples &amp; Extras\Scripts\TextConsoleSimulator.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Tools\Computer\ScriptableObjects\FileIconSettings.cs" />
     <Compile Include="Assets\Scripts\Gameplay\CardHolder\CardHolderType.cs" />
+    <Compile Include="Assets\Scripts\UI\Flow\NightSummaryPanel.cs" />
     <Compile Include="Assets\Scripts\Core\Managers\ToolsManager.cs" />
     <Compile Include="Assets\Scripts\Debug\DraggableFileIconHelper.cs" />
     <Compile Include="Assets\ThirdPartyTools\TextMeshPro\Examples &amp; Extras\Scripts\Benchmark04.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Cases\Verdicts\VerdictEvaluator.cs" />
+    <Compile Include="Assets\Scripts\UI\Chat\ToneSelector.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Tools\Computer\Apps\DraggableFileIcon.cs" />
     <Compile Include="Assets\ThirdPartyTools\TextMeshPro\Examples &amp; Extras\Scripts\SimpleScript.cs" />
     <Compile Include="Assets\Scripts\Core\Managers\MatManager.cs" />
     <Compile Include="Assets\ThirdPartyTools\TextMeshPro\Examples &amp; Extras\Scripts\VertexShakeB.cs" />
+    <Compile Include="Assets\Scripts\UI\Chat\HeartbeatLine.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Cards\ICardData.cs" />
     <Compile Include="Assets\Scripts\UI\Notebook\SuspectEntry.cs" />
+    <Compile Include="Assets\Scripts\Core\Events\GameEvents.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Tools\Computer\Apps\DocumentViewer.cs" />
     <Compile Include="Assets\Scripts\Core\Managers\BookManager.cs" />
     <Compile Include="Assets\Scripts\UI\SuspectItem.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Evidence\Evidence.cs" />
+    <Compile Include="Assets\Scripts\UI\Flow\BillDocument.cs" />
     <Compile Include="Assets\Scripts\UI\ViolationItem.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Reports\ReportAssetCreator.cs" />
     <Compile Include="Assets\ThirdPartyTools\TextMeshPro\Examples &amp; Extras\Scripts\Benchmark03.cs" />
@@ -186,14 +205,21 @@
     <Compile Include="Assets\ThirdPartyTools\TextMeshPro\Examples &amp; Extras\Scripts\TMP_UiFrameRateCounter.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Tools\Computer\UI\MenuBar.cs" />
     <Compile Include="Assets\ThirdPartyTools\TextMeshPro\Examples &amp; Extras\Scripts\TextMeshSpawner.cs" />
+    <Compile Include="Assets\Scripts\UI\Flow\SlideshowPanel.cs" />
     <Compile Include="Assets\ThirdPartyTools\TextMeshPro\Examples &amp; Extras\Scripts\EnvMapAnimator.cs" />
+    <Compile Include="Assets\Scripts\Core\Managers\SuspectTagParser.cs" />
+    <Compile Include="Assets\Scripts\Core\Singletons\SingletonMonoBehaviour.cs" />
     <Compile Include="Assets\ThirdPartyTools\TextMeshPro\Examples &amp; Extras\Scripts\VertexJitter.cs" />
+    <Compile Include="Assets\Scripts\Core\Data\DayResults.cs" />
     <Compile Include="Assets\Scripts\Core\Managers\DaysManager.cs" />
     <Compile Include="Assets\Scripts\Core\Managers\OverseerManager.cs" />
     <Compile Include="Assets\ThirdPartyTools\TextMeshPro\Examples &amp; Extras\Scripts\WarpTextExample.cs" />
+    <Compile Include="Assets\Scripts\Core\Data\EvidenceHotspot.cs" />
+    <Compile Include="Assets\Scripts\Core\Flow\FlowBootstrap.cs" />
     <Compile Include="Assets\ThirdPartyTools\TextMeshPro\Examples &amp; Extras\Scripts\VertexColorCycler.cs" />
     <Compile Include="Assets\Scripts\Core\Managers\NotebookManager.cs" />
     <Compile Include="Assets\Scripts\UI\Notebook\SuspectDraggableTag.cs" />
+    <Compile Include="Assets\Scripts\UI\Flow\BillStamp.cs" />
     <Compile Include="Assets\ThirdPartyTools\TextMeshPro\Examples &amp; Extras\Scripts\CameraController.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Tools\Computer\Apps\CitizenDatabaseDropZone.cs" />
     <Compile Include="Assets\Scripts\Core\Managers\NewspaperManager.cs" />
@@ -210,10 +236,13 @@
     <Compile Include="Assets\ThirdPartyTools\TextMeshPro\Examples &amp; Extras\Scripts\TMP_PhoneNumberValidator.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Cases\Verdicts\VerdictOptionPool.cs" />
     <Compile Include="Assets\Scripts\UI\CrimeItem.cs" />
+    <Compile Include="Assets\Scripts\Core\Data\NewspaperData.cs" />
+    <Compile Include="Assets\Scripts\Core\Data\SlideshowData.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Tools\FingerPrintDuster\LcdDisplayController.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Tools\Computer\Apps\ImageViewer.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Citizens\DatabaseCitizen.cs" />
     <Compile Include="Assets\ThirdPartyTools\TextMeshPro\Examples &amp; Extras\Scripts\ChatController.cs" />
+    <Compile Include="Assets\Scripts\UI\Flow\CaseEarningRow.cs" />
     <Compile Include="Assets\Scripts\Core\Managers\CardTypeManager.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Cards\ShaderCode.cs" />
     <Compile Include="Assets\ThirdPartyTools\TextMeshPro\Examples &amp; Extras\Scripts\TMP_DigitValidator.cs" />
@@ -1294,16 +1323,16 @@
       <HintPath>Library\ScriptAssemblies\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Unity.PlasticSCM.Editor">
+      <HintPath>Library\ScriptAssemblies\Unity.PlasticSCM.Editor.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Unity.RenderPipelines.Core.ShaderLibrary">
       <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Core.ShaderLibrary.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.TestTools.CodeCoverage.Editor">
       <HintPath>Library\ScriptAssemblies\Unity.TestTools.CodeCoverage.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.PlasticSCM.Editor">
-      <HintPath>Library\ScriptAssemblies\Unity.PlasticSCM.Editor.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.Multiplayer.Center.Editor">
